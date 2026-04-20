@@ -1,0 +1,33 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy Frontend via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}           # IP của Server
+        username: ${{ secrets.USERNAME }}   # viethoang5020
+        key: ${{ secrets.SSH_PRIVATE_KEY }} # Key deploy_ci bạn vừa tạo
+        port: 22
+        command_timeout: 60m                # Thời gian chờ tối đa (đề phòng build lâu)
+        script: |
+          # 1. Vào thư mục code Frontend để cập nhật code mới nhất
+          echo "Dang cap nhat code Frontend..."
+          cd ~/app/frontend
+          git pull origin main
+
+          # 2. Quan trọng: Phải quay về thư mục chứa file docker-compose.yaml (nằm ở backend)
+          echo "Chuyen sang thu muc Backend de chay Docker Compose..."
+          cd ~/app/backend
+
+          # 3. Chỉ build và khởi động lại container frontend (Giữ nguyên backend, db...)
+          echo "Build va restart container Frontend..."
+          docker compose up -d --build --no-deps frontend
+    
+         
