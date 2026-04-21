@@ -1,11 +1,11 @@
 // src/components/chatbotguest/ChatGuestHeader.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { GraduationCap } from "lucide-react";
 import PhIcon from "../ui/PhIcon.jsx";
 
 export default function ChatGuestHeader({ selectedRole, onRoleChange, roles = [] }) {
   const navigate = useNavigate();
+  const schoolLogoUrl = "https://utc2.edu.vn/images/030820230730_U09Tn.png";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -29,9 +29,12 @@ export default function ChatGuestHeader({ selectedRole, onRoleChange, roles = []
           className="flex cursor-pointer items-center gap-3"
           onClick={() => navigate("/")}
         >
-          <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-xl">
-            <GraduationCap className="h-8 w-8 text-white" />
-          </div>
+          <img
+            src={schoolLogoUrl}
+            alt="Logo Trường ĐH Giao thông Vận tải"
+            className="h-10 w-10 object-contain"
+            loading="eager"
+          />
           <div>
             <div className="font-semibold text-[#EB5A0D] leading-tight">
               Trường ĐH Giao thông Vận tải

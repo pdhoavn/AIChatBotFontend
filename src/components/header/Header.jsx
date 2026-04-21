@@ -1,11 +1,12 @@
 // src/components/header/Header.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { GraduationCap, Menu, X, User as UserIcon, LogOut, MessageSquare } from "lucide-react";
+import { Menu, X, User as UserIcon, LogOut, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/Auth";
 
 
 export default function Header() {
+  const schoolLogoUrl = "https://utc2.edu.vn/images/030820230730_U09Tn.png";
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -87,9 +88,12 @@ const scrollToSection = (id) => {
               setIsMobileMenuOpen(false);
             }}
           >
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-xl">
-              <GraduationCap className={`h-8 w-8 text-white`} />
-            </div>
+            <img
+              src={schoolLogoUrl}
+              alt="Logo Trường ĐH Giao thông Vận tải"
+              className="h-10 w-10 object-contain"
+              loading="eager"
+            />
             <div>
               <h1
                 className={`text-base font-bold ${
