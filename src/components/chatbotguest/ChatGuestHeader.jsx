@@ -1,26 +1,29 @@
 // src/components/chatbotguest/ChatGuestHeader.jsx
-import React, { useEffect, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { GraduationCap } from "lucide-react";
+import PhIcon from "../ui/PhIcon.jsx";
 
-export default function ChatGuestHeader() {
+export default function ChatGuestHeader({ selectedRole, onRoleChange, roles = [] }) {
   const navigate = useNavigate();
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 0);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const activeRoleObj = roles.find((r) => r.id === selectedRole);
+
   return (
-    <header
-      className={`sticky top-0 z-10 w-full border-b bg-white/90 backdrop-blur transition-shadow ${
-        isScrolled ? "shadow-sm" : ""
-      }`}
-    >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+    <header className="w-full bg-transparent">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 md:px-7 py-4">
         {/* Logo + Tên */}
         <div
           className="flex cursor-pointer items-center gap-3"
@@ -33,19 +36,53 @@ export default function ChatGuestHeader() {
             <div className="font-semibold text-[#EB5A0D] leading-tight">
               FPT University
             </div>
-            <div className="text-xs text-gray-500 -mt-0.5">Đại học FPT</div>
+            <div className="text-xs text-chat-text-muted -mt-0.5">Đại học FPT</div>
           </div>
         </div>
 
-        {/* Nút đăng nhập & Đăng ký ngay */}
-        <div className="flex items-center gap-3">
+        {/* Right side badges */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border-main bg-surface/55 px-2.5 py-1.5 text-[11px] font-medium text-text-main hover:bg-surface transition-colors focus:outline-none"
+            >
+              <PhIcon name="auto_awesome" size={13} className="text-accent" />
+              <span className="max-w-[130px] truncate">
+                {activeRoleObj ? activeRoleObj.label : "Trợ lý đại học"}
+              </span>
+              <PhIcon name="expand_more" size={13} className="text-text-muted ml-0.5" />
+            </button>
+            
+            {isMenuOpen && roles.length > 0 && (
+              <div className="absolute top-full right-0 mt-2 w-56 rounded-xl border border-border-main/70 bg-sidebar shadow-2xl p-1.5 z-50">
+                <div className="px-2 py-1.5 mb-1 text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+                  Chuyển đổi đối tượng
+                </div>
+                {roles.map((role) => (
+                  <button
+                    key={role.id}
+                    onClick={() => {
+                      onRoleChange && onRoleChange(role);
+                      setIsMenuOpen(false);
+                    }}
+                    className={`w-full text-left px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors ${
+                      selectedRole === role.id ? "bg-accent/12 text-accent" : "text-text-main hover:bg-primary/45"
+                    }`}
+                  >
+                    <span>{role.label}</span>
+                    {selectedRole === role.id && <PhIcon name="check" size={13} weight="bold" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             onClick={() => navigate("/loginprivate")}
             className="rounded-full bg-black px-4 py-1.5 text-sm text-white hover:opacity-90"
           >
             Đăng nhập
           </button>
-
           <Link
             to="/#admissions"
             className="rounded-full bg-[#EB5A0D] px-4 py-1.5 text-sm text-white font-medium hover:bg-orange-600 transition"

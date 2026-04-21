@@ -2,5 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root { height: 100%; }
-body { @apply bg-[#F8FAFC]; }
+@layer base {
+  :root {
+    --primary: #1e1e1e;
+    --sidebar: #252526;
+    --accent: #135bec;
+    --text-main: #ffffff;
+    --text-muted: #9ca3af;
+    --surface: #2d2d30;
+    --border-main: #374151;
+  }
+
+  [data-theme="light"] {
+    --primary: #ffffff;
+    --sidebar: #f8fafc;
+    --accent: #135bec;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --surface: #f1f5f9;
+    --border-main: #e2e8f0;
+  }
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+.chat-shell {
+  background-image:
+    radial-gradient(circle at 3% 0%, rgba(19, 91, 236, 0.15), transparent 36%),
+    radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.08), transparent 28%);
+}
+
+@keyframes chatRiseIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-message {
+  animation: chatRiseIn 260ms ease-out both;
+}

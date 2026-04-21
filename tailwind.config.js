@@ -4,6 +4,7 @@ module.exports = {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: ["class"],
   theme: {
     extend: {
       colors: {
@@ -33,6 +34,7 @@ module.exports = {
         "chart-3": "oklch(0.398 0.07 227.392)",
         "chart-4": "oklch(0.828 0.189 84.429)",
         "chart-5": "oklch(0.769 0.188 70.08)",
+        // Sidebar colors
         sidebar: "oklch(0.985 0 0)",
         "sidebar-foreground": "oklch(0.145 0 0)",
         "sidebar-primary": "#030213",
@@ -41,14 +43,54 @@ module.exports = {
         "sidebar-accent-foreground": "oklch(0.205 0 0)",
         "sidebar-border": "oklch(0.922 0 0)",
         "sidebar-ring": "oklch(0.708 0 0)",
+        // Reference design system tokens (light mode)
+        primary: "#ffffff",
+        sidebar: "#f8fafc",
+        accent: "#135bec",
+        "text-main": "#0f172a",
+        "text-muted": "#64748b",
+        surface: "#f1f5f9",
+        "border-main": "#e2e8f0",
+        // Light mode overrides
+        "surface-light": "#f1f5f9",
+        "sidebar-light": "#f8fafc",
+        "text-light": "#0f172a",
+        "text-muted-light": "#64748b",
+        // Chatbot guest colors
+        "chat-accent": "#135BFC",
+        "chat-accent-hover": "#1048C8",
+        "chat-surface": "#ffffff",
+        "chat-sidebar": "#F8FAFC",
+        "chat-border": "rgba(0, 0, 0, 0.07)",
+        "chat-text-main": "#030213",
+        "chat-text-muted": "#717182",
+        "chat-shadow": "rgba(0, 0, 0, 0.10)",
+        "chat-glow": "rgba(19, 91, 236, 0.12)",
       },
       borderRadius: {
         lg: "0.625rem",
         md: "calc(0.625rem - 2px)",
         sm: "calc(0.625rem - 4px)",
+        xl: "1rem",
+        "2xl": "1.25rem",
+        "3xl": "1.5rem",
+      },
+      boxShadow: {
+        "chat-input": "0 -4px 24px -4px rgba(19, 91, 236, 0.12), 0 4px 16px -4px rgba(0, 0, 0, 0.10)",
+        "chat-input-sm": "0 -2px 12px -2px rgba(0, 0, 0, 0.08)",
+        "chat-submit": "0 10px 22px -14px rgba(19, 91, 236, 0.80)",
+        "chat-bubble-user": "0 4px 12px rgba(19, 91, 236, 0.25)",
+        "chat-bubble-bot": "0 2px 8px rgba(0, 0, 0, 0.08)",
+      },
+      fontFamily: {
+        display: ["Be Vietnam Pro", "sans-serif"],
+      },
+      backgroundImage: {
+        "grid-pattern": "linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)",
       },
     },
   },
-  darkMode: ["class"],
-  plugins: [],
-}
+  plugins: [
+    require("@tailwindcss/typography"),
+  ],
+};

@@ -1,7 +1,35 @@
+// src/pages/chatbot/ChatGuestPage.jsx
 import React, { useEffect, useRef, useState } from "react";
-import ChatGuestHeader from "../../components/chatbotguest/ChatGuestHeader.jsx";
-import { API_CONFIG } from "../../config/api.js";
 import ReactMarkdown from "react-markdown";
+import ChatGuestHeader from "../../components/chatbotguest/ChatGuestHeader.jsx";
+import ChatMessageBubble from "../../components/chatbotguest/ChatMessageBubble.jsx";
+import ChatEmptyState from "../../components/chatbotguest/ChatEmptyState.jsx";
+import ChatInput from "../../components/chatbotguest/ChatInput.jsx";
+import SourcesPanel, { SourcesButton } from "../../components/chatbotguest/SourcesPanel.jsx";
+import LawDetailModal from "../../components/chatbotguest/LawDetailModal.jsx";
+import PhIcon from "../../components/ui/PhIcon.jsx";
+import { API_CONFIG } from "../../config/api.js";
+
+const ROLES = [
+  {
+    id: "officer",
+    label: "Viên chức / Người lao động",
+    greeting: "Xin chào! Bạn là viên chức hoặc người lao động tại FPT University. Mình sẽ hỗ trợ bạn các vấn đề về nghiên cứu khoa học, hợp tác đối ngoại, chế độ lương - chính sách, quy trình nội bộ, nhân sự, thuế thu nhập cá nhân, đảm bảo chất lượng và công tác khảo thí. Bạn cần mình giúp gì?",
+    context: "Bạn là trợ lý AI chuyên hỗ trợ các viên chức và người lao động tại FPT University. Ngữ cảnh: nghiên cứu khoa học, hợp tác đối ngoại, chế độ lương - chính sách, quy trình nội bộ, chính sách nhân sự, thuế thu nhập cá nhân, đảm bảo chất lượng và công tác khảo thí.",
+  },
+  {
+    id: "student",
+    label: "Sinh viên",
+    greeting: "Xin chào! Bạn là sinh viên FPT University. Mình sẽ hỗ trợ bạn các thắc mắc về công tác chính trị sinh viên, quy chế đào tạo (đăng ký học phần, điều kiện tốt nghiệp, xét học bổng...), thủ tục nội trú (ký túc xá), quy định khảo thí và các đợt khảo sát lấy ý kiến người học. Bạn cần mình giúp gì?",
+    context: "Bạn là trợ lý AI chuyên hỗ trợ sinh viên FPT University. Ngữ cảnh: công tác chính trị sinh viên, quy chế đào tạo (đăng ký học phần, điều kiện tốt nghiệp, xét học bổng...), thủ tục nội trú (ký túc xá), quy định khảo thí và các đợt khảo sát lấy ý kiến người học.",
+  },
+  {
+    id: "parent",
+    label: "Phụ huynh / Bên liên quan",
+    greeting: "Xin chào! Bạn là phụ huynh hoặc bên liên quan của FPT University. Mình sẽ hỗ trợ bạn tra cứu thông tin chung về nhà trường và các quy định liên quan đến việc khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp). Bạn cần mình giúp gì?",
+    context: "Bạn là trợ lý AI chuyên hỗ trợ phụ huynh và các bên liên quan của FPT University. Ngữ cảnh: tra cứu thông tin chung về nhà trường và các quy định liên quan đến việc khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp).",
+  },
+];
 
 const CHATBOT_PREFILL_KEY = "chatbot_prefill_message";
 const GUEST_ID_KEY = "guest_user_id_v1";
@@ -21,17 +49,20 @@ export default function ChatGuestPage() {
   const [wsReady, setWsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [partial, setPartial] = useState("");
-
-  // ❗️NEW: lưu RIASEC để gửi sau khi bot chào xong
   const [prefillMessage, setPrefillMessage] = useState(null);
   const [hasWelcomed, setHasWelcomed] = useState(false);
+  const [showSources, setShowSources] = useState(false);
+  const [selectedLaw, setSelectedLaw] = useState(null);
+  const [isLawModalOpen, setIsLawModalOpen] = useState(false);
+  const [greeting, setGreeting] = useState(null);
+  const [selectedRole, setSelectedRole] = useState(null);
 
   const partialRef = useRef("");
   const wsRef = useRef(null);
-  const listRef = useRef(null);
   const prefillSentRef = useRef(false);
+  const sources = [];
+  const autoScrollRef = useRef(null);
 
-  // guestId & sessionId (nếu sau này cần dùng)
   const [guestId] = useState(() => {
     let stored = localStorage.getItem(GUEST_ID_KEY);
     let numeric;
@@ -56,44 +87,31 @@ export default function ChatGuestPage() {
     return numeric;
   });
 
-  // Auto-scroll xuống cuối mỗi khi có tin nhắn mới
   useEffect(() => {
-    if (!listRef.current) return;
-    listRef.current.scrollTo({
-      top: listRef.current.scrollHeight,
-      behavior: "smooth",
-    });
+    if (autoScrollRef.current) {
+      autoScrollRef.current.scrollTo({
+        top: autoScrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [messages, partial]);
 
-  // Kết nối WS khi mount
   useEffect(() => {
     const wsUrl = API_BASE_URL.replace(/^http/, "ws") + "/chat/ws/chat";
-
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
       setWsReady(true);
-      setHasWelcomed(false);       // reset trạng thái chào
+      setHasWelcomed(false);
       prefillSentRef.current = false;
-
-      // Gửi handshake ban đầu (guest không có user_id)
-      ws.send(
-        JSON.stringify({
-          // có thể thêm guestId / sessionId nếu BE cần
-        })
-      );
+      ws.send(JSON.stringify({}));
     };
 
     ws.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data);
-
         switch (data.event) {
-          case "session_created":
-            // nếu muốn lấy session_id từ server thì xử lý ở đây
-            break;
-
           case "chunk":
             setPartial((prev) => {
               const next = prev + (data.content ?? "");
@@ -101,232 +119,204 @@ export default function ChatGuestPage() {
               return next;
             });
             break;
-
-          case "go": {
-            // go = kết thúc đoạn greeting đầu tiên
-            const finalText = (partialRef.current || "").trim();
-            if (finalText) {
-              const botMsg = { sender: "bot", text: finalText };
-              setMessages((prev) => [...prev, botMsg]);
-            }
-            partialRef.current = "";
-            setPartial("");
-            setIsLoading(false);
-
-            setHasWelcomed(true);    
-            break;
-          }
-
+          case "go":
           case "done": {
-            // done cho các câu trả lời sau này
             const finalText = (partialRef.current || "").trim();
             if (finalText) {
-              const botMsg = { sender: "bot", text: finalText };
-              setMessages((prev) => [...prev, botMsg]);
+              setMessages((prev) => {
+                if (prev.length === 0) {
+                  setGreeting(finalText);
+                  return prev;
+                }
+                return [...prev, { sender: "bot", text: finalText }];
+              });
             }
             partialRef.current = "";
             setPartial("");
             setIsLoading(false);
+            if (data.event === "go") setHasWelcomed(true);
             break;
           }
-
           case "error":
             setIsLoading(false);
             break;
-
           default:
-          // ignore log khác
+            break;
         }
       } catch {
         // ignore non-JSON
       }
     };
 
-    ws.onclose = () => {
-      setWsReady(false);
-    };
+    ws.onclose = () => setWsReady(false);
+    ws.onerror = () => setWsReady(false);
 
     return () => ws.close();
   }, [guestId, sessionId]);
 
-  // Lấy dữ liệu từ localStorage (RIASEC JSON hoặc legacy text)
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(CHATBOT_PREFILL_KEY);
-      if (!raw) return;
-
-      localStorage.removeItem(CHATBOT_PREFILL_KEY);
-
-      let initial = "";
-      try {
-        const parsed = JSON.parse(raw);
-
-        if (parsed && typeof parsed === "object" && "text" in parsed) {
-          // legacy: { text: "..." }
-          initial = parsed.text;
-        }else if (
-        parsed &&
-        typeof parsed === "object" &&
-        "answers" in parsed
-      ) {
-        initial = `Phân tích "answers":${JSON.stringify(parsed.answers)}`;
-      } else {
-        // fallback: stringify toàn bộ
-        initial = JSON.stringify(parsed);
-      }
-    } catch {
-      // không parse được => dùng raw
-      initial = raw;
-    }
-
-    if (!initial) return;
-
-    // ❗️CHỈ LƯU LẠI, KHÔNG PUSH LÊN UI NGAY
-    setPrefillMessage(initial);
-  } catch {
-    /* ignore */
-  }
-}, []);
-
-  // Sau khi WS sẵn sàng *và* bot đã chào xong -> mới gửi RIASEC lên
   useEffect(() => {
     if (!wsReady || !prefillMessage || !hasWelcomed) return;
     if (wsRef.current?.readyState !== WebSocket.OPEN) return;
     if (prefillSentRef.current) return;
 
-    // Hiển thị như 1 tin nhắn user
-    const userMsg = { sender: "user", text: prefillMessage };
-    setMessages((prev) => [...prev, userMsg]);
-
+    setMessages((prev) => [...prev, { sender: "user", text: prefillMessage }]);
     setIsLoading(true);
     setPartial("");
     partialRef.current = "";
 
-    // Gửi nội dung RIASEC sang server để bot phân tích
-    wsRef.current.send(
-      JSON.stringify({
-        message: prefillMessage,
-      })
-    );
-
+    wsRef.current.send(JSON.stringify({ message: prefillMessage }));
     prefillSentRef.current = true;
     setPrefillMessage(null);
   }, [wsReady, prefillMessage, hasWelcomed]);
 
-  const send = (text) => {
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(CHATBOT_PREFILL_KEY);
+      if (!raw) return;
+      localStorage.removeItem(CHATBOT_PREFILL_KEY);
+
+      let initial = "";
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object" && "text" in parsed) {
+          initial = parsed.text;
+        } else if (parsed && typeof parsed === "object" && "answers" in parsed) {
+          initial = `Phân tích "answers":${JSON.stringify(parsed.answers)}`;
+        } else {
+          initial = JSON.stringify(parsed);
+        }
+      } catch {
+        initial = raw;
+      }
+
+      if (!initial) return;
+      setPrefillMessage(initial);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const send = (text, roleContext) => {
     if (!text.trim()) return;
 
-    const userMsg = { sender: "user", text };
-    setMessages((prev) => [...prev, userMsg]);
+    const userMessage = text;
+    setMessages((prev) => [...prev, { sender: "user", text: userMessage }]);
     setInput("");
     setIsLoading(true);
     setPartial("");
     partialRef.current = "";
 
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(
-        JSON.stringify({
-          message: text,
-        })
-      );
+      wsRef.current.send(JSON.stringify({
+        message: userMessage,
+        context: roleContext || null
+      }));
     }
   };
 
-  const onSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (fileContent) => {
+    if (!input.trim() && !fileContent) return;
+    const selectedRoleObj = ROLES.find((r) => r.id === selectedRole);
+    send(fileContent || input, selectedRoleObj?.context);
+  };
+
+  const handleSuggestionClick = (text) => {
     if (!wsReady) return;
-    send(input);
+    const selectedRoleObj = ROLES.find((r) => r.id === selectedRole);
+    send(text, selectedRoleObj?.context);
+  };
+
+  const handleRoleSelect = (role) => {
+    setSelectedRole(role.id);
+    const selectedRoleObj = ROLES.find((r) => r.id === role.id);
+    if (selectedRoleObj) {
+      setGreeting(selectedRoleObj.greeting);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f7f8]">
-      <ChatGuestHeader />
+    <div className="chat-shell flex flex-col h-screen bg-sidebar relative w-full transition-colors duration-300 overflow-hidden">
+      <ChatGuestHeader 
+        roles={ROLES}
+        selectedRole={selectedRole}
+        onRoleChange={handleRoleSelect}
+      />
 
-      {/* Khung chat */}
-      <main className="mx-auto max-w-3xl px-4">
-        <div ref={listRef} className="min-h-[60vh] pt-6 pb-40 overflow-y-auto">
-          {messages.length === 0 && (
-            <div className="mt-16 text-center text-gray-400">
-              Hỏi bất kỳ điều gì… ✨
-            </div>
-          )}
-
-          {messages.map((m, i) => (
-            <div
-              key={i}
-              className={`mb-4 flex ${
-                m.sender === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm ${
-                  m.sender === "user"
-                    ? "bg-[#10a37f] text-white"
-                    : "bg-white text-gray-800"
-                }`}
-              >
-                {m.sender === "bot" ? (
-                  <ReactMarkdown>{m.text}</ReactMarkdown>
-                ) : (
-                  m.text
-                )}
-              </div>
-            </div>
-          ))}
-
-          {isLoading && (
-            <div className="mb-4 flex justify-start">
-              <div className="max-w-[85%] rounded-2xl bg-white px-4 py-3 text-[15px] text-gray-800 shadow-sm">
-                {partial}
-                <span className="ml-1 animate-pulse">▌</span>
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
-
-      {/* Thanh nhập */}
-      <form
-        onSubmit={onSubmit}
-        className="fixed bottom-0 left-0 right-0 z-20 border-t bg-[#f7f7f8]"
+      <div
+        ref={autoScrollRef}
+        className="flex-1 overflow-y-auto w-full relative"
       >
-        <div className="mx-auto max-w-3xl px-4 py-4">
-          <div className="rounded-2xl border bg-white shadow-sm">
-            <div className="flex items-end gap-3 p-3">
-<textarea
-  rows={1}
-  value={input}
-  onChange={(e) => setInput(e.target.value)}
-  placeholder={wsReady ? "Hỏi bất kỳ điều gì…" : "Đang kết nối…"}
-  className="max-h-40 flex-1 resize-none border-none p-2 focus:outline-none"
-  onKeyDown={(e) => {
-    // Enter để gửi, Shift+Enter để xuống dòng
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      if (wsReady && input.trim()) {
-        send(input);
-      }
-    }
-  }}
-/>
-              <button
-                type="submit"
-                disabled={!wsReady || !input.trim()}
-                className={`rounded-xl px-4 py-2 text-white ${
-                  !wsReady || !input.trim()
-                    ? "cursor-not-allowed bg-gray-300"
-                    : "bg-[#10a37f] hover:opacity-90"
-                }`}
-              >
-                Gửi
-              </button>
-            </div>
+        <div className="max-w-5xl mx-auto w-full px-3 md:px-6 flex flex-col pb-36 min-h-full">
+          <div className="relative z-20 mb-4">
+            <SourcesPanel
+              sources={sources}
+              showSources={showSources}
+              onToggle={() => setShowSources(!showSources)}
+              onClose={() => setShowSources(false)}
+            />
           </div>
-          <div className="mt-2 text-center text-xs text-gray-400">
-            Chatbot có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng.
+
+          <div className="w-full flex-1">
+            {messages.length === 0 && (
+              <ChatEmptyState
+                greeting={greeting}
+                onSendMessage={handleSuggestionClick}
+                onRoleSelect={handleRoleSelect}
+                selectedRole={selectedRole}
+              />
+            )}
+
+            {messages.map((m, i) => (
+              <div key={i} className="mb-4 chat-message">
+                <ChatMessageBubble message={m} />
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="mb-4 chat-message flex justify-start">
+                <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-surface border border-border-main/50 px-5 py-3.5 shadow-sm">
+                  {partial ? (
+                    <div className="text-sm leading-relaxed text-text-main prose prose-sm max-w-none">
+                      <ReactMarkdown>{partial}</ReactMarkdown>
+                      <span className="ml-1 animate-pulse text-accent">|</span>
+                    </div>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-text-muted">
+                      <span className="inline-block w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+                      <span className="inline-block w-1.5 h-1.5 bg-accent rounded-full animate-pulse [animation-delay:150ms]" />
+                      <span className="inline-block w-1.5 h-1.5 bg-accent rounded-full animate-pulse [animation-delay:300ms]" />
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </form>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 w-full z-20 px-3 md:px-6 pb-3 pt-2 pointer-events-none">
+        <div className="mx-auto w-full max-w-5xl">
+          <ChatInput
+            input={input}
+            isLoading={isLoading}
+            wsReady={wsReady}
+            onInputChange={setInput}
+            onSubmit={handleSubmit}
+            selectedRole={selectedRole}
+          />
+          <div className="mt-2 w-full flex justify-center pointer-events-auto text-xs text-text-muted">
+            <span className="bg-sidebar/80 backdrop-blur-sm px-3 py-0.5 rounded-full">
+              Chatbot có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <LawDetailModal
+        isOpen={isLawModalOpen}
+        law={selectedLaw}
+        onClose={() => setIsLawModalOpen(false)}
+      />
     </div>
   );
 }
