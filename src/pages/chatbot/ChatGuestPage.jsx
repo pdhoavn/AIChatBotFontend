@@ -14,20 +14,20 @@ const ROLES = [
   {
     id: "officer",
     label: "Viên chức / Người lao động",
-    greeting: "Xin chào! Bạn là viên chức hoặc người lao động tại FPT University. Mình sẽ hỗ trợ bạn các vấn đề về nghiên cứu khoa học, hợp tác đối ngoại, chế độ lương - chính sách, quy trình nội bộ, nhân sự, thuế thu nhập cá nhân, đảm bảo chất lượng và công tác khảo thí. Bạn cần mình giúp gì?",
-    context: "Bạn là trợ lý AI chuyên hỗ trợ các viên chức và người lao động tại FPT University. Ngữ cảnh: nghiên cứu khoa học, hợp tác đối ngoại, chế độ lương - chính sách, quy trình nội bộ, chính sách nhân sự, thuế thu nhập cá nhân, đảm bảo chất lượng và công tác khảo thí.",
+    greeting: "Xin chào! Bạn là viên chức hoặc người lao động tại ĐH Giao thông Vận tải Phân hiệu TP.HCM. Mình sẽ hỗ trợ bạn các vấn đề về nghiên cứu khoa học, hợp tác đối ngoại, chế độ lương - chính sách, quy trình nội bộ, nhân sự, thuế thu nhập cá nhân, đảm bảo chất lượng và công tác khảo thí. Bạn cần mình giúp gì?",
+    context: "Bạn là trợ lý AI chuyên hỗ trợ các viên chức và người lao động tại ĐH Giao thông Vận tải Phân hiệu TP.HCM. Ngữ cảnh: nghiên cứu khoa học, hợp tác đối ngoại, chế độ lương - chính sách, quy trình nội bộ, chính sách nhân sự, thuế thu nhập cá nhân, đảm bảo chất lượng và công tác khảo thí.",
   },
   {
     id: "student",
     label: "Sinh viên",
-    greeting: "Xin chào! Bạn là sinh viên FPT University. Mình sẽ hỗ trợ bạn các thắc mắc về công tác chính trị sinh viên, quy chế đào tạo (đăng ký học phần, điều kiện tốt nghiệp, xét học bổng...), thủ tục nội trú (ký túc xá), quy định khảo thí và các đợt khảo sát lấy ý kiến người học. Bạn cần mình giúp gì?",
-    context: "Bạn là trợ lý AI chuyên hỗ trợ sinh viên FPT University. Ngữ cảnh: công tác chính trị sinh viên, quy chế đào tạo (đăng ký học phần, điều kiện tốt nghiệp, xét học bổng...), thủ tục nội trú (ký túc xá), quy định khảo thí và các đợt khảo sát lấy ý kiến người học.",
+    greeting: "Xin chào! Bạn là sinh viên ĐH Giao thông Vận tải Phân hiệu TP.HCM. Mình sẽ hỗ trợ bạn các thắc mắc về công tác chính trị sinh viên, quy chế đào tạo (đăng ký học phần, điều kiện tốt nghiệp, xét học bổng...), thủ tục nội trú (ký túc xá), quy định khảo thí và các đợt khảo sát lấy ý kiến người học. Bạn cần mình giúp gì?",
+    context: "Bạn là trợ lý AI chuyên hỗ trợ sinh viên ĐH Giao thông Vận tải Phân hiệu TP.HCM. Ngữ cảnh: công tác chính trị sinh viên, quy chế đào tạo (đăng ký học phần, điều kiện tốt nghiệp, xét học bổng...), thủ tục nội trú (ký túc xá), quy định khảo thí và các đợt khảo sát lấy ý kiến người học.",
   },
   {
     id: "parent",
     label: "Phụ huynh / Bên liên quan",
-    greeting: "Xin chào! Bạn là phụ huynh hoặc bên liên quan của FPT University. Mình sẽ hỗ trợ bạn tra cứu thông tin chung về nhà trường và các quy định liên quan đến việc khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp). Bạn cần mình giúp gì?",
-    context: "Bạn là trợ lý AI chuyên hỗ trợ phụ huynh và các bên liên quan của FPT University. Ngữ cảnh: tra cứu thông tin chung về nhà trường và các quy định liên quan đến việc khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp).",
+    greeting: "Xin chào! Bạn là phụ huynh hoặc bên liên quan của ĐH Giao thông Vận tải Phân hiệu TP.HCM. Mình sẽ hỗ trợ bạn tra cứu thông tin chung về nhà trường và các quy định liên quan đến việc khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp). Bạn cần mình giúp gì?",
+    context: "Bạn là trợ lý AI chuyên hỗ trợ phụ huynh và các bên liên quan của ĐH Giao thông Vận tải Phân hiệu TP.HCM. Ngữ cảnh: tra cứu thông tin chung về nhà trường và các quy định liên quan đến việc khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp).",
   },
 ];
 

@@ -37,7 +37,7 @@ const handleLogin = async (event) => {
         // Không cho staff dùng trang này
         swal({
           title: "Sai trang đăng nhập",
-          text: "Tài khoản của bạn là cán bộ. Vui lòng dùng trang 'Cán Bộ FPT'.",
+          text: "Tài khoản của bạn là cán bộ. Vui lòng dùng trang 'Cán Bộ GTVT'.",
           icon: "warning",
           buttons: {
             ok: { text: "Đến trang cán bộ", value: true, className: "swal-ok-button" },
@@ -88,7 +88,7 @@ const handleLogin = async (event) => {
         <header>
           <div>
             <div className="logo-mandb" onClick={handleOnClick}>
-              <h3>FPT</h3>
+              <h3>GTVT</h3>
             </div>
             <div className="line"></div>
             <h3 className="text-login">Login</h3>
@@ -145,7 +145,7 @@ const handleLogin = async (event) => {
               <input
                 className="button-login button-admin"
                 type="button"
-                value="Cán Bộ FPT"
+                value="Cán Bộ GTVT"
                 onClick={() => navigate('/loginforad')}
               />
             </form>
@@ -164,7 +164,7 @@ const handleLogin = async (event) => {
                 </li>
                 <li>
                   <img src="/src/assets/email.svg" alt="" />
-                  <span>tuyensinhhcm@fpt.edu.vn</span>
+                  <span>tuyensinhhcm@utc2.edu.vn</span>
                 </li>
                 <li>
                   <img src="/src/assets/location.svg" alt="" />
@@ -193,7 +193,7 @@ const handleLogin = async (event) => {
               <img src="/src/assets/twitter.svg" alt="" />
             </div>
             <div className="line-end"></div>
-            <h5>Copyright&copy; : tuyensinhhcm@fpt.edu.vn</h5>
+            <h5>Copyright&copy; : tuyensinhhcm@utc2.edu.vn</h5>
           </div>
         </div>
       </>

@@ -22,8 +22,8 @@ export default function Footer() {
                 <GraduationCap className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-bold">FPT University</h3>
-                <p className="text-sm text-gray-400">Đại học FPT</p>
+                <h3 className="text-xl font-bold">ĐH Giao thông Vận tải</h3>
+                <p className="text-sm text-gray-400">Phân hiệu TP.HCM</p>
               </div>
             </div>
             <p className="text-gray-400 leading-relaxed mb-6">
@@ -121,8 +121,8 @@ export default function Footer() {
               </li>
               <li>
                 <span className="font-semibold text-white">Email:</span><br />
-                <a href="mailto:tuyensinh@fpt.edu.vn" className="hover:text-orange-400 transition-colors">
-                  tuyensinh@fpt.edu.vn
+                <a href="mailto:tuyensinh@utc2.edu.vn" className="hover:text-orange-400 transition-colors">
+                  tuyensinh@utc2.edu.vn
                 </a>
               </li>
               <li>
@@ -138,7 +138,7 @@ export default function Footer() {
         <div className="border-t border-gray-800 pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm text-center md:text-left">
-              © 2025 FPT University. All rights reserved.
+              © 2025 ĐH Giao thông Vận tải. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
               <a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">

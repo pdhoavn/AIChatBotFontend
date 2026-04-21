@@ -92,18 +92,18 @@ const scrollToSection = (id) => {
             </div>
             <div>
               <h1
-                className={`text-xl font-bold ${
+                className={`text-base font-bold ${
                   isSolidHeader ? "text-gray-900" : "text-white"
                 }`}
               >
-                FPT University
+                Trường ĐH Giao thông Vận tải
               </h1>
               <p
-                className={`text-xs ${
+                className={`text-[10px] ${
                   isSolidHeader ? "text-gray-600" : "text-white/90"
                 }`}
               >
-                Đại học FPT
+                Phân hiệu tại TP. Hồ Chí Minh
               </p>
             </div>
           </div>

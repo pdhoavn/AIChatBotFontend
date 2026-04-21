@@ -23,7 +23,7 @@ export default function ChatMessageBubble({ message }) {
               <PhIcon name="balance" size={12} className="text-accent" />
             </div>
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
-              FPT UNIVERSITY BOT
+              ĐẠI HỌC GTVT BOT
             </span>
           </div>
         )}

@@ -34,9 +34,9 @@ export default function ChatGuestHeader({ selectedRole, onRoleChange, roles = []
           </div>
           <div>
             <div className="font-semibold text-[#EB5A0D] leading-tight">
-              FPT University
+              Trường ĐH Giao thông Vận tải
             </div>
-            <div className="text-xs text-chat-text-muted -mt-0.5">Đại học FPT</div>
+            <div className="text-xs text-chat-text-muted -mt-0.5">Phân hiệu tại TP. Hồ Chí Minh</div>
           </div>
         </div>
 

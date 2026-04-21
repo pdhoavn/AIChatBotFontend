@@ -255,7 +255,7 @@ const newConv = () => ({
 });
 
 
-const CHAT_RATING_KEY = "fpt_chatbot_session_ratings_v1";
+const CHAT_RATING_KEY = "utc2_chatbot_session_ratings_v1";
 const CHATBOT_PREFILL_KEY = "chatbot_prefill_message";
 
 
@@ -1909,7 +1909,7 @@ if (isAuthenticated && user && !isStudent) {
     {/* RIGHT: khung chat */}
     <section className="col-span-12 md:col-span-8 flex flex-col">
       <div className="bg-[#EB5A0D] text-white px-6 py-3 flex items-center justify-between">
-        <div className="text-lg font-semibold">ChatBotFPT</div>
+        <div className="text-lg font-semibold">ChatBot GTVT</div>
 
         {activeConv && (
           <div className="flex items-center gap-1 text-sm">

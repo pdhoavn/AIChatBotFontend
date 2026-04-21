@@ -47,7 +47,7 @@ export default function LoginPage() {
           <Shield className="h-6 w-6 text-orange-600" />
           <div>
             <div className="text-lg font-semibold text-[#f97316]">Đăng nhập</div>
-            <div className="text-xs text-gray-500">Nền tảng FPT</div>
+            <div className="text-xs text-gray-500">Nền tảng ĐH GTVT</div>
           </div>
         </div>
 

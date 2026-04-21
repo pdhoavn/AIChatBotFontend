@@ -34,7 +34,7 @@ export default function BannerIntro() {
           <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight">
             Khởi đầu hành trình
             <span className="block mt-2 pb-5 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-              Thành công cùng FPT
+              Thành công cùng ĐH GTVT
             </span>
           </h1>
 

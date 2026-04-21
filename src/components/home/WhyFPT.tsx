@@ -41,11 +41,11 @@ export default function WhyFPT() {
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Tại sao chọn{' '}
             <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-              FPT University?
+              ĐH GTVT?
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Đại học FPT không chỉ là nơi học tập mà còn là cộng đồng phát triển toàn diện,
+            ĐH GTVT không chỉ là nơi học tập mà còn là cộng đồng phát triển toàn diện,
             mở ra cánh cửa thành công cho tương lai của bạn
           </p>
         </div>
@@ -80,8 +80,8 @@ export default function WhyFPT() {
                 Hệ sinh thái giáo dục toàn diện
               </h3>
               <p className="text-orange-50 text-lg leading-relaxed mb-6">
-                FPT University là thành viên của Tập đoàn FPT - tập đoàn công nghệ hàng đầu Việt Nam.
-                Sinh viên được học tập, thực hành và làm việc trong hệ sinh thái công nghệ lớn nhất Việt Nam.
+                ĐH GTVT TP.HCM - thành viên của ĐH Giao thông Vận tải.
+                Sinh viên được học tập, thực hành và làm việc trong môi trường giáo dục chất lượng cao.
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start">

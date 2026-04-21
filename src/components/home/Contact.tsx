@@ -5,25 +5,25 @@ const locations = [
     city: 'Hà Nội',
     address: 'Khu Giáo dục và Đào tạo, Khu Công nghệ cao Hòa Lạc, Km29 Đại lộ Thăng Long, Hà Nội',
     phone: '024 7300 5588',
-    email: 'tuyensinh.hn@fpt.edu.vn',
+    email: 'tuyensinh.hn@utc2.edu.vn',
   },
   {
     city: 'TP. Hồ Chí Minh',
     address: 'Lô E2a-7, Đường D1, Khu Công nghệ cao, P.Long Thạnh Mỹ, Tp. Thủ Đức, TP. HCM',
     phone: '028 7300 5588',
-    email: 'tuyensinh.hcm@fpt.edu.vn',
+    email: 'tuyensinh.hcm@utc2.edu.vn',
   },
   {
     city: 'Đà Nẵng',
-    address: 'Khu đô thị công nghệ FPT Đà Nẵng, Khu Công nghệ cao, P. Hòa Hải, Q. Ngũ Hành Sơn, TP. Đà Nẵng',
+    address: 'Khu Công nghệ cao, P. Hòa Hải, Q. Ngũ Hành Sơn, TP. Đà Nẵng',
     phone: '0236 7300 999',
-    email: 'tuyensinh.dn@fpt.edu.vn',
+    email: 'tuyensinh.dn@utc2.edu.vn',
   },
   {
     city: 'Cần Thơ',
     address: '600 Nguyễn Văn Cừ, P. An Bình, Q. Ninh Kiều, TP. Cần Thơ',
     phone: '0292 7300 800',
-    email: 'tuyensinh.ct@fpt.edu.vn',
+    email: 'tuyensinh.ct@utc2.edu.vn',
   },
 ];
 
@@ -39,7 +39,7 @@ export default function Contact() {
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            FPT University có mặt tại các thành phố lớn trên toàn quốc. Hãy tìm cơ sở gần bạn nhất!
+            ĐH GTVT có mặt tại các thành phố lớn trên toàn quốc. Hãy tìm cơ sở gần bạn nhất!
           </p>
         </div>
 

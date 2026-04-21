@@ -106,7 +106,7 @@ navigate('/loginprivate');
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Chỉ 4 bước đơn giản để trở thành sinh viên FPT University
+            Chỉ 4 bước đơn giản để trở thành sinh viên ĐH GTVT
           </p>
         </div>
 
