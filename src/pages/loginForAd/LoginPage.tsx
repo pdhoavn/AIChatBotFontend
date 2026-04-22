@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuth, type Role } from "@/contexts/Auth";
 import { Shield } from "lucide-react";
 import { useNavigate ,useLocation } from "react-router-dom";
-import bgImage from "@/assets/images/toiyeufpt.jpg";
+import bgImage from "@/assets/images/login-private.jpg";
 
 export default function LoginPage() {
 

@@ -22,12 +22,19 @@ const AUDIENCE_COLORS: Record<string, string> = {
   'Tuyển sinh':                'bg-orange-100 text-orange-700 border-orange-200',
 };
 
+const AUDIENCE_VALUE_MAP: Record<Audience, string> = {
+  'Viên chức/Người lao động': 'CANBO',
+  'Sinh viên':                 'SINHVIEN',
+  'Phụ huynh':                 'PHUHUYNH',
+  'Tuyển sinh':                'TUYENSINH',
+};
+
 type Audience = typeof AUDIENCE_OPTIONS[number];
 
 interface AddQuestionModalProps {
   intents: Intent[];
   onClose: () => void;
-  onSubmit: (data: { question: string; answer: string; intent_id: number; audiences: Audience[] }) => Promise<void>;
+  onSubmit: (data: { question: string; answer: string; intent_id: number; target_audiences: string[] }) => Promise<void>;
 }
 
 export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModalProps) {
@@ -126,7 +133,7 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
 
     try {
       setLoading(true);
-      await onSubmit({ question, answer, intent_id: intentId, audiences });
+      await onSubmit({ question, answer, intent_id: intentId, target_audiences: audiences.map(a => AUDIENCE_VALUE_MAP[a]) });
       onClose();
     } catch (error) {
     } finally {

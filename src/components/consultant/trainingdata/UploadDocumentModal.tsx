@@ -21,10 +21,17 @@ const AUDIENCE_COLORS: Record<string, string> = {
   'Tuyển sinh':                'bg-orange-100 text-orange-700 border-orange-200',
 };
 
+const AUDIENCE_VALUE_MAP: Record<Audience, string> = {
+  'Viên chức/Người lao động': 'CANBO',
+  'Sinh viên':                 'SINHVIEN',
+  'Phụ huynh':                 'PHUHUYNH',
+  'Tuyển sinh':                'TUYENSINH',
+};
+
 interface UploadDocumentModalProps {
   intents: Intent[];
   onClose: () => void;
-  onSubmit: (formData: FormData, intentId: number, audiences: Audience[]) => Promise<void>;
+  onSubmit: (formData: FormData, intentId: number, target_audiences: string[]) => Promise<void>;
 }
 
 export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocumentModalProps) {
@@ -87,7 +94,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
       formData.append('file', file);
       formData.append('title', title);
 
-      await onSubmit(formData, intentId, audiences);
+      await onSubmit(formData, intentId, audiences.map(a => AUDIENCE_VALUE_MAP[a]));
       onClose();
     } catch (error) {
     } finally {

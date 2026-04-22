@@ -52,7 +52,7 @@ export default function Router() {
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<ChatGuestPage />} />
       <Route path="/loginprivate" element={<LoginPrivate />} />
       <Route path="/loginforad" element={<LoginPage />} />
       <Route path="/chatbot" element={<ChatGuestPage />} />
