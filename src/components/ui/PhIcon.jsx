@@ -170,6 +170,7 @@ const ICON_MAP = {
   menu: List,
   // Actions
   close: X,
+  stop: Stop,
   attach_file: Paperclip,
   mic: Microphone,
   arrow_upward: ArrowUp,

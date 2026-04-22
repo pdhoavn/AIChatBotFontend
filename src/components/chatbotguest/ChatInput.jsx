@@ -32,7 +32,21 @@ const DOMAINS = [
   { id: "dau-tu-cong", label: "Đầu tư công", roles: ["all"] },
 ];
 
-export default function ChatInput({ input, isLoading, wsReady, onInputChange, onSubmit, onOpenCall, selectedRole }) {
+export default function ChatInput({
+  input,
+  isLoading,
+  wsReady,
+  onInputChange,
+  onSubmit,
+  onOpenCall,
+  selectedRole,
+  isListening = false,
+  transcript = "",
+  onMicClick,
+  onMicStop,
+  onTranscriptConfirm,
+  onStop,
+}) {
   const textareaRef = useRef(null);
   const wrapperRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -168,6 +182,36 @@ export default function ChatInput({ input, isLoading, wsReady, onInputChange, on
             </div>
           )}
 
+          {/* Live transcript banner */}
+          {isListening && (
+            <div className="mx-2 md:mx-3 mb-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-400/30">
+              <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse shrink-0" />
+              <span className="flex-1 text-[12px] text-red-300 italic min-w-0 truncate">
+                {transcript || "Đang nghe..."}
+              </span>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onTranscriptConfirm?.();
+                }}
+                className="shrink-0 px-2 py-0.5 rounded-full bg-red-400/20 hover:bg-red-400/30 text-[11px] text-red-300 font-medium transition-colors"
+              >
+                Gửi
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onMicStop?.();
+                }}
+                className="shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-red-400/20 transition-colors"
+              >
+                <PhIcon name="close" size={12} className="text-red-300" />
+              </button>
+            </div>
+          )}
+
           {/* Uploading indicator */}
           {isUploading && (
             <div className="mx-2 md:mx-3 mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/50 border border-border-main/70">
@@ -208,14 +252,28 @@ export default function ChatInput({ input, isLoading, wsReady, onInputChange, on
 
               <button
                 type="button"
-                title="Trao đổi giọng nói"
-                aria-label="Trao đổi giọng nói"
+                title={isListening ? "Dừng ghi âm" : "Trao đổi giọng nói"}
+                aria-label={isListening ? "Dừng ghi âm" : "Trao đổi giọng nói"}
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={onOpenCall}
+                onClick={() => {
+                  if (isListening) {
+                    onMicStop?.();
+                  } else {
+                    onMicClick?.();
+                  }
+                }}
                 disabled={isLoading || isUploading}
-                className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full border border-border-main/60 text-text-muted hover:text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/10 transition-colors disabled:opacity-40"
+                className={`w-9 h-9 shrink-0 flex items-center justify-center rounded-full border transition-all disabled:opacity-40 ${
+                  isListening
+                    ? "border-red-400/50 bg-red-500/15 text-red-400 animate-pulse"
+                    : "border-border-main/60 text-text-muted hover:text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/10"
+                }`}
               >
-                <PhIcon name="mic" size={15} />
+                <PhIcon
+                  name={isListening ? "call_end" : "mic"}
+                  size={15}
+                  className={isListening ? "text-red-400" : ""}
+                />
               </button>
 
               <div className="relative shrink-0">
@@ -257,9 +315,9 @@ export default function ChatInput({ input, isLoading, wsReady, onInputChange, on
                   : "Nhập câu hỏi..."
               }
               rows={1}
-              value={input}
+              value={isListening ? transcript : input}
               onChange={(e) => {
-                onInputChange(e.target.value);
+                if (!isListening) onInputChange(e.target.value);
                 const el = textareaRef.current;
                 if (el) {
                   el.style.height = "auto";
@@ -269,30 +327,40 @@ export default function ChatInput({ input, isLoading, wsReady, onInputChange, on
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  handleSubmit(e);
+                  if (isListening) {
+                    onTranscriptConfirm?.();
+                  } else {
+                    handleSubmit(e);
+                  }
                 }
               }}
               onFocus={() => setIsFocused(true)}
               disabled={isLoading || isUploading}
             />
 
-            {/* Loading spinner */}
-            {isLoading && (
-              <div className="shrink-0">
-                <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-              </div>
+            {/* Send / Stop button */}
+            {isLoading ? (
+              <button
+                type="button"
+                title="Dừng phản hồi"
+                onClick={onStop}
+                className={`shrink-0 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-[0_10px_22px_-14px_rgba(239,68,68,0.8)] ${
+                  isExpanded ? "w-9 h-9" : "w-8 h-8"
+                }`}
+              >
+                <PhIcon name="stop" size={isExpanded ? 15 : 13} weight="fill" />
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isUploading || (!input.trim() && !attachedFile) || !wsReady}
+                className={`shrink-0 rounded-full bg-accent text-white flex items-center justify-center hover:brightness-110 transition-all disabled:opacity-35 disabled:cursor-not-allowed shadow-[0_10px_22px_-14px_rgba(19,91,236,0.8)] ${
+                  isExpanded ? "w-9 h-9" : "w-8 h-8"
+                }`}
+              >
+                <PhIcon name="arrow_upward" size={isExpanded ? 17 : 15} weight="bold" />
+              </button>
             )}
-
-            {/* Send button */}
-            <button
-              type="submit"
-              disabled={isLoading || isUploading || (!input.trim() && !attachedFile) || !wsReady}
-              className={`shrink-0 rounded-full bg-accent text-white flex items-center justify-center hover:brightness-110 transition-all disabled:opacity-35 disabled:cursor-not-allowed shadow-[0_10px_22px_-14px_rgba(19,91,236,0.8)] ${
-                isExpanded ? "w-9 h-9" : "w-8 h-8"
-              }`}
-            >
-              <PhIcon name="arrow_upward" size={isExpanded ? 17 : 15} weight="bold" />
-            </button>
           </div>
 
           {/* Tool dropdown */}

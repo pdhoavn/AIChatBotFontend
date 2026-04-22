@@ -9,6 +9,7 @@ import SourcesPanel, { SourcesButton } from "../../components/chatbotguest/Sourc
 import LawDetailModal from "../../components/chatbotguest/LawDetailModal.jsx";
 import PhIcon from "../../components/ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
+import useSpeechRecognition from "../../hooks/useSpeechRecognition.js";
 
 const ROLES = [
   {
@@ -63,7 +64,34 @@ export default function ChatGuestPage() {
   const [greeting, setGreeting] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
 
+  const {
+    isListening,
+    isSupported: isSpeechSupported,
+    isMicrophoneAvailable,
+    transcript,
+    startListening,
+    stopListening,
+    clearTranscript,
+  } = useSpeechRecognition();
+
+  // Ref để tránh effect ghi đè input khi bắt đầu nghe mới
+  const isStartingRef = useRef(false);
+  // Lưu input trước khi bấm mic (để khôi phục nếu cancel)
+  const inputBeforeMicRef = useRef("");
+
+  // Khi dừng nghe, giữ transcript trong input để user thấy
+  useEffect(() => {
+    if (isStartingRef.current) {
+      isStartingRef.current = false;
+      return;
+    }
+    if (!isListening && transcript) {
+      setInput(transcript);
+    }
+  }, [isListening, transcript]);
+
   const partialRef = useRef("");
+  const isStoppedRef = useRef(false);
   const wsRef = useRef(null);
   const prefillSentRef = useRef(false);
   const sources = [];
@@ -111,10 +139,12 @@ export default function ChatGuestPage() {
       setWsReady(true);
       setHasWelcomed(false);
       prefillSentRef.current = false;
+      isStoppedRef.current = false;
       ws.send(JSON.stringify({}));
     };
 
     ws.onmessage = (e) => {
+      if (isStoppedRef.current) return;
       try {
         const data = JSON.parse(e.data);
         switch (data.event) {
@@ -127,6 +157,7 @@ export default function ChatGuestPage() {
             break;
           case "go":
           case "done": {
+            if (isStoppedRef.current) return;
             const finalText = (partialRef.current || "").trim();
             if (finalText) {
               setMessages((prev) => {
@@ -169,6 +200,7 @@ export default function ChatGuestPage() {
     setIsLoading(true);
     setPartial("");
     partialRef.current = "";
+    isStoppedRef.current = false;
 
     wsRef.current.send(JSON.stringify({ message: prefillMessage }));
     prefillSentRef.current = true;
@@ -211,6 +243,7 @@ export default function ChatGuestPage() {
     setIsLoading(true);
     setPartial("");
     partialRef.current = "";
+    isStoppedRef.current = false;
 
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
@@ -238,6 +271,43 @@ export default function ChatGuestPage() {
     if (selectedRoleObj) {
       setGreeting(selectedRoleObj.greeting);
     }
+  };
+
+  const handleMicClick = () => {
+    if (!isSpeechSupported) {
+      alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.");
+      return;
+    }
+    if (isMicrophoneAvailable === false) {
+      alert("Vui lòng cho phép truy cập microphone trong trình duyệt.");
+      return;
+    }
+    isStartingRef.current = true;
+    inputBeforeMicRef.current = input;
+    setInput("");
+    startListening();
+  };
+
+  const handleStop = () => {
+    isStoppedRef.current = true;
+    setIsLoading(false);
+  };
+
+  const handleMicStop = () => {
+    if (!transcript.trim()) {
+      setInput(inputBeforeMicRef.current);
+    }
+    stopListening();
+  };
+
+  const handleTranscriptConfirm = () => {
+    const confirmed = transcript.trim();
+    if (!confirmed) return;
+    stopListening();
+    clearTranscript();
+    const selectedRoleObj = ROLES.find((r) => r.id === selectedRole);
+    send(confirmed, selectedRoleObj?.context);
+    setInput("");
   };
 
   return (
@@ -278,13 +348,13 @@ export default function ChatGuestPage() {
               </div>
             ))}
 
-            {isLoading && (
+            {(isLoading || partial) && (
               <div className="mb-4 chat-message flex justify-start">
                 <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-surface border border-border-main/50 px-5 py-3.5 shadow-sm">
                   {partial ? (
                     <div className="text-sm leading-relaxed text-text-main prose prose-sm max-w-none">
                       <ReactMarkdown>{partial}</ReactMarkdown>
-                      <span className="ml-1 animate-pulse text-accent">|</span>
+                      {isLoading && <span className="ml-1 animate-pulse text-accent">|</span>}
                     </div>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 text-text-muted">
@@ -308,7 +378,14 @@ export default function ChatGuestPage() {
             wsReady={wsReady}
             onInputChange={setInput}
             onSubmit={handleSubmit}
+            onOpenCall={handleMicClick}
             selectedRole={selectedRole}
+            isListening={isListening}
+            transcript={transcript}
+            onMicClick={handleMicClick}
+            onMicStop={handleMicStop}
+            onTranscriptConfirm={handleTranscriptConfirm}
+            onStop={handleStop}
           />
           <div className="mt-2 w-full flex justify-center pointer-events-auto text-xs text-text-muted">
             <span className="bg-sidebar/80 backdrop-blur-sm px-3 py-0.5 rounded-full">
