@@ -24,6 +24,7 @@ export function TrainingDataManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [audienceFilter, setAudienceFilter] = useState<string[]>([]);
   const [intents, setIntents] = useState<Intent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -254,8 +255,11 @@ export function TrainingDataManagement() {
         q.intent_name?.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesCategory = categoryFilter === 'all' || q.intent_id?.toString() === categoryFilter;
-      
-      return matchesSearch && matchesCategory;
+
+      const matchesAudience = audienceFilter.length === 0 ||
+        (q.target_audiences && q.target_audiences.some(a => audienceFilter.includes(a)));
+
+      return matchesSearch && matchesCategory && matchesAudience;
     })
   );
 
@@ -286,7 +290,7 @@ export function TrainingDataManagement() {
   useEffect(() => {
     setQuestionsPage(1);
     setDocumentsPage(1);
-  }, [searchQuery, statusFilter, categoryFilter, activeTab]);
+  }, [searchQuery, statusFilter, categoryFilter, audienceFilter, activeTab]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -321,6 +325,9 @@ export function TrainingDataManagement() {
         onStatusFilterChange={setStatusFilter}
         categoryFilter={categoryFilter}
         onCategoryFilterChange={setCategoryFilter}
+        audienceFilter={audienceFilter}
+        onAudienceFilterChange={setAudienceFilter}
+        showAudienceFilter={activeTab === 'questions'}
         intents={intents}
         isLeader={isLeader}
       />

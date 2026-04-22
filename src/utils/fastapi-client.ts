@@ -312,6 +312,7 @@ export interface TrainingQuestion {
   approved_by?: number;
   status?: string; // draft, approved, rejected, deleted
   reject_reason?: string;
+  target_audiences?: string[];
 }
 
 // Intent types

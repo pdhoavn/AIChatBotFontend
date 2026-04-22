@@ -1,5 +1,12 @@
 import { TrainingQuestion } from './types';
 
+const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
+  CANBO:     { label: 'Viên chức/NLĐ', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  SINHVIEN:  { label: 'Sinh viên',      color: 'bg-green-100 text-green-700 border-green-200' },
+  PHUHUYNH:  { label: 'Phụ huynh',     color: 'bg-purple-100 text-purple-700 border-purple-200' },
+  TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-orange-100 text-orange-700 border-orange-200' },
+};
+
 interface QuestionListProps {
   questions: TrainingQuestion[];
   selectedQuestion: TrainingQuestion | null;
@@ -27,6 +34,32 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
     );
   };
 
+  const renderAudienceBadges = (audiences?: string[]) => {
+    if (!audiences || audiences.length === 0) return null;
+    return (
+      <div className="flex flex-wrap gap-1 mb-2">
+        {audiences.map(val => {
+          const info = AUDIENCE_DISPLAY[val];
+          return info ? (
+            <span
+              key={val}
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${info.color}`}
+            >
+              {info.label}
+            </span>
+          ) : (
+            <span
+              key={val}
+              className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border bg-gray-100 text-gray-700 border-gray-200"
+            >
+              {val}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-2">
       {questions.map((question) => (
@@ -45,17 +78,19 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
             </h3>
             {getStatusBadge(question.status)}
           </div>
-          
+
           {question.intent_name && (
             <p className="text-xs text-gray-500 mb-2">
               Intent: {question.intent_name}
             </p>
           )}
-          
+
+          {renderAudienceBadges(question.target_audiences)}
+
           <p className="text-sm text-gray-600 line-clamp-2">
             {question.answer}
           </p>
-          
+
           {question.status === 'rejected' && question.reject_reason && (
             <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
               <p className="text-xs text-red-700">
@@ -63,7 +98,7 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
               </p>
             </div>
           )}
-          
+
           {question.created_at && (
             <p className="text-xs text-gray-400 mt-2">
               {new Date(question.created_at).toLocaleDateString('vi-VN')}
@@ -71,7 +106,7 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
           )}
         </div>
       ))}
-      
+
       {questions.length === 0 && (
         <div className="text-center py-12 text-gray-500">
           <p>Không có câu hỏi nào</p>
