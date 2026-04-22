@@ -1,7 +1,7 @@
 // src/components/chatbotguest/ChatEmptyState.jsx
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { Sparkle, BadgeCheck, School, Users } from "lucide-react";
+import { Sparkle, BadgeCheck, School, Users, GraduationCap } from "lucide-react";
 
 const ROLES = [
   {
@@ -25,12 +25,20 @@ const ROLES = [
     description: "Tra cứu thông tin chung về nhà trường và quy định liên quan đến khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp).",
     color: "purple",
   },
+  {
+    id: "admission",
+    label: "Tuyển sinh",
+    icon: "graduation_cap",
+    description: "Hỗ trợ thông tin về tuyển sinh đại học, cao đẳng (xét tuyển, điểm chuẩn, ngành đào tạo, học phí, chính sách học bổng, điều kiện xét tuyển và quy trình đăng ký).",
+    color: "orange",
+  },
 ];
 
 const ROLE_ICONS = {
   badge_check: BadgeCheck,
   school: School,
   users: Users,
+  graduation_cap: GraduationCap,
 };
 
 const COLOR_MAP = {
@@ -64,6 +72,16 @@ const COLOR_MAP = {
     ring: "peer-checked:ring-violet-300",
     labelText: "text-violet-700",
   },
+  orange: {
+    bg: "bg-orange-50",
+    border: "border-orange-200",
+    iconBg: "bg-orange-100",
+    iconBorder: "border-orange-200",
+    iconText: "text-orange-600",
+    hoverBorder: "hover:border-orange-400",
+    ring: "peer-checked:ring-orange-300",
+    labelText: "text-orange-700",
+  },
 };
 
 export default function ChatEmptyState({ onSendMessage, suggestions, greeting, onRoleSelect, selectedRole }) {
@@ -92,7 +110,7 @@ export default function ChatEmptyState({ onSendMessage, suggestions, greeting, o
           </div>
 
           {/* Role selection grid */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
             {ROLES.map((role) => {
               const c = COLOR_MAP[role.color];
               const IconComp = ROLE_ICONS[role.icon];

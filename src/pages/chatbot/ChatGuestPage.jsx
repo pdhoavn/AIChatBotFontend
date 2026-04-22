@@ -29,6 +29,12 @@ const ROLES = [
     greeting: "Xin chào! Bạn là phụ huynh hoặc bên liên quan của ĐH Giao thông Vận tải Phân hiệu TP.HCM. Mình sẽ hỗ trợ bạn tra cứu thông tin chung về nhà trường và các quy định liên quan đến việc khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp). Bạn cần mình giúp gì?",
     context: "Bạn là trợ lý AI chuyên hỗ trợ phụ huynh và các bên liên quan của ĐH Giao thông Vận tải Phân hiệu TP.HCM. Ngữ cảnh: tra cứu thông tin chung về nhà trường và các quy định liên quan đến việc khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp).",
   },
+  {
+    id: "admission",
+    label: "Tuyển sinh",
+    greeting: "Xin chào! Bạn đang quan tâm đến tuyển sinh của ĐH Giao thông Vận tải Phân hiệu TP.HCM. Mình sẽ hỗ trợ bạn các thông tin về tuyển sinh đại học, cao đẳng (xét tuyển, điểm chuẩn, ngành đào tạo, học phí, chính sách học bổng, điều kiện xét tuyển và quy trình đăng ký). Bạn cần mình giúp gì?",
+    context: "Bạn là trợ lý AI chuyên hỗ trợ thông tin tuyển sinh của ĐH Giao thông Vận tải Phân hiệu TP.HCM. Ngữ cảnh: tuyển sinh đại học, cao đẳng (xét tuyển, điểm chuẩn, ngành đào tạo, học phí, chính sách học bổng, điều kiện xét tuyển và quy trình đăng ký).",
+  },
 ];
 
 const CHATBOT_PREFILL_KEY = "chatbot_prefill_message";
