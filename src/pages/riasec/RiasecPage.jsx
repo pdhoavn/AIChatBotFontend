@@ -6,7 +6,7 @@ import RiasecGuestForm from '../../components/riasec/RiasecGuestForm.jsx';
 const RiasecPage =() =>{
     return(
     <>
-    <Header />
+    <Header minimal />
     <div class='pb-8'></div>
     <RiasecGuestForm/>
     <Footer />

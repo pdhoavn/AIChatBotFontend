@@ -81,16 +81,16 @@ export default function ChatGuestHeader({ selectedRole, onRoleChange, roles = []
             )}
           </div>
           <button
-            onClick={() => navigate("/loginprivate")}
+            onClick={() => navigate("/loginforad")}
             className="rounded-full bg-black px-4 py-1.5 text-sm text-white hover:opacity-90"
           >
             Đăng nhập
           </button>
           <Link
-            to="/#admissions"
+            to="/riasec"
             className="rounded-full bg-[#EB5A0D] px-4 py-1.5 text-sm text-white font-medium hover:bg-orange-600 transition"
           >
-            Đăng ký ngay
+            Khảo sát ngay
           </Link>
         </div>
       </div>
