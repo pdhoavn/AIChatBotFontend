@@ -119,6 +119,10 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
       alert('Vui lòng chọn danh mục');
       return;
     }
+    if (audiences.length === 0) {
+      alert('Vui lòng chọn ít nhất một đối tượng');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -224,14 +228,29 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
 
           {}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Đối tượng
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Đối tượng <span className="text-red-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={() =>
+                  setAudiences(
+                    audiences.length === AUDIENCE_OPTIONS.length
+                      ? []
+                      : [...AUDIENCE_OPTIONS]
+                  )
+                }
+                className="text-xs text-[#EB5A0D] hover:underline"
+              >
+                {audiences.length === AUDIENCE_OPTIONS.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+              </button>
+            </div>
             <div ref={audienceRef} className="relative">
               <button
                 type="button"
                 onClick={() => setAudienceOpen(prev => !prev)}
-                className="w-full flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-300 transition-colors"
+                className="w-full flex items-center justify-between rounded-md border border-input bg-gray-100 px-3 py-2 text-sm shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-300 transition-colors"
               >
                 {audiences.length === 0 ? (
                   <span className="text-gray-400">Chọn đối tượng...</span>
@@ -251,7 +270,7 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
               </button>
 
               {audienceOpen && (
-                <div className="absolute z-50 mt-1 w-full rounded-md border bg-white shadow-md">
+                <div className="absolute z-50 bottom-full mb-1 w-full rounded-md border bg-white shadow-md">
                   {AUDIENCE_OPTIONS.map((option) => {
                     const selected = audiences.includes(option);
                     return (
