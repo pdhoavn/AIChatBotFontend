@@ -1,6 +1,13 @@
 import { TrainingDocument } from './types';
 import { FileText } from 'lucide-react';
 
+const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
+  CANBO:     { label: 'Viên chức/NLĐ', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  SINHVIEN:  { label: 'Sinh viên',      color: 'bg-green-100 text-green-700 border-green-200' },
+  PHUHUYNH:  { label: 'Phụ huynh',     color: 'bg-purple-100 text-purple-700 border-purple-200' },
+  TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-orange-100 text-orange-700 border-orange-200' },
+};
+
 interface DocumentListProps {
   documents: TrainingDocument[];
   selectedDocument: TrainingDocument | null;
@@ -28,12 +35,6 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
     );
   };
 
-  const formatFileSize = (sizeInBytes: number) => {
-    if (sizeInBytes < 1024) return `${sizeInBytes} B`;
-    if (sizeInBytes < 1024 * 1024) return `${(sizeInBytes / 1024).toFixed(1)} KB`;
-    return `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
   return (
     <div className="space-y-2">
       {documents.map((doc) => (
@@ -47,36 +48,62 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
           }`}
         >
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-gray-100 rounded">
+            <div className="p-2 bg-gray-100 rounded mt-0.5">
               <FileText className="h-5 w-5 text-gray-600" />
             </div>
-            
+
             <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-start mb-1">
-                <h3 className="font-medium text-gray-900 truncate">
+              <div className="flex justify-between items-start mb-1.5">
+                <h3 className="font-medium text-gray-900 truncate pr-2">
                   {doc.title}
                 </h3>
                 {getStatusBadge(doc.status)}
               </div>
-              
-              <div className="flex items-center gap-3 text-xs text-gray-500">
-                <span>{doc.file_type?.toUpperCase() || 'FILE'}</span>
+
+              {}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1.5">
+                <span className="text-xs text-gray-500 font-medium">
+                  {doc.file_type?.toUpperCase() || 'FILE'}
+                </span>
                 {doc.intent_name && (
-                  <>
-                    <span>•</span>
-                    <span>{doc.intent_name}</span>
-                  </>
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                    {doc.intent_name}
+                  </span>
                 )}
               </div>
-              
+
+              {}
+              {doc.target_audiences && doc.target_audiences.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-1.5">
+                  {doc.target_audiences.map(val => {
+                    const info = AUDIENCE_DISPLAY[val];
+                    return info ? (
+                      <span
+                        key={val}
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${info.color}`}
+                      >
+                        {info.label}
+                      </span>
+                    ) : (
+                      <span
+                        key={val}
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border bg-gray-100 text-gray-700 border-gray-200"
+                      >
+                        {val}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
               {doc.status === 'rejected' && doc.reject_reason && (
-                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
+                <div className="mt-1.5 p-2 bg-red-50 border border-red-200 rounded">
                   <p className="text-xs text-red-700 line-clamp-2">
                     <span className="font-semibold">Lý do từ chối:</span> {doc.reject_reason}
                   </p>
                 </div>
               )}
-              
+
               {doc.created_at && (
                 <p className="text-xs text-gray-400 mt-1">
                   {new Date(doc.created_at).toLocaleDateString('vi-VN')}
@@ -86,7 +113,7 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
           </div>
         </div>
       ))}
-      
+
       {documents.length === 0 && (
         <div className="text-center py-12 text-gray-500">
           <p>Không có tài liệu nào</p>

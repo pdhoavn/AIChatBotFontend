@@ -161,28 +161,6 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
 
           {}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Danh mục <span className="text-red-500">*</span>
-            </label>
-            <Select
-              value={intentId?.toString() || ''}
-              onValueChange={(value) => setIntentId(parseInt(value))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Chọn danh mục" />
-              </SelectTrigger>
-              <SelectContent>
-                {intents.map((intent) => (
-                  <SelectItem key={intent.intent_id} value={intent.intent_id.toString()}>
-                    {intent.intent_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {}
-          <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-gray-700">
                 Đối tượng <span className="text-red-500">*</span>
@@ -246,6 +224,28 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
                 </div>
               )}
             </div>
+          </div>
+
+          {}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Danh mục <span className="text-red-500">*</span>
+            </label>
+            <Select
+              value={intentId?.toString() || ''}
+              onValueChange={(value) => setIntentId(parseInt(value))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn danh mục" />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {intents.map((intent) => (
+                  <SelectItem key={intent.intent_id} value={intent.intent_id.toString()}>
+                    {intent.intent_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

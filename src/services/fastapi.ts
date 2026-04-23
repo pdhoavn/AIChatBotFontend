@@ -236,8 +236,7 @@ export const chatAPI = {
 
 // Knowledge Base API
 export const knowledgeAPI = {
-  uploadDocument: (formData: FormData, intendId: number) => {
-    // For file uploads, we need to handle FormData differently
+  uploadDocument: (formData: FormData, intendId: number, target_audiences: string[] = []) => {
     const token = localStorage.getItem("access_token");
     const headers: HeadersInit = {};
 
@@ -245,7 +244,10 @@ export const knowledgeAPI = {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    // Add intend_id as query parameter (backend expects intend_id, not intent_id)
+    // target_audiences goes into FormData (backend uses Form([]))
+    // intend_id goes as query param (backend uses Query(...))
+    target_audiences.forEach(a => formData.append('target_audiences', a));
+
     const url = `${API_CONFIG.FASTAPI_BASE_URL}/knowledge/upload/document?intend_id=${intendId}`;
 
     return fetch(url, {
@@ -260,7 +262,7 @@ export const knowledgeAPI = {
     });
   },
 
-  uploadTrainingQuestion: (data: { question: string; answer: string; intent_id: number }) =>
+  uploadTrainingQuestion: (data: { question: string; answer: string; intent_id: number; target_audiences: string[] }) =>
     fastAPIClient.post<TrainingQuestion>('/knowledge/upload/training_question', data),
 
   // Get documents with optional status filter
