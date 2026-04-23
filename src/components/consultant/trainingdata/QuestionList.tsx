@@ -79,13 +79,13 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
             {getStatusBadge(question.status)}
           </div>
 
+          {renderAudienceBadges(question.target_audiences)}
+
           {question.intent_name && (
             <p className="text-xs text-gray-500 mb-2">
               Intent: {question.intent_name}
             </p>
           )}
-
-          {renderAudienceBadges(question.target_audiences)}
 
           <p className="text-sm text-gray-600 line-clamp-2">
             {question.answer}

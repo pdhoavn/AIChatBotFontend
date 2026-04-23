@@ -9,6 +9,33 @@ import { knowledgeAPI } from '../../../services/fastapi';
 import { toast } from 'react-toastify';
 import { Pagination } from '../../common/Pagination';
 
+const AUDIENCE_DISPLAY = {
+  CANBO:     { label: 'Viên chức/NLĐ', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  SINHVIEN:  { label: 'Sinh viên',      color: 'bg-green-100 text-green-700 border-green-200' },
+  PHUHUYNH:  { label: 'Phụ huynh',     color: 'bg-purple-100 text-purple-700 border-purple-200' },
+  TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-orange-100 text-orange-700 border-orange-200' },
+};
+
+function AudienceBadges({ audiences }) {
+  if (!audiences || audiences.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {audiences.map(val => {
+        const info = AUDIENCE_DISPLAY[val];
+        return info ? (
+          <span key={val} className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${info.color}`}>
+            {info.label}
+          </span>
+        ) : (
+          <span key={val} className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border bg-gray-100 text-gray-700 border-gray-200">
+            {val}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 export function LeaderKnowledgeBase() {
   const [activeTab, setActiveTab] = useState('qa');
   const [trainingQuestions, setTrainingQuestions] = useState([]);
@@ -128,6 +155,15 @@ export function LeaderKnowledgeBase() {
           </span>
         </div>
 
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          {question.intent_name && (
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+              {question.intent_name}
+            </span>
+          )}
+          <AudienceBadges audiences={question.target_audiences} />
+        </div>
+
         <div className="mb-4 space-y-3">
           <div>
             <div className="text-sm font-medium text-gray-700 mb-1">Câu hỏi:</div>
@@ -212,6 +248,15 @@ export function LeaderKnowledgeBase() {
           <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800 flex-shrink-0">
             Nháp
           </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          {document.intent_name && (
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+              {document.intent_name}
+            </span>
+          )}
+          <AudienceBadges audiences={document.target_audiences} />
         </div>
 
         <div className="mb-4 space-y-2">

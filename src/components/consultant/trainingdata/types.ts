@@ -14,6 +14,7 @@ export interface TrainingDocument extends APIKnowledgeDocument {
   intent_id?: number;
   file_size?: number;
   file_type?: string;
+  target_audiences?: string[];
 }
 
 export interface Intent extends APIIntent {

@@ -202,7 +202,7 @@ export function TrainingDataManagement() {
     }
   };
 
-  const handleAddQuestion = async (data: { question: string; answer: string; intent_id: number }) => {
+  const handleAddQuestion = async (data: { question: string; answer: string; intent_id: number; target_audiences: string[] }) => {
     try {
       await knowledgeAPI.uploadTrainingQuestion(data);
       toast.success('Tạo câu hỏi thành công! Đang chờ duyệt.');
@@ -213,9 +213,9 @@ export function TrainingDataManagement() {
     }
   };
 
-  const handleUploadDocument = async (formData: FormData, intentId: number) => {
+  const handleUploadDocument = async (formData: FormData, intentId: number, target_audiences: string[] = []) => {
     try {
-      await knowledgeAPI.uploadDocument(formData, intentId);
+      await knowledgeAPI.uploadDocument(formData, intentId, target_audiences);
       toast.success('Tải lên tài liệu thành công! Đang chờ duyệt.');
       await fetchDocuments();
     } catch (error) {
