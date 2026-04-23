@@ -155,13 +155,13 @@ export function LeaderKnowledgeBase() {
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mb-3">
+        <div className="flex flex-col gap-1.5 mb-3">
+          <AudienceBadges audiences={question.target_audiences} />
           {question.intent_name && (
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-              {question.intent_name}
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full self-start">
+              Lĩnh vực: {question.intent_name}
             </span>
           )}
-          <AudienceBadges audiences={question.target_audiences} />
         </div>
 
         <div className="mb-4 space-y-3">
@@ -250,13 +250,13 @@ export function LeaderKnowledgeBase() {
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mb-3">
+        <div className="flex flex-col gap-1.5 mb-3">
+          <AudienceBadges audiences={document.target_audiences} />
           {document.intent_name && (
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-              {document.intent_name}
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full self-start">
+              Lĩnh vực: {document.intent_name}
             </span>
           )}
-          <AudienceBadges audiences={document.target_audiences} />
         </div>
 
         <div className="mb-4 space-y-2">

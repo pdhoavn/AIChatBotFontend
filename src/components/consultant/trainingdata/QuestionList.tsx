@@ -83,7 +83,7 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
 
           {question.intent_name && (
             <p className="text-xs text-gray-500 mb-2">
-              Intent: {question.intent_name}
+              Lĩnh vực: {question.intent_name}
             </p>
           )}
 

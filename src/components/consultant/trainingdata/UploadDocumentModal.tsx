@@ -79,10 +79,6 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
       alert('Vui lòng nhập tiêu đề');
       return;
     }
-    if (!intentId) {
-      alert('Vui lòng chọn danh mục');
-      return;
-    }
     if (audiences.length === 0) {
       alert('Vui lòng chọn ít nhất một đối tượng');
       return;
@@ -94,7 +90,8 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
       formData.append('file', file);
       formData.append('title', title);
 
-      await onSubmit(formData, intentId, audiences.map(a => AUDIENCE_VALUE_MAP[a]));
+      const resolvedIntentId = intentId ?? intents.find(i => i.intent_name === 'N/A')?.intent_id;
+      await onSubmit(formData, resolvedIntentId, audiences.map(a => AUDIENCE_VALUE_MAP[a]));
       onClose();
     } catch (error) {
     } finally {
@@ -229,14 +226,14 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
           {}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Danh mục <span className="text-red-500">*</span>
+              Lĩnh vực
             </label>
             <Select
               value={intentId?.toString() || ''}
               onValueChange={(value) => setIntentId(parseInt(value))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Chọn danh mục" />
+                <SelectValue placeholder="Chọn lĩnh vực" />
               </SelectTrigger>
               <SelectContent side="top">
                 {intents.map((intent) => (

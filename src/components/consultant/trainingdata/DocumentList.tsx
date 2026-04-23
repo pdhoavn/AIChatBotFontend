@@ -67,7 +67,7 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
                 </span>
                 {doc.intent_name && (
                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                    {doc.intent_name}
+                    Lĩnh vực: {doc.intent_name}
                   </span>
                 )}
               </div>

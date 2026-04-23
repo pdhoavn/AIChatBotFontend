@@ -81,16 +81,6 @@ export function QuestionDetailModal({
           {}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Danh mục
-            </label>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
-              {question.intent_name || 'Chưa chọn danh mục'}
-            </p>
-          </div>
-
-          {}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
               Đối tượng
             </label>
             <div className="flex flex-wrap gap-2 bg-gray-50 p-3 rounded-lg">
@@ -111,6 +101,16 @@ export function QuestionDetailModal({
                 <span className="text-sm text-gray-400">Chưa có đối tượng</span>
               )}
             </div>
+          </div>
+
+          {}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Lĩnh vực
+            </label>
+            <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
+              {question.intent_name || 'Chưa chọn lĩnh vực'}
+            </p>
           </div>
 
           {}

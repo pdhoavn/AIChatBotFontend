@@ -110,10 +110,10 @@ export function SearchAndFilter({
         {}
         <Select value={categoryFilter} onValueChange={onCategoryFilterChange}>
           <SelectTrigger className="w-48">
-            <SelectValue placeholder="Danh mục" />
+            <SelectValue placeholder="Lĩnh vực" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tất cả danh mục</SelectItem>
+            <SelectItem value="all">Tất cả lĩnh vực</SelectItem>
             {intents?.map((intent) => (
               <SelectItem key={intent.intent_id} value={intent.intent_id.toString()}>
                 {intent.intent_name}
