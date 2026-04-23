@@ -1,6 +1,7 @@
 // src/pages/chatbot/ChatGuestPage.jsx
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { toast } from "react-toastify";
 import ChatGuestHeader from "../../components/chatbotguest/ChatGuestHeader.jsx";
 import ChatMessageBubble from "../../components/chatbotguest/ChatMessageBubble.jsx";
 import ChatEmptyState from "../../components/chatbotguest/ChatEmptyState.jsx";
@@ -254,12 +255,20 @@ export default function ChatGuestPage() {
   };
 
   const handleSubmit = (fileContent) => {
+    if (!selectedRole) {
+      toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-role-submit" });
+      return;
+    }
     if (!input.trim() && !fileContent) return;
     const selectedRoleObj = ROLES.find((r) => r.id === selectedRole);
     send(fileContent || input, selectedRoleObj?.context);
   };
 
   const handleSuggestionClick = (text) => {
+    if (!selectedRole) {
+      toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-role-suggestion" });
+      return;
+    }
     if (!wsReady) return;
     const selectedRoleObj = ROLES.find((r) => r.id === selectedRole);
     send(text, selectedRoleObj?.context);
@@ -301,6 +310,10 @@ export default function ChatGuestPage() {
   };
 
   const handleTranscriptConfirm = () => {
+    if (!selectedRole) {
+      toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-role-transcript" });
+      return;
+    }
     const confirmed = transcript.trim();
     if (!confirmed) return;
     stopListening();
