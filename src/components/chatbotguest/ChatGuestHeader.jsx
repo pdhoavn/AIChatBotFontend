@@ -1,13 +1,22 @@
 // src/components/chatbotguest/ChatGuestHeader.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { BadgeCheck, GraduationCap, School, Users } from "lucide-react";
 import PhIcon from "../ui/PhIcon.jsx";
+import { resolveAudienceCode } from "../../api/audienceApi.ts";
 
 const AUDIENCE_LABELS = {
   officer: "Viên chức / Người lao động",
   student: "Sinh viên",
   parent: "Phụ huynh / Bên liên quan",
   admission: "Tuyển sinh",
+};
+
+const AUDIENCE_META = {
+  officer: { label: "Viên chức / Người lao động", icon: BadgeCheck },
+  student: { label: "Sinh viên", icon: School },
+  parent: { label: "Phụ huynh / Bên liên quan", icon: Users },
+  admission: { label: "Tuyển sinh", icon: GraduationCap },
 };
 
 export default function ChatGuestHeader({ selectedAudience, onAudienceChange, audiences = [] }) {
@@ -27,6 +36,14 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
   }, []);
 
   const activeAudienceObj = audiences.find((a) => a.id === selectedAudience?.id);
+  const shouldShowRiasecLink = resolveAudienceCode(activeAudienceObj || selectedAudience) === "TUYENSINH";
+  const activeAudienceMeta = activeAudienceObj
+    ? AUDIENCE_META[activeAudienceObj.name] || {
+        label: AUDIENCE_LABELS[activeAudienceObj.name] || activeAudienceObj.name,
+        icon: BadgeCheck,
+      }
+    : null;
+  const ActiveAudienceIcon = activeAudienceMeta?.icon || BadgeCheck;
 
   return (
     <header className="w-full bg-transparent">
@@ -57,9 +74,9 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center gap-1.5 rounded-xl border border-border-main bg-surface/55 px-2.5 py-1.5 text-[11px] font-medium text-text-main hover:bg-surface transition-colors focus:outline-none"
             >
-              <PhIcon name="auto_awesome" size={13} className="text-accent" />
+              <ActiveAudienceIcon size={13} className="text-accent" />
               <span className="max-w-[130px] truncate">
-                {activeAudienceObj ? (AUDIENCE_LABELS[activeAudienceObj.name] || activeAudienceObj.name) : "Trợ lý đại học"}
+                {activeAudienceMeta?.label || "Trợ lý đại học"}
               </span>
               <PhIcon name="expand_more" size={13} className="text-text-muted ml-0.5" />
             </button>
@@ -69,21 +86,32 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
                 <div className="px-2 py-1.5 mb-1 text-[10px] font-semibold text-text-muted uppercase tracking-wider">
                   Chuyển đổi đối tượng
                 </div>
-                {audiences.map((audience) => (
-                  <button
-                    key={audience.id}
-                    onClick={() => {
-                      onAudienceChange && onAudienceChange(audience);
-                      setIsMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors ${
-                      selectedAudience?.id === audience.id ? "bg-accent/12 text-accent" : "text-text-main hover:bg-primary/45"
-                    }`}
-                  >
-                    <span>{AUDIENCE_LABELS[audience.name] || audience.name}</span>
-                    {selectedAudience?.id === audience.id && <PhIcon name="check" size={13} weight="bold" />}
-                  </button>
-                ))}
+                {audiences.map((audience) => {
+                  const meta = AUDIENCE_META[audience.name] || {
+                    label: AUDIENCE_LABELS[audience.name] || audience.name,
+                    icon: BadgeCheck,
+                  };
+                  const AudienceIcon = meta.icon;
+
+                  return (
+                    <button
+                      key={audience.id}
+                      onClick={() => {
+                        onAudienceChange && onAudienceChange(audience);
+                        setIsMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors ${
+                        selectedAudience?.id === audience.id ? "bg-accent/12 text-accent" : "text-text-main hover:bg-primary/45"
+                      }`}
+                    >
+                      <span className="flex min-w-0 items-center gap-2 pr-2">
+                        <AudienceIcon size={13} className="shrink-0" />
+                        <span className="truncate">{meta.label}</span>
+                      </span>
+                      {selectedAudience?.id === audience.id && <PhIcon name="check" size={13} weight="bold" />}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -93,12 +121,20 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
           >
             Đăng nhập
           </button>
-          <Link
-            to="/riasec"
-            className="rounded-full bg-[#EB5A0D] px-4 py-1.5 text-sm text-white font-medium hover:bg-orange-600 transition"
-          >
-            Khảo sát ngay
-          </Link>
+          {shouldShowRiasecLink && (
+            <Link
+              to="/riasec"
+              className="riasec-cta-reveal group inline-flex h-9 items-center gap-2 rounded-full border border-[#EB5A0D]/20 bg-[#EB5A0D] px-3 text-white transition hover:bg-[#d95208]"
+            >
+              <PhIcon name="school" size={15} className="shrink-0" />
+              <span className="text-sm font-medium">
+                Tìm ngành phù hợp
+              </span>
+              <span className="hidden rounded-full bg-white/18 px-2 py-0.5 text-[10px] font-medium text-orange-50 md:inline-flex">
+                RIASEC 3-5 phút
+              </span>
+            </Link>
+          )}
         </div>
       </div>
     </header>

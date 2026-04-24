@@ -193,6 +193,7 @@ const ICON_MAP = {
   // General
   person: User,
   account_circle: UserCircle,
+  school: Student,
   check: Check,
   check_circle: CheckCircle,
   verified: SealCheck,

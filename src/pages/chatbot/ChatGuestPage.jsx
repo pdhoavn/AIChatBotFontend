@@ -25,6 +25,32 @@ function generateNumericId() {
   return Math.floor(Math.random() * max);
 }
 
+function buildRiasecPrefillMessage(answers) {
+  if (!answers || typeof answers !== "object") return "";
+
+  const normalizedScores = ["R", "I", "A", "S", "E", "C"].reduce(
+    (acc, key) => {
+      const rawValue = answers[key];
+      const numericValue =
+        typeof rawValue === "number" ? rawValue : Number(rawValue || 0);
+      acc[key] = Number.isFinite(numericValue) ? numericValue : 0;
+      return acc;
+    },
+    {}
+  );
+
+  const ranking = Object.entries(normalizedScores)
+    .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
+    .map(([trait, score]) => `${trait}=${score}`);
+
+  return [
+    "Đây là kết quả trắc nghiệm RIASEC của tôi.",
+    `Điểm từng nhóm: ${ranking.join(", ")}.`,
+    "Hãy phân tích nhóm tính cách nổi trội, giải thích ý nghĩa của kết quả, và gợi ý ngành học hoặc định hướng phù hợp cho mục tiêu tuyển sinh.",
+    "Ưu tiên trả lời ngắn gọn, rõ ràng, có thể hành động được.",
+  ].join(" ");
+}
+
 export default function ChatGuestPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -42,6 +68,7 @@ export default function ChatGuestPage() {
   const [intents, setIntents] = useState([]);
   const [selectedAudience, setSelectedAudience] = useState(null);
   const [selectedIntent, setSelectedIntent] = useState(null);
+  const [prefillAudienceCode, setPrefillAudienceCode] = useState(null);
 
   const {
     isListening,
@@ -106,6 +133,21 @@ export default function ChatGuestPage() {
         toast.error("Không thể tải danh sách đối tượng.");
       });
   }, []);
+
+  useEffect(() => {
+    if (!prefillAudienceCode || audiences.length === 0 || selectedAudience) return;
+
+    const matchedAudience = audiences.find(
+      (audience) => resolveAudienceCode(audience) === prefillAudienceCode
+    );
+
+    if (matchedAudience) {
+      setSelectedAudience(matchedAudience);
+      if (matchedAudience.description) {
+        setGreeting(matchedAudience.description);
+      }
+    }
+  }, [audiences, prefillAudienceCode, selectedAudience]);
 
   // Load intents with docs when audience changes
   useEffect(() => {
@@ -201,6 +243,12 @@ export default function ChatGuestPage() {
 
   useEffect(() => {
     if (!wsReady || !prefillMessage || !hasWelcomed) return;
+    if (
+      prefillAudienceCode &&
+      resolveAudienceCode(selectedAudience) !== prefillAudienceCode
+    ) {
+      return;
+    }
     if (wsRef.current?.readyState !== WebSocket.OPEN) return;
     if (prefillSentRef.current) return;
 
@@ -210,10 +258,16 @@ export default function ChatGuestPage() {
     partialRef.current = "";
     isStoppedRef.current = false;
 
-    wsRef.current.send(JSON.stringify({ message: prefillMessage }));
+    wsRef.current.send(
+      JSON.stringify({
+        message: prefillMessage,
+        audience_id: selectedAudience?.id || null,
+      })
+    );
     prefillSentRef.current = true;
     setPrefillMessage(null);
-  }, [wsReady, prefillMessage, hasWelcomed]);
+    setPrefillAudienceCode(null);
+  }, [wsReady, prefillMessage, hasWelcomed, prefillAudienceCode, selectedAudience]);
 
   useEffect(() => {
     try {
@@ -227,7 +281,11 @@ export default function ChatGuestPage() {
         if (parsed && typeof parsed === "object" && "text" in parsed) {
           initial = parsed.text;
         } else if (parsed && typeof parsed === "object" && "answers" in parsed) {
-          initial = `Phân tích "answers":${JSON.stringify(parsed.answers)}`;
+          initial = buildRiasecPrefillMessage(parsed.answers);
+          const audienceCode = resolveAudienceCode(parsed.target_audience);
+          if (audienceCode) {
+            setPrefillAudienceCode(audienceCode);
+          }
         } else {
           initial = JSON.stringify(parsed);
         }

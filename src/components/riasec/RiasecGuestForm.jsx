@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/Auth";
 import axios from "axios";
@@ -96,6 +96,8 @@ const GUEST_ID_KEY = "riasec_guest_id";
 export default function RiasecGuestForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const questionRefs = useRef({});
+  const submitActionsRef = useRef(null);
 
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -267,7 +269,10 @@ export default function RiasecGuestForm() {
 
     await postRiasecToServer();
 
-    const json = buildRiasecJson();
+    const json = {
+      ...buildRiasecJson(),
+      target_audience: "TUYENSINH",
+    };
     localStorage.setItem(CHATBOT_PREFILL_KEY, JSON.stringify(json));
 
     if (user) {
@@ -279,6 +284,23 @@ export default function RiasecGuestForm() {
 
   const handleChange = (qid, value) => {
     setAnswers((prev) => ({ ...prev, [qid]: value }));
+
+    const currentIndex = QUESTIONS.findIndex((question) => question.id === qid);
+    if (currentIndex < 0) return;
+
+    const nextQuestion = QUESTIONS[currentIndex + 1];
+    const nextTarget = nextQuestion
+      ? questionRefs.current[nextQuestion.id]
+      : submitActionsRef.current;
+
+    if (!nextTarget) return;
+
+    window.setTimeout(() => {
+      nextTarget.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 120);
   };
 
   const handleSubmit = (e) => {
@@ -339,7 +361,17 @@ export default function RiasecGuestForm() {
       {!submitted && (
         <form onSubmit={handleSubmit} className="space-y-6">
           {QUESTIONS.map((q, idx) => (
-            <div key={q.id} className="rounded-xl border bg-white p-4">
+            <div
+              key={q.id}
+              ref={(node) => {
+                if (node) {
+                  questionRefs.current[q.id] = node;
+                } else {
+                  delete questionRefs.current[q.id];
+                }
+              }}
+              className="rounded-xl border bg-white p-4 scroll-mt-28"
+            >
               <div className="flex items-center justify-between mb-3">
                 <div className="font-medium">
                   {idx + 1}. {q.text}
@@ -373,7 +405,7 @@ export default function RiasecGuestForm() {
             </div>
           ))}
 
-          <div className="flex items-center justify-between">
+          <div ref={submitActionsRef} className="flex items-center justify-between scroll-mt-28">
             <div className="text-sm text-gray-500">
               Đã trả lời: {Object.keys(answers).length}/{QUESTIONS.length}
             </div>
