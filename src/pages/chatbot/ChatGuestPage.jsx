@@ -11,33 +11,7 @@ import LawDetailModal from "../../components/chatbotguest/LawDetailModal.jsx";
 import PhIcon from "../../components/ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition.js";
-
-const ROLES = [
-  {
-    id: "officer",
-    label: "Viên chức / Người lao động",
-    greeting: "Xin chào! Bạn là viên chức hoặc người lao động tại ĐH Giao thông Vận tải Phân hiệu TP.HCM. Mình sẽ hỗ trợ bạn các vấn đề về nghiên cứu khoa học, hợp tác đối ngoại, chế độ lương - chính sách, quy trình nội bộ, nhân sự, thuế thu nhập cá nhân, đảm bảo chất lượng và công tác khảo thí. Bạn cần mình giúp gì?",
-    context: "Bạn là trợ lý AI chuyên hỗ trợ các viên chức và người lao động tại ĐH Giao thông Vận tải Phân hiệu TP.HCM. Ngữ cảnh: nghiên cứu khoa học, hợp tác đối ngoại, chế độ lương - chính sách, quy trình nội bộ, chính sách nhân sự, thuế thu nhập cá nhân, đảm bảo chất lượng và công tác khảo thí.",
-  },
-  {
-    id: "student",
-    label: "Sinh viên",
-    greeting: "Xin chào! Bạn là sinh viên ĐH Giao thông Vận tải Phân hiệu TP.HCM. Mình sẽ hỗ trợ bạn các thắc mắc về công tác chính trị sinh viên, quy chế đào tạo (đăng ký học phần, điều kiện tốt nghiệp, xét học bổng...), thủ tục nội trú (ký túc xá), quy định khảo thí và các đợt khảo sát lấy ý kiến người học. Bạn cần mình giúp gì?",
-    context: "Bạn là trợ lý AI chuyên hỗ trợ sinh viên ĐH Giao thông Vận tải Phân hiệu TP.HCM. Ngữ cảnh: công tác chính trị sinh viên, quy chế đào tạo (đăng ký học phần, điều kiện tốt nghiệp, xét học bổng...), thủ tục nội trú (ký túc xá), quy định khảo thí và các đợt khảo sát lấy ý kiến người học.",
-  },
-  {
-    id: "parent",
-    label: "Phụ huynh / Bên liên quan",
-    greeting: "Xin chào! Bạn là phụ huynh hoặc bên liên quan của ĐH Giao thông Vận tải Phân hiệu TP.HCM. Mình sẽ hỗ trợ bạn tra cứu thông tin chung về nhà trường và các quy định liên quan đến việc khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp). Bạn cần mình giúp gì?",
-    context: "Bạn là trợ lý AI chuyên hỗ trợ phụ huynh và các bên liên quan của ĐH Giao thông Vận tải Phân hiệu TP.HCM. Ngữ cảnh: tra cứu thông tin chung về nhà trường và các quy định liên quan đến việc khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp).",
-  },
-  {
-    id: "admission",
-    label: "Tuyển sinh",
-    greeting: "Xin chào! Bạn đang quan tâm đến tuyển sinh của ĐH Giao thông Vận tải Phân hiệu TP.HCM. Mình sẽ hỗ trợ bạn các thông tin về tuyển sinh đại học, cao đẳng (xét tuyển, điểm chuẩn, ngành đào tạo, học phí, chính sách học bổng, điều kiện xét tuyển và quy trình đăng ký). Bạn cần mình giúp gì?",
-    context: "Bạn là trợ lý AI chuyên hỗ trợ thông tin tuyển sinh của ĐH Giao thông Vận tải Phân hiệu TP.HCM. Ngữ cảnh: tuyển sinh đại học, cao đẳng (xét tuyển, điểm chuẩn, ngành đào tạo, học phí, chính sách học bổng, điều kiện xét tuyển và quy trình đăng ký).",
-  },
-];
+import { audienceAPI, resolveAudienceCode } from "../../api/audienceApi.ts";
 
 const CHATBOT_PREFILL_KEY = "chatbot_prefill_message";
 const GUEST_ID_KEY = "guest_user_id_v1";
@@ -63,7 +37,11 @@ export default function ChatGuestPage() {
   const [selectedLaw, setSelectedLaw] = useState(null);
   const [isLawModalOpen, setIsLawModalOpen] = useState(false);
   const [greeting, setGreeting] = useState(null);
-  const [selectedRole, setSelectedRole] = useState(null);
+
+  const [audiences, setAudiences] = useState([]);
+  const [intents, setIntents] = useState([]);
+  const [selectedAudience, setSelectedAudience] = useState(null);
+  const [selectedIntent, setSelectedIntent] = useState(null);
 
   const {
     isListening,
@@ -75,12 +53,9 @@ export default function ChatGuestPage() {
     clearTranscript,
   } = useSpeechRecognition();
 
-  // Ref để tránh effect ghi đè input khi bắt đầu nghe mới
   const isStartingRef = useRef(false);
-  // Lưu input trước khi bấm mic (để khôi phục nếu cancel)
   const inputBeforeMicRef = useRef("");
 
-  // Khi dừng nghe, giữ transcript trong input để user thấy
   useEffect(() => {
     if (isStartingRef.current) {
       isStartingRef.current = false;
@@ -121,6 +96,38 @@ export default function ChatGuestPage() {
     }
     return numeric;
   });
+
+  // Fetch audiences on mount; intents loaded per-audience via /knowledge/intentbyid
+  useEffect(() => {
+    audienceAPI
+      .getAudiences()
+      .then((data) => setAudiences(data || []))
+      .catch(() => {
+        toast.error("Không thể tải danh sách đối tượng.");
+      });
+  }, []);
+
+  // Load intents with docs when audience changes
+  useEffect(() => {
+    if (!selectedAudience) {
+      setIntents([]);
+      return;
+    }
+
+    const code = resolveAudienceCode(selectedAudience);
+
+    if (!code) {
+      setIntents([]);
+      return;
+    }
+    audienceAPI
+      .getIntentsByAudience(code)
+      .then((data) => setIntents(data || []))
+      .catch(() => {
+        toast.error("Không thể tải danh sách lĩnh vực.");
+        setIntents([]);
+      });
+  }, [selectedAudience]);
 
   useEffect(() => {
     if (autoScrollRef.current) {
@@ -235,7 +242,7 @@ export default function ChatGuestPage() {
     }
   }, []);
 
-  const send = (text, roleContext) => {
+  const send = (text, intentId) => {
     if (!text.trim()) return;
 
     const userMessage = text;
@@ -249,37 +256,40 @@ export default function ChatGuestPage() {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         message: userMessage,
-        context: roleContext || null
+        audience_id: selectedAudience?.id || null,
+        intent_id: intentId ?? selectedIntent?.intent_id ?? null,
       }));
     }
   };
 
-  const handleSubmit = (fileContent) => {
-    if (!selectedRole) {
-      toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-role-submit" });
+  const handleSubmit = (fileContent, intentId) => {
+    if (!selectedAudience) {
+      toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-audience-submit" });
       return;
     }
     if (!input.trim() && !fileContent) return;
-    const selectedRoleObj = ROLES.find((r) => r.id === selectedRole);
-    send(fileContent || input, selectedRoleObj?.context);
+    send(fileContent || input, intentId);
   };
 
   const handleSuggestionClick = (text) => {
-    if (!selectedRole) {
-      toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-role-suggestion" });
+    if (!selectedAudience) {
+      toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-audience-suggestion" });
       return;
     }
     if (!wsReady) return;
-    const selectedRoleObj = ROLES.find((r) => r.id === selectedRole);
-    send(text, selectedRoleObj?.context);
+    send(text);
   };
 
-  const handleRoleSelect = (role) => {
-    setSelectedRole(role.id);
-    const selectedRoleObj = ROLES.find((r) => r.id === role.id);
-    if (selectedRoleObj) {
-      setGreeting(selectedRoleObj.greeting);
+  const handleAudienceChange = (audience) => {
+    setSelectedAudience(audience);
+    setSelectedIntent(null);
+    if (audience?.description) {
+      setGreeting(audience.description);
     }
+  };
+
+  const handleIntentChange = (intent) => {
+    setSelectedIntent(intent);
   };
 
   const handleMicClick = () => {
@@ -310,25 +320,24 @@ export default function ChatGuestPage() {
   };
 
   const handleTranscriptConfirm = () => {
-    if (!selectedRole) {
-      toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-role-transcript" });
+    if (!selectedAudience) {
+      toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-audience-transcript" });
       return;
     }
     const confirmed = transcript.trim();
     if (!confirmed) return;
     stopListening();
     clearTranscript();
-    const selectedRoleObj = ROLES.find((r) => r.id === selectedRole);
-    send(confirmed, selectedRoleObj?.context);
+    send(confirmed);
     setInput("");
   };
 
   return (
     <div className="chat-shell flex flex-col h-screen bg-sidebar relative w-full transition-colors duration-300 overflow-hidden">
-      <ChatGuestHeader 
-        roles={ROLES}
-        selectedRole={selectedRole}
-        onRoleChange={handleRoleSelect}
+      <ChatGuestHeader
+        audiences={audiences}
+        selectedAudience={selectedAudience}
+        onAudienceChange={handleAudienceChange}
       />
 
       <div
@@ -350,8 +359,9 @@ export default function ChatGuestPage() {
               <ChatEmptyState
                 greeting={greeting}
                 onSendMessage={handleSuggestionClick}
-                onRoleSelect={handleRoleSelect}
-                selectedRole={selectedRole}
+                onAudienceChange={handleAudienceChange}
+                selectedAudience={selectedAudience}
+                audiences={audiences}
               />
             )}
 
@@ -392,7 +402,10 @@ export default function ChatGuestPage() {
             onInputChange={setInput}
             onSubmit={handleSubmit}
             onOpenCall={handleMicClick}
-            selectedRole={selectedRole}
+            selectedAudience={selectedAudience}
+            selectedIntent={selectedIntent}
+            onIntentChange={handleIntentChange}
+            intents={intents}
             isListening={isListening}
             transcript={transcript}
             onMicClick={handleMicClick}

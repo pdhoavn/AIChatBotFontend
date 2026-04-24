@@ -2,36 +2,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import PhIcon from "../ui/PhIcon.jsx";
 
-const DOMAINS = [
-  // 1. Viên chức / Người lao động (officer)
-  { id: "khoa-hoc-cong-nghe", label: "Khoa học công nghệ", roles: ["officer"] },
-  { id: "hop-tac-doi-ngoai", label: "Hợp tác đối ngoại", roles: ["officer"] },
-  { id: "luong-chinh-sach", label: "Lương - chính sách", roles: ["officer"] },
-  { id: "quy-dinh-noi-bo", label: "Quy định nội bộ", roles: ["officer"] },
-  { id: "chinh-sach-nhan-su", label: "Chính sách nhân sự", roles: ["officer"] },
-  { id: "thue-tncn", label: "Thuế TNCN", roles: ["officer"] },
-  { id: "dam-bao-chat-luong", label: "Đảm bảo chất lượng", roles: ["officer"] },
-  { id: "khao-sat-y-kien", label: "Khảo sát ý kiến nội bộ", roles: ["officer"] },
-  { id: "khao-thi-giang-vien", label: "Khảo thí giảng viên", roles: ["officer"] },
-
-  // 2. Sinh viên (student)
-  { id: "cong-tac-chinh-tri-sv", label: "Công tác chính trị sinh viên", roles: ["student"] },
-  { id: "dao-tao-sinh-vien", label: "Đào tạo sinh viên", roles: ["student"] },
-  { id: "noi-tru-ktx", label: "Nội trú KTX", roles: ["student"] },
-  { id: "khao-thi-sinh-vien", label: "Khảo thí sinh viên", roles: ["student"] },
-  { id: "khao-sat-nguoi-hoc", label: "Khảo sát người học", roles: ["student"] },
-
-  // 3. Phụ huynh / Doanh nghiệp (parent)
-  { id: "khao-sat-cac-ben", label: "Khảo sát các bên liên quan", roles: ["parent"] },
-
-  // Mặc định (cho tất cả)
-  { id: "chung", label: "Chung (Mặc định)", roles: ["all"] },
-  { id: "tuyen-sinh", label: "Tuyển sinh", roles: ["all"] },
-  { id: "cac-quyet-dinh", label: "Các quyết định", roles: ["all"] },
-  { id: "hop-dong", label: "Hợp đồng", roles: ["all"] },
-  { id: "dau-tu-cong", label: "Đầu tư công", roles: ["all"] },
-];
-
 export default function ChatInput({
   input,
   isLoading,
@@ -39,7 +9,10 @@ export default function ChatInput({
   onInputChange,
   onSubmit,
   onOpenCall,
-  selectedRole,
+  selectedAudience,
+  selectedIntent,
+  onIntentChange,
+  intents = [],
   isListening = false,
   transcript = "",
   onMicClick,
@@ -50,7 +23,6 @@ export default function ChatInput({
   const textareaRef = useRef(null);
   const wrapperRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [selectedTool, setSelectedTool] = useState(null);
   const [isToolMenuOpen, setIsToolMenuOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [attachedFile, setAttachedFile] = useState(null);
@@ -58,9 +30,14 @@ export default function ChatInput({
 
   const isExpanded = isFocused || !!input.trim() || !!attachedFile || isLoading;
 
-  const availableOptions = DOMAINS.filter(
-    (d) => d.roles.includes("all") || (selectedRole && d.roles.includes(selectedRole))
-  );
+  const availableIntents = selectedAudience
+    ? intents.filter((intent) => {
+        if (intent?.target_audience_id == null) {
+          return true;
+        }
+        return intent.target_audience_id === selectedAudience.id;
+      })
+    : [];
 
   useEffect(() => {
     if (!isToolMenuOpen && !isFocused) return;
@@ -113,16 +90,9 @@ export default function ChatInput({
     if (!wsReady) return;
 
     const fileContent = attachedFile ? attachedFile.text : null;
-    onSubmit(fileContent);
+    onSubmit(fileContent, selectedIntent?.intent_id || null);
     setAttachedFile(null);
     setIsToolMenuOpen(false);
-    setSelectedTool(null);
-  };
-
-  const formatSize = (bytes) => {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
   return (
@@ -285,16 +255,14 @@ export default function ChatInput({
                   onClick={() => setIsToolMenuOpen((prev) => !prev)}
                   disabled={isLoading || isUploading}
                   className={`h-9 px-2.5 shrink-0 inline-flex items-center gap-1.5 rounded-full border transition-colors disabled:opacity-40 ${
-                    selectedTool
+                    selectedIntent
                       ? "border-accent/40 bg-accent/10 text-accent"
                       : "border-border-main/60 text-text-muted hover:text-text-main hover:bg-primary/50"
                   }`}
                 >
                   <PhIcon name="database" size={14} />
                   <span className="text-[11px] max-w-[92px] truncate">
-                    {selectedTool
-                      ? DOMAINS.find((t) => t.id === selectedTool)?.label
-                      : "Lĩnh vực"}
+                    {selectedIntent ? selectedIntent.intent_name : "Lĩnh vực"}
                   </span>
                   <PhIcon name="expand_more" size={11} />
                 </button>
@@ -363,19 +331,29 @@ export default function ChatInput({
             )}
           </div>
 
-          {/* Tool dropdown */}
+          {/* Intent dropdown */}
           {isToolMenuOpen && (
             <div className="absolute bottom-full left-2 md:left-3 z-30 pb-2">
               <div className="w-56 overflow-y-auto max-h-[320px] rounded-xl border border-border-main/70 bg-sidebar shadow-2xl p-1.5 scrollbar-thin scrollbar-thumb-border-main scrollbar-track-transparent">
-                {availableOptions.map((tool) => {
-                  const active = selectedTool === tool.id;
+                {!selectedAudience && (
+                  <div className="px-2.5 py-2 text-[12px] text-text-muted">
+                    Chọn đối tượng trước khi lọc lĩnh vực.
+                  </div>
+                )}
+                {selectedAudience && availableIntents.length === 0 && (
+                  <div className="px-2.5 py-2 text-[12px] text-text-muted">
+                    Chưa có lĩnh vực nào cho đối tượng này.
+                  </div>
+                )}
+                {availableIntents.map((intent) => {
+                  const active = selectedIntent?.intent_id === intent.intent_id;
                   return (
                     <button
-                      key={tool.id}
+                      key={intent.intent_id}
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => {
-                        setSelectedTool(tool.id);
+                        onIntentChange(intent);
                         setIsToolMenuOpen(false);
                       }}
                       className={`w-full text-left px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors ${
@@ -384,17 +362,17 @@ export default function ChatInput({
                           : "text-text-main hover:bg-primary/45"
                       }`}
                     >
-                      <span className="truncate pr-2">{tool.label}</span>
+                      <span className="truncate pr-2">{intent.intent_name}</span>
                       {active && <PhIcon name="check" size={13} weight="bold" className="shrink-0" />}
                     </button>
                   );
                 })}
-                {selectedTool && (
+                {selectedIntent && (
                   <button
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => {
-                      setSelectedTool(null);
+                      onIntentChange(null);
                       setIsToolMenuOpen(false);
                     }}
                     className="w-full text-left px-2.5 py-2 mt-1 border-t border-border-main/50 rounded-lg text-[11px] text-text-muted hover:text-text-main hover:bg-primary/45 transition-colors"
