@@ -254,9 +254,13 @@ export const knowledgeAPI = {
       method: 'POST',
       headers,
       body: formData,
-    }).then(response => {
+    }).then(async response => {
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorBody = await response.json().catch(() => null);
+        const message = errorBody?.detail || `HTTP error! status: ${response.status}`;
+        const error = new Error(message) as Error & { detail?: string };
+        error.detail = errorBody?.detail;
+        throw error;
       }
       return response.json();
     });

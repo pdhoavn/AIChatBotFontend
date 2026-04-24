@@ -219,7 +219,8 @@ export function TrainingDataManagement() {
       toast.success('Tải lên tài liệu thành công! Đang chờ duyệt.');
       await fetchDocuments();
     } catch (error) {
-      toast.error('Không thể tải lên tài liệu');
+      const message = (error as Error).message;
+      toast.error(message || 'Không thể tải lên tài liệu');
       throw error;
     }
   };
