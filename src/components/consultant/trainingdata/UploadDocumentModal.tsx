@@ -135,11 +135,11 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
                   type="file"
                   className="sr-only"
                   onChange={handleFileChange}
-                  accept=".pdf,.doc,.docx,.txt"
+                  accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
                 />
               </label>
               <p className="text-xs text-gray-500 mt-2">
-                Định dạng: PDF, DOC, DOCX, TXT
+                Định dạng: PDF, DOC, DOCX, TXT, XLS, XLSX
               </p>
             </div>
           </div>
