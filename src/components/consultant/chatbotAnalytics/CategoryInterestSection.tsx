@@ -24,13 +24,13 @@ export function CategoryInterestSection({ intentStats, loading, error }: Categor
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Danh Mục</CardTitle>
+        <CardTitle>Lĩnh Vực</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin mr-2" />
-            <span>Đang tải danh mục...</span>
+            <span>Đang tải lĩnh vực...</span>
           </div>
         ) : error ? (
           <div className="text-center py-8 text-red-600">
@@ -46,7 +46,7 @@ export function CategoryInterestSection({ intentStats, loading, error }: Categor
           </div>
         ) : intentStats.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <p>Không có danh mục nào.</p>
+            <p>Không có lĩnh vực nào.</p>
           </div>
         ) : (
           <>
@@ -54,7 +54,7 @@ export function CategoryInterestSection({ intentStats, loading, error }: Categor
               <TableHeader>
                 <TableRow className="h-12">
                   <TableHead className="py-3 font-medium">
-                    Danh Mục
+                    Lĩnh Vực
                   </TableHead>
                   <TableHead className="text-right py-3 font-medium">
                     Số Lần Được Hỏi

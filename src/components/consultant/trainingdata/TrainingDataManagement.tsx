@@ -59,7 +59,7 @@ export function TrainingDataManagement() {
       const data = await intentAPI.getIntents();
       setIntents(data.map(intent => ({ ...intent, description: intent.description || '' })));
     } catch (error) {
-      toast.error('Không thể tải danh sách danh mục');
+      toast.error('Không thể tải danh sách lĩnh vực');
     }
   };
 

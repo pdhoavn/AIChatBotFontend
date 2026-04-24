@@ -19,7 +19,7 @@ export function SearchAndFilter({
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm kiếm theo từ khóa, danh mục hoặc thẻ..."
+              placeholder="Tìm kiếm theo từ khóa, lĩnh vực hoặc thẻ..."
               className="pl-10"
             />
           </div>

@@ -50,16 +50,16 @@ export function EditIntentModal({ isOpen, onClose, intent, onEdit }: EditIntentM
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Chỉnh Sửa Danh Mục</DialogTitle>
+          <DialogTitle>Chỉnh Sửa Lĩnh Vực</DialogTitle>
           <DialogDescription>
-            Cập nhật thông tin danh mục
+            Cập nhật thông tin lĩnh vực
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="edit-intent-name">
-              Tên Danh Mục <span className="text-red-500">*</span>
+              Tên Lĩnh Vực <span className="text-red-500">*</span>
             </Label>
             <Input
               id="edit-intent-name"
@@ -74,7 +74,7 @@ export function EditIntentModal({ isOpen, onClose, intent, onEdit }: EditIntentM
             <Label htmlFor="edit-description">Mô Tả</Label>
             <Textarea
               id="edit-description"
-              placeholder="Mô tả ngắn gọn về danh mục này..."
+              placeholder="Mô tả ngắn gọn về lĩnh vực này..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               disabled={submitting}

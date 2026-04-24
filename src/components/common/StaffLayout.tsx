@@ -79,7 +79,7 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
       { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard, path: '/consultant/overview' },
       { id: 'analytics', label: 'Phân Tích Chatbot', icon: TrendingUp, path: '/consultant/analytics' },
       { id: 'trainingdata', label: 'Dữ Liệu Huấn Luyện', icon: Database, path: '/consultant/trainingdata' },
-      { id: 'intents', label: 'Quản Lý Danh Mục', icon: Tag, path: '/consultant/intents' },
+      { id: 'intents', label: 'Quản Lý Lĩnh Vực', icon: Tag, path: '/consultant/intents' },
       ...(user?.isLeader ? [
         { id: 'leader', label: 'Duyệt Cơ Sở Tri Thức', icon: Shield, path: '/consultant/leader' }
       ] : []),
@@ -98,7 +98,7 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
     Admin: { label: 'Quản Trị Viên', icon: Shield, color: 'bg-red-100 text-red-700 border-red-200' },
     'Content Manager': { label: 'Quản Lý Nội Dung', icon: FileEdit, color: 'bg-blue-100 text-blue-700 border-blue-200' },
     'Admission Official': { label: 'Cán Bộ Tuyển Sinh', icon: GraduationCap, color: 'bg-green-100 text-green-700 border-green-200' },
-    Consultant: { label: 'Tư Vấn Viên', icon: TrendingUp, color: 'bg-purple-100 text-purple-700 border-purple-200' },
+    Consultant: { label: 'Quản Trị Viên', icon: TrendingUp, color: 'bg-purple-100 text-purple-700 border-purple-200' },
     Parent: { label: 'Phụ Huynh', icon: User, color: 'bg-gray-100 text-gray-700 border-gray-200' }
   };
 

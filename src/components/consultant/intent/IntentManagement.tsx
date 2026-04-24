@@ -43,7 +43,7 @@ export function IntentManagement() {
       const filteredList = intentList.filter(intent => intent.intent_id !== 0);
       setIntents(filteredList);
     } catch (error) {
-      toast.error('Không thể tải danh sách danh mục');
+      toast.error('Không thể tải danh sách lĩnh vực');
     } finally {
       setLoading(false);
     }
@@ -52,11 +52,11 @@ export function IntentManagement() {
   const handleAddIntent = async (intentName: string, description: string) => {
     try {
       await intentAPI.createIntent({ intent_name: intentName, description });
-      toast.success('Tạo danh mục thành công');
+      toast.success('Tạo lĩnh vực thành công');
       await fetchIntents();
       setShowAddDialog(false);
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Không thể tạo danh mục');
+      toast.error(error.response?.data?.detail || 'Không thể tạo lĩnh vực');
       throw error;
     }
   };
@@ -73,16 +73,16 @@ export function IntentManagement() {
       });
       
       if (wasDeleted) {
-        toast.success('Cập nhật danh mục thành công và khôi phục thành công');
+        toast.success('Cập nhật lĩnh vực thành công và khôi phục thành công');
       } else {
-        toast.success('Cập nhật danh mục thành công');
+        toast.success('Cập nhật lĩnh vực thành công');
       }
       
       await fetchIntents();
       setShowEditDialog(false);
       setSelectedIntent(null);
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Không thể cập nhật danh mục');
+      toast.error(error.response?.data?.detail || 'Không thể cập nhật lĩnh vực');
       throw error;
     }
   };
@@ -92,12 +92,12 @@ export function IntentManagement() {
     
     try {
       await intentAPI.deleteIntent(selectedIntent.intent_id);
-      toast.success('Xóa danh mục thành công');
+      toast.success('Xóa lĩnh vực thành công');
       await fetchIntents();
       setShowDeleteDialog(false);
       setSelectedIntent(null);
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Không thể xóa danh mục');
+      toast.error(error.response?.data?.detail || 'Không thể xóa lĩnh vực');
     }
   };
 
@@ -141,14 +141,14 @@ export function IntentManagement() {
       <div className="bg-white border-b px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Quản Lý Danh Mục</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Quản Lý Lĩnh Vực</h1>
           </div>
           <Button 
             onClick={() => setShowAddDialog(true)}
             className="bg-[#EB5A0D] hover:bg-[#d64f0a]"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Thêm Danh Mục
+            Thêm Lĩnh Vực
           </Button>
         </div>
 
@@ -158,7 +158,7 @@ export function IntentManagement() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               type="text"
-              placeholder="Tìm kiếm danh mục theo tên hoặc mô tả..."
+              placeholder="Tìm kiếm lĩnh vực theo tên hoặc mô tả..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -218,19 +218,19 @@ export function IntentManagement() {
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#EB5A0D]"></div>
-                  <p className="mt-2 text-sm text-gray-500">Đang tải danh mục...</p>
+                  <p className="mt-2 text-sm text-gray-500">Đang tải lĩnh vực...</p>
                 </div>
               </div>
             ) : filteredIntents.length === 0 ? (
               <div className="text-center py-12">
                 <Tag className="h-12 w-12 mx-auto text-gray-300 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {searchQuery ? 'Không tìm thấy danh mục' : 'Chưa có danh mục nào'}
+                  {searchQuery ? 'Không tìm thấy lĩnh vực' : 'Chưa có lĩnh vực nào'}
                 </h3>
                 <p className="text-gray-500">
                   {searchQuery 
                     ? 'Thử tìm kiếm với từ khóa khác' 
-                    : 'Bắt đầu bằng cách tạo danh mục đầu tiên'}
+                    : 'Bắt đầu bằng cách tạo lĩnh vực đầu tiên'}
                 </p>
               </div>
             ) : (

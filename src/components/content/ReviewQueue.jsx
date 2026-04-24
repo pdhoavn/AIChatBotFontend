@@ -162,7 +162,7 @@ export default function ReviewQueue() {
               <span>Bởi {article.author_name || 'Không Rõ Tác Giả'}</span>
               <span className="mx-1">•</span>
               <span>
-                <span className="text-gray-500">Danh Mục:</span> {article.major_name || 'Chung'}
+                <span className="text-gray-500">Lĩnh Vực:</span> {article.major_name || 'Chung'}
               </span>
               <span className="mx-1">•</span>
               <span>

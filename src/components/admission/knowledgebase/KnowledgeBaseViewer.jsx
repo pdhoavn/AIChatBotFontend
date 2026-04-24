@@ -10,7 +10,7 @@ import { Pagination } from '../../common/Pagination';
 
 export function KnowledgeBaseViewer() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Tất Cả Danh Mục');
+  const [selectedCategory, setSelectedCategory] = useState('Tất Cả Lĩnh Vực');
   const [selectedQA, setSelectedQA] = useState(null);
   const [isQADialogOpen, setIsQADialogOpen] = useState(false);
   const [trainingQuestions, setTrainingQuestions] = useState([]);
@@ -21,7 +21,7 @@ export function KnowledgeBaseViewer() {
   const [documentsPage, setDocumentsPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  const categories = ['Tất Cả Danh Mục', ...intents.map(intent => intent.intent_name)];
+  const categories = ['Tất Cả Lĩnh Vực', ...intents.map(intent => intent.intent_name)];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -103,7 +103,7 @@ export function KnowledgeBaseViewer() {
       template.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = selectedCategory === 'Tất Cả Danh Mục' || template.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'Tất Cả Lĩnh Vực' || template.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -112,7 +112,7 @@ export function KnowledgeBaseViewer() {
       doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = selectedCategory === 'Tất Cả Danh Mục' || doc.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'Tất Cả Lĩnh Vực' || doc.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 

@@ -33,12 +33,12 @@ interface QAPair {
 const qaPairs: QAPair[] = [];
 
 const categories = [
-  'Tất Cả Danh Mục',
+  'Tất Cả Lĩnh Vực',
 ];
 
 export function KnowledgeBaseManagement() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Tất Cả Danh Mục');
+  const [selectedCategory, setSelectedCategory] = useState('Tất Cả Lĩnh Vực');
   const [selectedQA, setSelectedQA] = useState<QAPair | null>(qaPairs[0]);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -49,7 +49,7 @@ export function KnowledgeBaseManagement() {
   const filteredQAPairs = qaPairs.filter(qa => {
     const matchesSearch = qa.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          qa.answer.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'Tất Cả Danh Mục' || qa.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'Tất Cả Lĩnh Vực' || qa.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -249,7 +249,7 @@ export function KnowledgeBaseManagement() {
                     <div>
                       <Label className="flex items-center gap-2 mb-2">
                         <Tag className="h-4 w-4" />
-                        Danh Mục
+                        Lĩnh Vực
                       </Label>
                       {isEditing ? (
                         <Select value={editedCategory} onValueChange={setEditedCategory}>
@@ -257,7 +257,7 @@ export function KnowledgeBaseManagement() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {categories.filter(c => c !== 'Tất Cả Danh Mục').map(cat => (
+                            {categories.filter(c => c !== 'Tất Cả Lĩnh Vực').map(cat => (
                               <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                             ))}
                           </SelectContent>

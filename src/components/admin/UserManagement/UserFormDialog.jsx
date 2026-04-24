@@ -12,7 +12,7 @@ import { API_CONFIG } from '../../../config/api.js';
 const translatePermission = (permissionName) => {
   const translations = {
     'admin': 'Quản Trị Viên',
-    'consultant': 'Tư Vấn Viên',
+    'consultant': 'Quản Trị Viên',
     'content_manager': 'Quản Lý Nội Dung',
     'content manager': 'Quản Lý Nội Dung',
     'admission_official': 'Cán Bộ Tuyển Sinh',

@@ -58,7 +58,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
   const [intentLoading, setIntentLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedIntent, setSelectedIntent] = useState('Tất cả danh mục');
+  const [selectedIntent, setSelectedIntent] = useState('Tất cả lĩnh vực');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedQuestion, setSelectedQuestion] = useState<TrainingQuestionPair | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -122,7 +122,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
         const intent = intentsData.find(i => i.intent_id === question.intent_id);
         return {
           ...question,
-          intent_name: intent?.intent_name || 'Không có danh mục'
+          intent_name: intent?.intent_name || 'Không có lĩnh vực'
         };
       });
       
@@ -134,7 +134,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
         setSelectedQuestion(null);
       }
     } catch (error) {
-      toast.error('Không thể tải câu hỏi huấn luyện hoặc danh mục');
+      toast.error('Không thể tải câu hỏi huấn luyện hoặc lĩnh vực');
     } finally {
       setLoading(false);
       setIntentLoading(false);
@@ -159,7 +159,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
     fetchTemplates();
   }, [showAddDialog]);
 
-  const intentCategories = ['Tất cả danh mục', ...intents.map(intent => intent.intent_name)];
+  const intentCategories = ['Tất cả lĩnh vực', ...intents.map(intent => intent.intent_name)];
 
   useEffect(() => {
     if (prefilledQuestion && templateAction) {
@@ -194,7 +194,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
   const filteredTrainingQuestions = trainingQuestions.filter(tq => {
     const matchesSearch = tq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          tq.answer.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesIntent = selectedIntent === 'Tất cả danh mục' || tq.intent_name === selectedIntent;
+    const matchesIntent = selectedIntent === 'Tất cả lĩnh vực' || tq.intent_name === selectedIntent;
     return matchesSearch && matchesIntent;
   });
 
@@ -421,7 +421,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
                     <div className={`text-sm break-words ${
                       selectedQuestion?.question_id === tq.question_id ? 'text-blue-100' : 'text-muted-foreground'
                     }`}>
-                      Danh mục: {tq.intent_name || 'Đang tải...'}
+                      Lĩnh vực: {tq.intent_name || 'Đang tải...'}
                     </div>
                   </div>
                 </button>

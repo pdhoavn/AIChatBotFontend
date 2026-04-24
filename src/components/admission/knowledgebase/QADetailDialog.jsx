@@ -14,7 +14,7 @@ export function QADetailDialog({ isQADialogOpen, setIsQADialogOpen, selectedQA }
           <div className="space-y-6 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Danh Mục</div>
+                <div className="text-sm text-muted-foreground">Lĩnh Vực</div>
                 <div className="font-medium">{selectedQA.category}</div>
               </div>
               <div className="space-y-1">

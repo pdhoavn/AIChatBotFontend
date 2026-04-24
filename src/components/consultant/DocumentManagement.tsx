@@ -92,13 +92,13 @@ export function DocumentManagement() {
       const data = await intentAPI.getIntents();
       setIntents(data);
     } catch (error) {
-      toast.error('Không thể tải danh mục. Vui lòng thử lại.');
+      toast.error('Không thể tải lĩnh vực. Vui lòng thử lại.');
     }
   };
 
   const handleUpload = async () => {
     if (!uploadedFile || !user || !selectedIntent) {
-      toast.error('Vui lòng điền tất cả các trường bắt buộc (tệp và danh mục)');
+      toast.error('Vui lòng điền tất cả các trường bắt buộc (tệp và lĩnh vực)');
       return;
     }
 

@@ -46,16 +46,16 @@ export function AddIntentModal({ isOpen, onClose, onAdd }: AddIntentModalProps) 
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Thêm Danh Mục Mới</DialogTitle>
+          <DialogTitle>Thêm Lĩnh Vực Mới</DialogTitle>
           <DialogDescription>
-            Tạo danh mục mới để phân loại câu hỏi và tài liệu
+            Tạo lĩnh vực mới để phân loại câu hỏi và tài liệu
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="intent-name">
-              Tên Danh Mục <span className="text-red-500">*</span>
+              Tên Lĩnh Vực <span className="text-red-500">*</span>
             </Label>
             <Input
               id="intent-name"
@@ -70,7 +70,7 @@ export function AddIntentModal({ isOpen, onClose, onAdd }: AddIntentModalProps) 
             <Label htmlFor="description">Mô Tả</Label>
             <Textarea
               id="description"
-              placeholder="Mô tả ngắn gọn về danh mục này..."
+              placeholder="Mô tả ngắn gọn về lĩnh vực này..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               disabled={submitting}
@@ -92,7 +92,7 @@ export function AddIntentModal({ isOpen, onClose, onAdd }: AddIntentModalProps) 
             disabled={!intentName.trim() || submitting}
             className="bg-[#EB5A0D] hover:bg-[#d64f0a]"
           >
-            {submitting ? 'Đang tạo...' : 'Tạo Danh Mục'}
+            {submitting ? 'Đang tạo...' : 'Tạo Lĩnh Vực'}
           </Button>
         </DialogFooter>
       </DialogContent>

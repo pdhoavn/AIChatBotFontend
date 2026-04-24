@@ -19,10 +19,10 @@ export function DeleteIntentDialog({ isOpen, onClose, intent, onDelete }: Delete
             <div className="p-2 bg-red-100 rounded-full">
               <AlertCircle className="h-5 w-5 text-red-600" />
             </div>
-            <DialogTitle>Xác Nhận Xóa Danh Mục</DialogTitle>
+            <DialogTitle>Xác Nhận Xóa Lĩnh Vực</DialogTitle>
           </div>
           <DialogDescription className="pt-2">
-            Bạn có chắc chắn muốn xóa danh mục này không? Hành động này không thể hoàn tác.
+            Bạn có chắc chắn muốn xóa lĩnh vực này không? Hành động này không thể hoàn tác.
           </DialogDescription>
         </DialogHeader>
 
@@ -37,7 +37,7 @@ export function DeleteIntentDialog({ isOpen, onClose, intent, onDelete }: Delete
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 my-2">
           <p className="text-sm text-yellow-800">
-            <strong>Lưu ý:</strong> Việc xóa danh mục có thể ảnh hưởng đến các câu hỏi và tài liệu đã liên kết với danh mục này.
+            <strong>Lưu ý:</strong> Việc xóa lĩnh vực có thể ảnh hưởng đến các câu hỏi và tài liệu đã liên kết với lĩnh vực này.
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export function DeleteIntentDialog({ isOpen, onClose, intent, onDelete }: Delete
             variant="destructive"
             onClick={onDelete}
           >
-            Xóa Danh Mục
+            Xóa Lĩnh Vực
           </Button>
         </DialogFooter>
       </DialogContent>
