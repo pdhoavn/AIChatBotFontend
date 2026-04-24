@@ -26,15 +26,47 @@ function generateNumericId() {
 
 function normalizeWsSources(sources) {
   if (!Array.isArray(sources)) return [];
-  return sources.filter((source) => {
+  const seenDocIds = new Set();
+  const normalized = [];
+
+  for (const source of sources) {
+    let documentId = null;
+    let fileName = null;
+
     if (typeof source === "number") {
-      return Number.isFinite(source);
+      documentId = source;
+    } else if (typeof source === "string") {
+      const parsed = Number(source.trim());
+      documentId = Number.isFinite(parsed) ? parsed : null;
+    } else if (source && typeof source === "object") {
+      const rawId = source.document_id ?? source.documentId ?? source.id;
+      const parsedId =
+        typeof rawId === "number" ? rawId : Number(String(rawId ?? "").trim());
+      if (Number.isFinite(parsedId)) {
+        documentId = parsedId;
+      }
+
+      const rawFileName = source.file_name ?? source.fileName ?? source.name;
+      if (typeof rawFileName === "string" && rawFileName.trim()) {
+        fileName = rawFileName.trim();
+      }
     }
-    if (typeof source === "string") {
-      return source.trim().length > 0;
+
+    if (!Number.isInteger(documentId) || documentId <= 0) {
+      continue;
     }
-    return false;
-  });
+    if (seenDocIds.has(documentId)) {
+      continue;
+    }
+
+    seenDocIds.add(documentId);
+    normalized.push({
+      document_id: documentId,
+      file_name: fileName,
+    });
+  }
+
+  return normalized;
 }
 
 function buildRiasecPrefillMessage(answers) {
