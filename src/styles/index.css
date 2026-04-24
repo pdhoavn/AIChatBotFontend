@@ -83,6 +83,21 @@ html {
   animation: chatRiseIn 260ms ease-out both;
 }
 
+@keyframes riasecCtaReveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.riasec-cta-reveal {
+  animation: riasecCtaReveal 220ms ease-out both;
+}
+
 /**
  * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
  */
