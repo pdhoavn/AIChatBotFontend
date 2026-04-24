@@ -189,6 +189,7 @@ const ICON_MAP = {
   refresh: ArrowsClockwise,
   edit: Pencil,
   fullscreen: ArrowsOut,
+  open_in_new: ArrowsOut,
   filter_alt: FunnelSimple,
   // General
   person: User,

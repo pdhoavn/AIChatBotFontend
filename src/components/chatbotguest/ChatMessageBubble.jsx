@@ -8,6 +8,47 @@ export default function ChatMessageBubble({ message }) {
   const hasLawyerSuggestion = message.text?.includes("[SUGGEST_LAWYER]");
   const cleanContent = message.text?.replace("[SUGGEST_LAWYER]", "").trim();
 
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+  const sources = Array.isArray(message.sources) ? message.sources : [];
+
+  const citationsByDocId = new Map();
+  for (const source of sources) {
+    let documentId = null;
+    let fileName = null;
+
+    if (typeof source === "number") {
+      documentId = source;
+    } else if (typeof source === "string") {
+      const parsed = Number(source.trim());
+      documentId = Number.isFinite(parsed) ? parsed : null;
+    } else if (source && typeof source === "object") {
+      const rawId = source.document_id ?? source.documentId ?? source.id;
+      const parsedId =
+        typeof rawId === "number" ? rawId : Number(String(rawId ?? "").trim());
+      if (Number.isFinite(parsedId)) {
+        documentId = parsedId;
+      }
+
+      const rawFileName = source.file_name ?? source.fileName ?? source.name;
+      if (typeof rawFileName === "string" && rawFileName.trim()) {
+        fileName = rawFileName.trim();
+      }
+    }
+
+    if (!Number.isInteger(documentId) || documentId <= 0) continue;
+
+    if (!citationsByDocId.has(documentId)) {
+      citationsByDocId.set(documentId, {
+        documentId,
+        fileName: fileName || null,
+      });
+    }
+  }
+
+  const citations = Array.from(citationsByDocId.values());
+
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
@@ -60,6 +101,32 @@ export default function ChatMessageBubble({ message }) {
                       <PhIcon name="search" size={18} />
                       Tìm Chuyên Gia Ngay
                     </a>
+                  </div>
+                )}
+
+                {citations.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-border-main/20">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <PhIcon name="menu_book" size={12} className="text-accent" />
+                      <span className="text-[11px] font-medium text-text-muted">
+                        Tài liệu tham khảo
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {citations.map((citation) => (
+                        <a
+                          key={citation.documentId}
+                          href={`${API_BASE_URL}/knowledge/documents/${citation.documentId}/public-view`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/8 border border-accent/20 text-accent text-xs font-medium hover:bg-accent/15 hover:border-accent/30 transition-colors"
+                        >
+                          <PhIcon name="description" size={12} />
+                          {citation.fileName || `Tài liệu #${citation.documentId}`}
+                          <PhIcon name="open_in_new" size={10} />
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 )}
               </>
