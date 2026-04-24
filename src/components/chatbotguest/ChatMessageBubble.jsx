@@ -8,6 +8,24 @@ export default function ChatMessageBubble({ message }) {
   const hasLawyerSuggestion = message.text?.includes("[SUGGEST_LAWYER]");
   const cleanContent = message.text?.replace("[SUGGEST_LAWYER]", "").trim();
 
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+  const sources = message.sources || [];
+
+  const docIds = [...new Set(
+    (sources || [])
+      .map((s) => {
+        if (typeof s === "number") return s;
+        if (typeof s === "string") {
+          const parsed = Number(s.trim());
+          return Number.isFinite(parsed) ? parsed : Number.NaN;
+        }
+        return Number.NaN;
+      })
+      .filter((n) => Number.isInteger(n) && n > 0)
+  )];
+
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
@@ -60,6 +78,32 @@ export default function ChatMessageBubble({ message }) {
                       <PhIcon name="search" size={18} />
                       Tìm Chuyên Gia Ngay
                     </a>
+                  </div>
+                )}
+
+                {docIds.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-border-main/20">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <PhIcon name="menu_book" size={12} className="text-accent" />
+                      <span className="text-[11px] font-medium text-text-muted">
+                        Tài liệu tham khảo
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {docIds.map((docId) => (
+                        <a
+                          key={docId}
+                          href={`${API_BASE_URL}/knowledge/documents/${docId}/public-view`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/8 border border-accent/20 text-accent text-xs font-medium hover:bg-accent/15 hover:border-accent/30 transition-colors"
+                        >
+                          <PhIcon name="description" size={12} />
+                          Tài liệu #{docId}
+                          <PhIcon name="open_in_new" size={10} />
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 )}
               </>

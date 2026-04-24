@@ -6,7 +6,6 @@ import ChatGuestHeader from "../../components/chatbotguest/ChatGuestHeader.jsx";
 import ChatMessageBubble from "../../components/chatbotguest/ChatMessageBubble.jsx";
 import ChatEmptyState from "../../components/chatbotguest/ChatEmptyState.jsx";
 import ChatInput from "../../components/chatbotguest/ChatInput.jsx";
-import SourcesPanel, { SourcesButton } from "../../components/chatbotguest/SourcesPanel.jsx";
 import LawDetailModal from "../../components/chatbotguest/LawDetailModal.jsx";
 import PhIcon from "../../components/ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
@@ -25,10 +24,17 @@ function generateNumericId() {
   return Math.floor(Math.random() * max);
 }
 
-function extractDocumentIds(sources) {
-  return (sources || [])
-    .map((s) => (typeof s === "number" ? s : Number.NaN))
-    .filter((n) => Number.isInteger(n) && n > 0);
+function normalizeWsSources(sources) {
+  if (!Array.isArray(sources)) return [];
+  return sources.filter((source) => {
+    if (typeof source === "number") {
+      return Number.isFinite(source);
+    }
+    if (typeof source === "string") {
+      return source.trim().length > 0;
+    }
+    return false;
+  });
 }
 
 function buildRiasecPrefillMessage(answers) {
@@ -65,7 +71,6 @@ export default function ChatGuestPage() {
   const [partial, setPartial] = useState("");
   const [prefillMessage, setPrefillMessage] = useState(null);
   const [hasWelcomed, setHasWelcomed] = useState(false);
-  const [showSources, setShowSources] = useState(false);
   const [selectedLaw, setSelectedLaw] = useState(null);
   const [isLawModalOpen, setIsLawModalOpen] = useState(false);
   const [greeting, setGreeting] = useState(null);
@@ -75,7 +80,6 @@ export default function ChatGuestPage() {
   const [selectedAudience, setSelectedAudience] = useState(null);
   const [selectedIntent, setSelectedIntent] = useState(null);
   const [prefillAudienceCode, setPrefillAudienceCode] = useState(null);
-  const [sources, setSources] = useState([]);
 
   const {
     isListening,
@@ -192,6 +196,7 @@ export default function ChatGuestPage() {
     wsRef.current = ws;
 
     ws.onopen = () => {
+      if (wsRef.current !== ws) return;
       setWsReady(true);
       setHasWelcomed(false);
       prefillSentRef.current = false;
@@ -200,6 +205,7 @@ export default function ChatGuestPage() {
     };
 
     ws.onmessage = (e) => {
+      if (wsRef.current !== ws) return;
       if (isStoppedRef.current) return;
       try {
         const data = JSON.parse(e.data);
@@ -222,6 +228,7 @@ export default function ChatGuestPage() {
             const finalText = (partialRef.current || "").trim();
             const confidence =
               typeof data.confidence === "number" ? data.confidence : null;
+            const normalizedSources = normalizeWsSources(data.sources);
 
             if (finalText) {
               setMessages((prev) => {
@@ -231,23 +238,14 @@ export default function ChatGuestPage() {
                 }
                 return [
                   ...prev,
-                  { sender: "bot", text: finalText, confidence },
+                  {
+                    sender: "bot",
+                    text: finalText,
+                    confidence,
+                    sources: normalizedSources,
+                  },
                 ];
               });
-            }
-
-            const docIds = extractDocumentIds(data.sources);
-            if (docIds.length > 0) {
-              setSources(
-                docIds.map((id) => ({
-                  documentId: id,
-                  viewUrl: `${API_BASE_URL}/knowledge/documents/${id}/public-view`,
-                }))
-              );
-            } else if (Array.isArray(data.sources) && data.sources.length > 0) {
-              setSources([]);
-            } else {
-              setSources([]);
             }
 
             partialRef.current = "";
@@ -266,10 +264,21 @@ export default function ChatGuestPage() {
       }
     };
 
-    ws.onclose = () => setWsReady(false);
-    ws.onerror = () => setWsReady(false);
+    ws.onclose = () => {
+      if (wsRef.current !== ws) return;
+      setWsReady(false);
+    };
+    ws.onerror = () => {
+      if (wsRef.current !== ws) return;
+      setWsReady(false);
+    };
 
-    return () => ws.close();
+    return () => {
+      if (wsRef.current === ws) {
+        wsRef.current = null;
+      }
+      ws.close();
+    };
   }, [guestId, sessionId]);
 
   useEffect(() => {
@@ -341,8 +350,6 @@ export default function ChatGuestPage() {
     setPartial("");
     partialRef.current = "";
     isStoppedRef.current = false;
-    setSources([]);
-    setShowSources(false);
 
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
@@ -436,21 +443,6 @@ export default function ChatGuestPage() {
         className="flex-1 overflow-y-auto w-full relative"
       >
         <div className="max-w-5xl mx-auto w-full px-3 md:px-6 flex flex-col pb-36 min-h-full">
-          <div className="relative z-20 mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <SourcesButton
-                sourcesCount={sources.length}
-                showSources={showSources}
-                onToggle={() => setShowSources(!showSources)}
-              />
-            </div>
-            <SourcesPanel
-              sources={sources}
-              showSources={showSources}
-              onClose={() => setShowSources(false)}
-            />
-          </div>
-
           <div className="w-full flex-1">
             {messages.length === 0 && (
               <ChatEmptyState
