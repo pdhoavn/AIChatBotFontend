@@ -270,8 +270,11 @@ export function TrainingDataManagement() {
         d.intent_name?.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesCategory = categoryFilter === 'all' || d.intent_id?.toString() === categoryFilter;
-      
-      return matchesSearch && matchesCategory;
+
+      const matchesAudience = audienceFilter.length === 0 ||
+        (d.target_audiences && d.target_audiences.some(a => audienceFilter.includes(a)));
+
+      return matchesSearch && matchesCategory && matchesAudience;
     })
   );
 
@@ -327,7 +330,7 @@ export function TrainingDataManagement() {
         onCategoryFilterChange={setCategoryFilter}
         audienceFilter={audienceFilter}
         onAudienceFilterChange={setAudienceFilter}
-        showAudienceFilter={activeTab === 'questions'}
+        showAudienceFilter={true}
         intents={intents}
         isLeader={isLeader}
       />
