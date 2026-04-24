@@ -4,7 +4,8 @@ import { Button } from '../../ui/system_users/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/system_users/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../ui/system_users/dialog';
 import { Textarea } from '../../ui/system_users/textarea';
-import { MessageCircle, FileText, Check, X, Loader2, Users } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/system_users/select';
+import { MessageCircle, FileText, Check, X, Loader2, Users, Search } from 'lucide-react';
 
 const AUDIENCE_FILTER_OPTIONS = [
   { value: 'CANBO',     label: 'Viên chức/NLĐ', inactive: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',   active: 'bg-blue-600 text-white border-blue-600 shadow-sm',   dot: 'bg-blue-500' },
@@ -12,7 +13,7 @@ const AUDIENCE_FILTER_OPTIONS = [
   { value: 'PHUHUYNH',  label: 'Phụ huynh',      inactive: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100', active: 'bg-purple-600 text-white border-purple-600 shadow-sm', dot: 'bg-purple-500' },
   { value: 'TUYENSINH', label: 'Tuyển sinh',     inactive: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100', active: 'bg-orange-600 text-white border-orange-600 shadow-sm', dot: 'bg-orange-500' },
 ];
-import { knowledgeAPI } from '../../../services/fastapi';
+import { knowledgeAPI, intentAPI } from '../../../services/fastapi';
 import { toast } from 'react-toastify';
 import { Pagination } from '../../common/Pagination';
 
@@ -54,6 +55,9 @@ export function LeaderKnowledgeBase() {
   const [selectedItemType, setSelectedItemType] = useState(null);
   const [approvingId, setApprovingId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [intents, setIntents] = useState([]);
   const [audienceFilter, setAudienceFilter] = useState([]);
   const [questionsPage, setQuestionsPage] = useState(1);
   const [documentsPage, setDocumentsPage] = useState(1);
@@ -61,7 +65,15 @@ export function LeaderKnowledgeBase() {
   
   useEffect(() => {
     fetchPendingItems();
+    fetchIntents();
   }, []);
+
+  const fetchIntents = async () => {
+    try {
+      const data = await intentAPI.getIntents();
+      setIntents(data || []);
+    } catch (error) {}
+  };
 
   const fetchPendingItems = async () => {
     try {
@@ -323,13 +335,24 @@ export function LeaderKnowledgeBase() {
     );
   };
 
-  const filteredQuestions = audienceFilter.length === 0
-    ? trainingQuestions
-    : trainingQuestions.filter(q => q.target_audiences?.some(a => audienceFilter.includes(a)));
+  const filteredQuestions = trainingQuestions.filter(q => {
+    const matchesSearch = !searchQuery ||
+      q.question?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      q.answer?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      q.intent_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === 'all' || q.intent_id?.toString() === categoryFilter;
+    const matchesAudience = audienceFilter.length === 0 || q.target_audiences?.some(a => audienceFilter.includes(a));
+    return matchesSearch && matchesCategory && matchesAudience;
+  });
 
-  const filteredDocuments = audienceFilter.length === 0
-    ? documents
-    : documents.filter(d => d.target_audiences?.some(a => audienceFilter.includes(a)));
+  const filteredDocuments = documents.filter(d => {
+    const matchesSearch = !searchQuery ||
+      d.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.intent_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === 'all' || d.intent_id?.toString() === categoryFilter;
+    const matchesAudience = audienceFilter.length === 0 || d.target_audiences?.some(a => audienceFilter.includes(a));
+    return matchesSearch && matchesCategory && matchesAudience;
+  });
 
   const totalQuestionsPages = Math.ceil(filteredQuestions.length / ITEMS_PER_PAGE);
   const paginatedQuestions = filteredQuestions.slice(
@@ -346,13 +369,39 @@ export function LeaderKnowledgeBase() {
   useEffect(() => {
     setQuestionsPage(1);
     setDocumentsPage(1);
-  }, [activeTab, audienceFilter]);
+  }, [activeTab, audienceFilter, searchQuery, categoryFilter]);
 
   return (
     <div className="min-h-screen h-full p-6 bg-[#F8FAFC]">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">Duyệt Cơ Sở Tri Thức</h1>
         <p className="text-muted-foreground">Xét duyệt câu hỏi huấn luyện và tài liệu đang chờ phê duyệt</p>
+      </div>
+
+      <div className="flex gap-3 mb-3">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EB5A0D] focus:border-transparent text-sm"
+          />
+        </div>
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Tất cả lĩnh vực" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tất cả lĩnh vực</SelectItem>
+            {intents.map((intent) => (
+              <SelectItem key={intent.intent_id} value={intent.intent_id.toString()}>
+                {intent.intent_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex items-center gap-2 flex-wrap mb-4">
