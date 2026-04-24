@@ -2,12 +2,13 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Sparkle, BadgeCheck, School, Users, GraduationCap } from "lucide-react";
+import { resolveAudienceCode } from "../../api/audienceApi.ts";
 
 const AUDIENCE_META = {
-  officer: { icon: BadgeCheck, color: "blue", label: "Viên chức / Người lao động" },
-  student: { icon: School, color: "green", label: "Sinh viên" },
-  parent: { icon: Users, color: "purple", label: "Phụ huynh / Bên liên quan" },
-  admission: { icon: GraduationCap, color: "orange", label: "Tuyển sinh" },
+  CANBO: { icon: BadgeCheck, color: "blue", label: "Viên chức / Người lao động" },
+  SINHVIEN: { icon: School, color: "green", label: "Sinh viên" },
+  PHUHUYNH: { icon: Users, color: "purple", label: "Phụ huynh / Bên liên quan" },
+  TUYENSINH: { icon: GraduationCap, color: "orange", label: "Tuyển sinh" },
 };
 
 const COLOR_MAP = {
@@ -87,7 +88,12 @@ export default function ChatEmptyState({
           {/* Audience selection grid */}
           <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
             {audiences.map((audience) => {
-              const meta = AUDIENCE_META[audience.name] || { icon: FALLBACK_ICON, color: FALLBACK_COLOR, label: audience.name };
+              const audienceCode = resolveAudienceCode(audience);
+              const meta = AUDIENCE_META[audienceCode] || {
+                icon: FALLBACK_ICON,
+                color: FALLBACK_COLOR,
+                label: audience.name,
+              };
               const c = COLOR_MAP[meta.color];
               const IconComp = meta.icon;
               const isSelected = selectedAudience?.id === audience.id;

@@ -6,17 +6,17 @@ import PhIcon from "../ui/PhIcon.jsx";
 import { resolveAudienceCode } from "../../api/audienceApi.ts";
 
 const AUDIENCE_LABELS = {
-  officer: "Viên chức / Người lao động",
-  student: "Sinh viên",
-  parent: "Phụ huynh / Bên liên quan",
-  admission: "Tuyển sinh",
+  CANBO: "Viên chức / Người lao động",
+  SINHVIEN: "Sinh viên",
+  PHUHUYNH: "Phụ huynh / Bên liên quan",
+  TUYENSINH: "Tuyển sinh",
 };
 
 const AUDIENCE_META = {
-  officer: { label: "Viên chức / Người lao động", icon: BadgeCheck },
-  student: { label: "Sinh viên", icon: School },
-  parent: { label: "Phụ huynh / Bên liên quan", icon: Users },
-  admission: { label: "Tuyển sinh", icon: GraduationCap },
+  CANBO: { label: "Viên chức / Người lao động", icon: BadgeCheck },
+  SINHVIEN: { label: "Sinh viên", icon: School },
+  PHUHUYNH: { label: "Phụ huynh / Bên liên quan", icon: Users },
+  TUYENSINH: { label: "Tuyển sinh", icon: GraduationCap },
 };
 
 export default function ChatGuestHeader({ selectedAudience, onAudienceChange, audiences = [] }) {
@@ -36,10 +36,11 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
   }, []);
 
   const activeAudienceObj = audiences.find((a) => a.id === selectedAudience?.id);
-  const shouldShowRiasecLink = resolveAudienceCode(activeAudienceObj || selectedAudience) === "TUYENSINH";
-  const activeAudienceMeta = activeAudienceObj
-    ? AUDIENCE_META[activeAudienceObj.name] || {
-        label: AUDIENCE_LABELS[activeAudienceObj.name] || activeAudienceObj.name,
+  const activeAudienceCode = resolveAudienceCode(activeAudienceObj || selectedAudience);
+  const shouldShowRiasecLink = activeAudienceCode === "TUYENSINH";
+  const activeAudienceMeta = activeAudienceCode
+    ? AUDIENCE_META[activeAudienceCode] || {
+        label: AUDIENCE_LABELS[activeAudienceCode] || activeAudienceObj?.name,
         icon: BadgeCheck,
       }
     : null;
@@ -87,8 +88,9 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
                   Chuyển đổi đối tượng
                 </div>
                 {audiences.map((audience) => {
-                  const meta = AUDIENCE_META[audience.name] || {
-                    label: AUDIENCE_LABELS[audience.name] || audience.name,
+                  const audienceCode = resolveAudienceCode(audience);
+                  const meta = AUDIENCE_META[audienceCode] || {
+                    label: AUDIENCE_LABELS[audienceCode] || audience.name,
                     icon: BadgeCheck,
                   };
                   const AudienceIcon = meta.icon;
