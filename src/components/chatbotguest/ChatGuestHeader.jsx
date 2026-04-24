@@ -3,7 +3,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import PhIcon from "../ui/PhIcon.jsx";
 
-export default function ChatGuestHeader({ selectedRole, onRoleChange, roles = [] }) {
+const AUDIENCE_LABELS = {
+  officer: "Viên chức / Người lao động",
+  student: "Sinh viên",
+  parent: "Phụ huynh / Bên liên quan",
+  admission: "Tuyển sinh",
+};
+
+export default function ChatGuestHeader({ selectedAudience, onAudienceChange, audiences = [] }) {
   const navigate = useNavigate();
   const schoolLogoUrl = "https://utc2.edu.vn/images/030820230730_U09Tn.png";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,7 +26,7 @@ export default function ChatGuestHeader({ selectedRole, onRoleChange, roles = []
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const activeRoleObj = roles.find((r) => r.id === selectedRole);
+  const activeAudienceObj = audiences.find((a) => a.id === selectedAudience?.id);
 
   return (
     <header className="w-full bg-transparent">
@@ -52,29 +59,29 @@ export default function ChatGuestHeader({ selectedRole, onRoleChange, roles = []
             >
               <PhIcon name="auto_awesome" size={13} className="text-accent" />
               <span className="max-w-[130px] truncate">
-                {activeRoleObj ? activeRoleObj.label : "Trợ lý đại học"}
+                {activeAudienceObj ? (AUDIENCE_LABELS[activeAudienceObj.name] || activeAudienceObj.name) : "Trợ lý đại học"}
               </span>
               <PhIcon name="expand_more" size={13} className="text-text-muted ml-0.5" />
             </button>
             
-            {isMenuOpen && roles.length > 0 && (
+            {isMenuOpen && audiences.length > 0 && (
               <div className="absolute top-full right-0 mt-2 w-56 rounded-xl border border-border-main/70 bg-sidebar shadow-2xl p-1.5 z-50">
                 <div className="px-2 py-1.5 mb-1 text-[10px] font-semibold text-text-muted uppercase tracking-wider">
                   Chuyển đổi đối tượng
                 </div>
-                {roles.map((role) => (
+                {audiences.map((audience) => (
                   <button
-                    key={role.id}
+                    key={audience.id}
                     onClick={() => {
-                      onRoleChange && onRoleChange(role);
+                      onAudienceChange && onAudienceChange(audience);
                       setIsMenuOpen(false);
                     }}
                     className={`w-full text-left px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors ${
-                      selectedRole === role.id ? "bg-accent/12 text-accent" : "text-text-main hover:bg-primary/45"
+                      selectedAudience?.id === audience.id ? "bg-accent/12 text-accent" : "text-text-main hover:bg-primary/45"
                     }`}
                   >
-                    <span>{role.label}</span>
-                    {selectedRole === role.id && <PhIcon name="check" size={13} weight="bold" />}
+                    <span>{AUDIENCE_LABELS[audience.name] || audience.name}</span>
+                    {selectedAudience?.id === audience.id && <PhIcon name="check" size={13} weight="bold" />}
                   </button>
                 ))}
               </div>

@@ -3,42 +3,11 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Sparkle, BadgeCheck, School, Users, GraduationCap } from "lucide-react";
 
-const ROLES = [
-  {
-    id: "officer",
-    label: "Viên chức / Người lao động",
-    icon: "badge_check",
-    description: "Tra cứu và hướng dẫn nghiệp vụ về nghiên cứu khoa học, hợp tác đối ngoại, chế độ lương - chính sách, quy trình nội bộ, nhân sự, thuế TNCN, đảm bảo chất lượng và khảo thí.",
-    color: "blue",
-  },
-  {
-    id: "student",
-    label: "Sinh viên",
-    icon: "school",
-    description: "Hỗ trợ thắc mắc về công tác chính trị sinh viên, quy chế đào tạo (đăng ký học phần, tốt nghiệp, học bổng...), thủ tục nội trú, quy định khảo thí và khảo sát ý kiến.",
-    color: "green",
-  },
-  {
-    id: "parent",
-    label: "Phụ huynh / Bên liên quan",
-    icon: "users",
-    description: "Tra cứu thông tin chung về nhà trường và quy định liên quan đến khảo sát, lấy ý kiến của các bên liên quan (phụ huynh, doanh nghiệp).",
-    color: "purple",
-  },
-  {
-    id: "admission",
-    label: "Tuyển sinh",
-    icon: "graduation_cap",
-    description: "Hỗ trợ thông tin về tuyển sinh đại học, cao đẳng (xét tuyển, điểm chuẩn, ngành đào tạo, học phí, chính sách học bổng, điều kiện xét tuyển và quy trình đăng ký).",
-    color: "orange",
-  },
-];
-
-const ROLE_ICONS = {
-  badge_check: BadgeCheck,
-  school: School,
-  users: Users,
-  graduation_cap: GraduationCap,
+const AUDIENCE_META = {
+  officer: { icon: BadgeCheck, color: "blue", label: "Viên chức / Người lao động" },
+  student: { icon: School, color: "green", label: "Sinh viên" },
+  parent: { icon: Users, color: "purple", label: "Phụ huynh / Bên liên quan" },
+  admission: { icon: GraduationCap, color: "orange", label: "Tuyển sinh" },
 };
 
 const COLOR_MAP = {
@@ -49,7 +18,6 @@ const COLOR_MAP = {
     iconBorder: "border-blue-200",
     iconText: "text-blue-600",
     hoverBorder: "hover:border-blue-400",
-    ring: "peer-checked:ring-blue-300",
     labelText: "text-blue-700",
   },
   green: {
@@ -59,7 +27,6 @@ const COLOR_MAP = {
     iconBorder: "border-emerald-200",
     iconText: "text-emerald-600",
     hoverBorder: "hover:border-emerald-400",
-    ring: "peer-checked:ring-emerald-300",
     labelText: "text-emerald-700",
   },
   purple: {
@@ -69,7 +36,6 @@ const COLOR_MAP = {
     iconBorder: "border-violet-200",
     iconText: "text-violet-600",
     hoverBorder: "hover:border-violet-400",
-    ring: "peer-checked:ring-violet-300",
     labelText: "text-violet-700",
   },
   orange: {
@@ -79,12 +45,21 @@ const COLOR_MAP = {
     iconBorder: "border-orange-200",
     iconText: "text-orange-600",
     hoverBorder: "hover:border-orange-400",
-    ring: "peer-checked:ring-orange-300",
     labelText: "text-orange-700",
   },
 };
 
-export default function ChatEmptyState({ onSendMessage, suggestions, greeting, onRoleSelect, selectedRole }) {
+const FALLBACK_COLOR = "blue";
+const FALLBACK_ICON = BadgeCheck;
+
+export default function ChatEmptyState({
+  onSendMessage,
+  suggestions,
+  greeting,
+  onAudienceChange,
+  selectedAudience,
+  audiences = [],
+}) {
   const items = suggestions || [];
 
   return (
@@ -109,17 +84,18 @@ export default function ChatEmptyState({ onSendMessage, suggestions, greeting, o
             </div>
           </div>
 
-          {/* Role selection grid */}
+          {/* Audience selection grid */}
           <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
-            {ROLES.map((role) => {
-              const c = COLOR_MAP[role.color];
-              const IconComp = ROLE_ICONS[role.icon];
-              const isSelected = selectedRole === role.id;
+            {audiences.map((audience) => {
+              const meta = AUDIENCE_META[audience.name] || { icon: FALLBACK_ICON, color: FALLBACK_COLOR, label: audience.name };
+              const c = COLOR_MAP[meta.color];
+              const IconComp = meta.icon;
+              const isSelected = selectedAudience?.id === audience.id;
 
               return (
                 <button
-                  key={role.id}
-                  onClick={() => onRoleSelect && onRoleSelect(role)}
+                  key={audience.id}
+                  onClick={() => onAudienceChange && onAudienceChange(audience)}
                   className={`role-card group relative rounded-2xl border-2 p-4 text-left transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
                     isSelected
                       ? `!border-accent shadow-md bg-accent/5 scale-[1.01] ring-1 ring-accent/30`
@@ -134,10 +110,10 @@ export default function ChatEmptyState({ onSendMessage, suggestions, greeting, o
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`text-xs font-bold uppercase tracking-wide ${c.labelText} leading-tight`}>
-                        {role.label}
+                        {meta.label}
                       </p>
                       <p className="text-[12px] text-text-muted mt-1.5 leading-relaxed line-clamp-3">
-                        {role.description}
+                        {audience.description}
                       </p>
                     </div>
                   </div>
