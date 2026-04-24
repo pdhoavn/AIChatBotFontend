@@ -25,6 +25,12 @@ function generateNumericId() {
   return Math.floor(Math.random() * max);
 }
 
+function extractDocumentIds(sources) {
+  return (sources || [])
+    .map((s) => (typeof s === "number" ? s : Number.NaN))
+    .filter((n) => Number.isInteger(n) && n > 0);
+}
+
 function buildRiasecPrefillMessage(answers) {
   if (!answers || typeof answers !== "object") return "";
 
@@ -69,6 +75,7 @@ export default function ChatGuestPage() {
   const [selectedAudience, setSelectedAudience] = useState(null);
   const [selectedIntent, setSelectedIntent] = useState(null);
   const [prefillAudienceCode, setPrefillAudienceCode] = useState(null);
+  const [sources, setSources] = useState([]);
 
   const {
     isListening,
@@ -97,7 +104,6 @@ export default function ChatGuestPage() {
   const isStoppedRef = useRef(false);
   const wsRef = useRef(null);
   const prefillSentRef = useRef(false);
-  const sources = [];
   const autoScrollRef = useRef(null);
 
   const [guestId] = useState(() => {
@@ -206,22 +212,47 @@ export default function ChatGuestPage() {
             });
             break;
           case "go":
+            if (typeof data.confidence === "number") {
+              // keep for parity with backend flow; final value is attached on done
+            }
+            setHasWelcomed(true);
+            break;
           case "done": {
             if (isStoppedRef.current) return;
             const finalText = (partialRef.current || "").trim();
+            const confidence =
+              typeof data.confidence === "number" ? data.confidence : null;
+
             if (finalText) {
               setMessages((prev) => {
                 if (prev.length === 0) {
                   setGreeting(finalText);
                   return prev;
                 }
-                return [...prev, { sender: "bot", text: finalText }];
+                return [
+                  ...prev,
+                  { sender: "bot", text: finalText, confidence },
+                ];
               });
             }
+
+            const docIds = extractDocumentIds(data.sources);
+            if (docIds.length > 0) {
+              setSources(
+                docIds.map((id) => ({
+                  documentId: id,
+                  viewUrl: `${API_BASE_URL}/knowledge/documents/${id}/public-view`,
+                }))
+              );
+            } else if (Array.isArray(data.sources) && data.sources.length > 0) {
+              setSources([]);
+            } else {
+              setSources([]);
+            }
+
             partialRef.current = "";
             setPartial("");
             setIsLoading(false);
-            if (data.event === "go") setHasWelcomed(true);
             break;
           }
           case "error":
@@ -310,6 +341,8 @@ export default function ChatGuestPage() {
     setPartial("");
     partialRef.current = "";
     isStoppedRef.current = false;
+    setSources([]);
+    setShowSources(false);
 
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
@@ -404,10 +437,16 @@ export default function ChatGuestPage() {
       >
         <div className="max-w-5xl mx-auto w-full px-3 md:px-6 flex flex-col pb-36 min-h-full">
           <div className="relative z-20 mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <SourcesButton
+                sourcesCount={sources.length}
+                showSources={showSources}
+                onToggle={() => setShowSources(!showSources)}
+              />
+            </div>
             <SourcesPanel
               sources={sources}
               showSources={showSources}
-              onToggle={() => setShowSources(!showSources)}
               onClose={() => setShowSources(false)}
             />
           </div>

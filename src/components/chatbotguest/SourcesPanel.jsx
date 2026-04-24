@@ -15,7 +15,7 @@ export function SourcesButton({ sourcesCount, showSources, onToggle }) {
       }`}
     >
       <PhIcon name="menu_book" size={14} />
-      {sourcesCount} tài liệu dẫn chiếu
+      {sourcesCount} trích dẫn
     </button>
   );
 }
@@ -27,9 +27,9 @@ export default function SourcesPanel({ sources, showSources, onClose }) {
     <div className="w-[22rem] max-w-full bg-sidebar/95 backdrop-blur-xl border border-border-main rounded-2xl shadow-2xl p-4 max-h-[68vh] overflow-y-auto custom-scrollbar">
       <div className="flex items-center justify-between mb-3.5">
         <div>
-          <h3 className="text-sm font-semibold text-text-main">Nguồn tham khảo</h3>
+          <h3 className="text-sm font-semibold text-text-main">Trích dẫn</h3>
           <p className="text-[11px] text-text-muted mt-0.5">
-            Thông tin được sử dụng để xây dựng phản hồi
+            Chọn trích dẫn để mở tài liệu ở tab mới
           </p>
         </div>
         <button
@@ -39,36 +39,24 @@ export default function SourcesPanel({ sources, showSources, onClose }) {
           <PhIcon name="close" size={16} />
         </button>
       </div>
-      <div className="space-y-2.5">
-        {sources.map((source, i) => (
-          <div
-            key={i}
+      <div className="space-y-2">
+        {sources.map((source) => (
+          <a
+            key={source.documentId}
+            href={source.viewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="p-3 bg-surface/65 rounded-xl border border-border-main/65 transition-colors"
           >
-            <div className="flex items-start justify-between gap-2">
-              <div className="text-xs font-medium text-text-main">{source.dieu_ten}</div>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-accent/10 text-accent shrink-0">
-                {source.similarity}%
-              </span>
-            </div>
-            <div className="text-[10px] text-text-muted mt-1">
-              {source.de_muc} — {source.chuong}
-            </div>
-            <p className="text-[11px] text-text-muted/90 mt-2 leading-relaxed line-clamp-3">
-              {source.content}
-            </p>
-            <div className="mt-2.5 flex items-center gap-2">
-              <div className="h-1.5 flex-1 bg-border-main rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-accent rounded-full transition-all"
-                  style={{ width: `${source.similarity}%` }}
-                />
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-xs font-medium text-text-main">
+                Trích dẫn #{source.documentId}
               </div>
-              <span className="text-[10px] text-text-muted whitespace-nowrap">
-                Độ phù hợp
+              <span className="text-[11px] font-medium px-2 py-1 rounded-lg bg-accent/10 text-accent transition-colors">
+                Mở tab mới
               </span>
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </div>
