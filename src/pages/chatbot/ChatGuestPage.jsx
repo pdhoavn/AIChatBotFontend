@@ -11,7 +11,7 @@ import LawDetailModal from "../../components/chatbotguest/LawDetailModal.jsx";
 import PhIcon from "../../components/ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition.js";
-import { audienceAPI } from "../../api/audienceApi.ts";
+import { audienceAPI, resolveAudienceCode } from "../../api/audienceApi.ts";
 
 const CHATBOT_PREFILL_KEY = "chatbot_prefill_message";
 const GUEST_ID_KEY = "guest_user_id_v1";
@@ -97,20 +97,37 @@ export default function ChatGuestPage() {
     return numeric;
   });
 
-  // Fetch audiences and intents on mount
+  // Fetch audiences on mount; intents loaded per-audience via /knowledge/intentbyid
   useEffect(() => {
-    Promise.all([
-      audienceAPI.getAudiences(),
-      audienceAPI.getIntents(),
-    ])
-      .then(([audiencesData, intentsData]) => {
-        setAudiences(audiencesData || []);
-        setIntents(intentsData || []);
-      })
+    audienceAPI
+      .getAudiences()
+      .then((data) => setAudiences(data || []))
       .catch(() => {
-        toast.error("Không thể tải danh sách đối tượng và lĩnh vực.");
+        toast.error("Không thể tải danh sách đối tượng.");
       });
   }, []);
+
+  // Load intents with docs when audience changes
+  useEffect(() => {
+    if (!selectedAudience) {
+      setIntents([]);
+      return;
+    }
+
+    const code = resolveAudienceCode(selectedAudience);
+
+    if (!code) {
+      setIntents([]);
+      return;
+    }
+    audienceAPI
+      .getIntentsByAudience(code)
+      .then((data) => setIntents(data || []))
+      .catch(() => {
+        toast.error("Không thể tải danh sách lĩnh vực.");
+        setIntents([]);
+      });
+  }, [selectedAudience]);
 
   useEffect(() => {
     if (autoScrollRef.current) {

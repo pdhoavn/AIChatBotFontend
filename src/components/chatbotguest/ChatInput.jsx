@@ -31,7 +31,12 @@ export default function ChatInput({
   const isExpanded = isFocused || !!input.trim() || !!attachedFile || isLoading;
 
   const availableIntents = selectedAudience
-    ? intents.filter((i) => i.target_audience_id === selectedAudience.id)
+    ? intents.filter((intent) => {
+        if (intent?.target_audience_id == null) {
+          return true;
+        }
+        return intent.target_audience_id === selectedAudience.id;
+      })
     : [];
 
   useEffect(() => {
@@ -330,6 +335,16 @@ export default function ChatInput({
           {isToolMenuOpen && (
             <div className="absolute bottom-full left-2 md:left-3 z-30 pb-2">
               <div className="w-56 overflow-y-auto max-h-[320px] rounded-xl border border-border-main/70 bg-sidebar shadow-2xl p-1.5 scrollbar-thin scrollbar-thumb-border-main scrollbar-track-transparent">
+                {!selectedAudience && (
+                  <div className="px-2.5 py-2 text-[12px] text-text-muted">
+                    Chọn đối tượng trước khi lọc lĩnh vực.
+                  </div>
+                )}
+                {selectedAudience && availableIntents.length === 0 && (
+                  <div className="px-2.5 py-2 text-[12px] text-text-muted">
+                    Chưa có lĩnh vực nào cho đối tượng này.
+                  </div>
+                )}
                 {availableIntents.map((intent) => {
                   const active = selectedIntent?.intent_id === intent.intent_id;
                   return (
