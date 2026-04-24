@@ -4,7 +4,14 @@ import { Button } from '../../ui/system_users/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/system_users/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../ui/system_users/dialog';
 import { Textarea } from '../../ui/system_users/textarea';
-import { MessageCircle, FileText, Check, X, Loader2 } from 'lucide-react';
+import { MessageCircle, FileText, Check, X, Loader2, Users } from 'lucide-react';
+
+const AUDIENCE_FILTER_OPTIONS = [
+  { value: 'CANBO',     label: 'Viên chức/NLĐ', inactive: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',   active: 'bg-blue-600 text-white border-blue-600 shadow-sm',   dot: 'bg-blue-500' },
+  { value: 'SINHVIEN',  label: 'Sinh viên',      inactive: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100', active: 'bg-green-600 text-white border-green-600 shadow-sm', dot: 'bg-green-500' },
+  { value: 'PHUHUYNH',  label: 'Phụ huynh',      inactive: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100', active: 'bg-purple-600 text-white border-purple-600 shadow-sm', dot: 'bg-purple-500' },
+  { value: 'TUYENSINH', label: 'Tuyển sinh',     inactive: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100', active: 'bg-orange-600 text-white border-orange-600 shadow-sm', dot: 'bg-orange-500' },
+];
 import { knowledgeAPI } from '../../../services/fastapi';
 import { toast } from 'react-toastify';
 import { Pagination } from '../../common/Pagination';
@@ -47,6 +54,7 @@ export function LeaderKnowledgeBase() {
   const [selectedItemType, setSelectedItemType] = useState(null);
   const [approvingId, setApprovingId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
+  const [audienceFilter, setAudienceFilter] = useState([]);
   const [questionsPage, setQuestionsPage] = useState(1);
   const [documentsPage, setDocumentsPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
@@ -309,14 +317,28 @@ export function LeaderKnowledgeBase() {
     );
   };
 
-  const totalQuestionsPages = Math.ceil(trainingQuestions.length / ITEMS_PER_PAGE);
-  const paginatedQuestions = trainingQuestions.slice(
+  const toggleAudience = (value) => {
+    setAudienceFilter(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    );
+  };
+
+  const filteredQuestions = audienceFilter.length === 0
+    ? trainingQuestions
+    : trainingQuestions.filter(q => q.target_audiences?.some(a => audienceFilter.includes(a)));
+
+  const filteredDocuments = audienceFilter.length === 0
+    ? documents
+    : documents.filter(d => d.target_audiences?.some(a => audienceFilter.includes(a)));
+
+  const totalQuestionsPages = Math.ceil(filteredQuestions.length / ITEMS_PER_PAGE);
+  const paginatedQuestions = filteredQuestions.slice(
     (questionsPage - 1) * ITEMS_PER_PAGE,
     questionsPage * ITEMS_PER_PAGE
   );
 
-  const totalDocumentsPages = Math.ceil(documents.length / ITEMS_PER_PAGE);
-  const paginatedDocuments = documents.slice(
+  const totalDocumentsPages = Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE);
+  const paginatedDocuments = filteredDocuments.slice(
     (documentsPage - 1) * ITEMS_PER_PAGE,
     documentsPage * ITEMS_PER_PAGE
   );
@@ -324,7 +346,7 @@ export function LeaderKnowledgeBase() {
   useEffect(() => {
     setQuestionsPage(1);
     setDocumentsPage(1);
-  }, [activeTab]);
+  }, [activeTab, audienceFilter]);
 
   return (
     <div className="min-h-screen h-full p-6 bg-[#F8FAFC]">
@@ -333,20 +355,51 @@ export function LeaderKnowledgeBase() {
         <p className="text-muted-foreground">Xét duyệt câu hỏi huấn luyện và tài liệu đang chờ phê duyệt</p>
       </div>
 
+      <div className="flex items-center gap-2 flex-wrap mb-4">
+        <div className="flex items-center gap-1.5 text-sm text-gray-600 font-medium pr-1">
+          <Users className="h-4 w-4 text-gray-500" />
+          <span>Đối tượng:</span>
+        </div>
+        {AUDIENCE_FILTER_OPTIONS.map((opt) => {
+          const selected = audienceFilter.includes(opt.value);
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => toggleAudience(opt.value)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all ${selected ? opt.active : opt.inactive}`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${selected ? 'bg-white' : opt.dot}`} />
+              {opt.label}
+            </button>
+          );
+        })}
+        {audienceFilter.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setAudienceFilter([])}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors ml-1"
+          >
+            <X className="h-3 w-3" />
+            Xóa lọc
+          </button>
+        )}
+      </div>
+
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="qa" className="gap-2">
             <MessageCircle className="h-4 w-4" />
             Câu Hỏi Huấn Luyện
             <span className="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">
-              {trainingQuestions.length}
+              {filteredQuestions.length}
             </span>
           </TabsTrigger>
           <TabsTrigger value="documents" className="gap-2">
             <FileText className="h-4 w-4" />
             Tài Liệu
             <span className="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">
-              {documents.length}
+              {filteredDocuments.length}
             </span>
           </TabsTrigger>
         </TabsList>
