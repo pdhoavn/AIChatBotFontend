@@ -190,7 +190,7 @@ export function StudentDetailDialog({ isOpen, onClose, userId }) {
         label: 'Chưa Kích Hoạt', 
         variant: 'secondary', 
         icon: XCircle, 
-        className: 'text-orange-600' 
+        className: 'text-yellow-600' 
       };
     } else {
       return { 
@@ -284,7 +284,7 @@ export function StudentDetailDialog({ isOpen, onClose, userId }) {
                     { key: 'realistic', label: 'Thực tế (Realistic)', color: 'bg-green-500' },
                     { key: 'investigative', label: 'Nghiên cứu (Investigative)', color: 'bg-blue-500' },
                     { key: 'artistic', label: 'Nghệ thuật (Artistic)', color: 'bg-purple-500' },
-                    { key: 'social', label: 'Xã hội (Social)', color: 'bg-orange-500' },
+                    { key: 'social', label: 'Xã hội (Social)', color: 'bg-yellow-500' },
                     { key: 'enterprising', label: 'Kinh doanh (Enterprising)', color: 'bg-red-500' },
                     { key: 'conventional', label: 'Quy ước (Conventional)', color: 'bg-gray-500' }
                   ].map(({ key, label, color }) => {

@@ -27,7 +27,7 @@ const SidebarItem = ({ active, icon, label, onClick }) => (
   <button
     onClick={onClick}
     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition ${
-      active ? "bg-[#FFF3ED] text-[#EB5A0D]" : "hover:bg-gray-50 text-gray-600"
+      active ? "bg-[#FFFDE7] text-[#facb01]" : "hover:bg-gray-50 text-gray-600"
     }`}
   >
     <span className="text-base">{icon}</span>
@@ -167,7 +167,7 @@ const LiveChatHistory = ({ user }) => {
 <li
   key={s.session_id}
   className={`px-3 py-2 text-xs cursor-pointer hover:bg-gray-50 ${
-    s.session_id === selectedSessionId ? "bg-orange-50" : ""
+    s.session_id === selectedSessionId ? "bg-yellow-50" : ""
   }`}
   onClick={() => setSelectedSessionId(s.session_id)}
 >
@@ -228,7 +228,7 @@ const LiveChatHistory = ({ user }) => {
                   <div
                     className={`px-3 py-1.5 max-w-[70%] rounded-xl text-xs ${
                       isMyMessage
-                        ? "bg-[#EB5A0D] text-white"
+                        ? "bg-[#facb01] text-white"
                         : "bg-white text-gray-800 border border-gray-200"
                     }`}
                   >
@@ -1541,7 +1541,7 @@ if (isAuthenticated && user && !isStudent) {
         </div>
 
         <h1 className="text-2xl md:text-3xl font-semibold mb-6">
-          Chào mừng, <span className="text-[#EB5A0D]">{form.fullName}</span>
+          Chào mừng, <span className="text-[#facb01]">{form.fullName}</span>
         </h1>
 
         <div className="grid grid-cols-12 gap-6">
@@ -1587,7 +1587,7 @@ if (isAuthenticated && user && !isStudent) {
             {/* PROFILE TAB */}
             {tab === "profile" && (
               <div className="rounded-2xl overflow-hidden border border-gray-200">
-                <div className="h-14 bg-[#EB5A0D]" />
+                <div className="h-14 bg-[#facb01]" />
                 <div className="p-6">
                   {/* name + email */}
                   <div className="flex items-end gap-4 mb-6 -mt-2">
@@ -1599,7 +1599,7 @@ if (isAuthenticated && user && !isStudent) {
                       <Link
                         to="/riasec"
                         className="shrink-0 whitespace-nowrap inline-flex items-center gap-2
-               px-3 py-1.5 rounded-md text-xs bg-[#EB5A0D] text-white hover:opacity-90"
+               px-3 py-1.5 rounded-md text-xs bg-[#facb01] text-white hover:opacity-90"
                         title="Làm bài trắc nghiệm RIASEC"
                       >
                         RIASEC
@@ -1619,7 +1619,7 @@ if (isAuthenticated && user && !isStudent) {
                         value={form.fullName}
                         onChange={handleChange}
                         disabled={!editing}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D]"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01]"
                       />
                     </div>
 
@@ -1631,7 +1631,7 @@ if (isAuthenticated && user && !isStudent) {
                         value={form.gender}
                         onChange={handleChange}
                         disabled={!editing}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D] bg-white"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01] bg-white"
                       >
                         {GENDERS.map((g) => (
                           <option key={g.value} value={g.value}>
@@ -1652,7 +1652,7 @@ if (isAuthenticated && user && !isStudent) {
                         value={form.dob}
                         onChange={handleChange}
                         disabled={!editing}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D]"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01]"
                       />
                     </div> */}
 
@@ -1665,7 +1665,7 @@ if (isAuthenticated && user && !isStudent) {
                         value={form.email}
                         onChange={handleChange}
                         disabled={!editing}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D]"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01]"
                       />
                     </div>
 
@@ -1679,7 +1679,7 @@ if (isAuthenticated && user && !isStudent) {
                         value={form.phone}
                         onChange={handleChange}
                         disabled={!editing}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D]"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01]"
                       />
                     </div>
 
@@ -1691,7 +1691,7 @@ if (isAuthenticated && user && !isStudent) {
                         value={form.address}
                         onChange={handleChange}
                         disabled={!editing}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D]"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01]"
                       />
                     </div> */}
 
@@ -1705,7 +1705,7 @@ if (isAuthenticated && user && !isStudent) {
                         value={form.school}
                         onChange={handleChange}
                         disabled={!editing}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D]"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01]"
                       />
                     </div> */}
 
@@ -1717,7 +1717,7 @@ if (isAuthenticated && user && !isStudent) {
                         value={form.grade}
                         onChange={handleChange}
                         disabled={!editing}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D] bg-white"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01] bg-white"
                       >
                         {GRADES.map((g) => (
                           <option key={g} value={g}>
@@ -1742,7 +1742,7 @@ if (isAuthenticated && user && !isStudent) {
                         value={form.admissionScore}
                         onChange={handleAdmissionScoreChange}
                         disabled={!editing}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D]"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01]"
                       />
                     </div> */}
 
@@ -1757,7 +1757,7 @@ if (isAuthenticated && user && !isStudent) {
                         onChange={handleChange}
                         disabled={!editing}
                         className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm 
-               focus:outline-none focus:ring-2 focus:ring-[#EB5A0D] bg-white"
+               focus:outline-none focus:ring-2 focus:ring-[#facb01] bg-white"
                       >
                         <option value="">Chọn tổ hợp</option>
                         <option value="A00">A00 - Toán, Lý, Hóa</option>
@@ -1781,7 +1781,7 @@ if (isAuthenticated && user && !isStudent) {
                         onChange={handleChange}
                         disabled={!editing}
                         className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm 
-               focus:outline-none focus:ring-2 focus:ring-[#EB5A0D] bg-white"
+               focus:outline-none focus:ring-2 focus:ring-[#facb01] bg-white"
                       >
                         <option value="">Chọn ngành học</option>
                         <option value="software">Kỹ thuật phần mềm</option>
@@ -1802,7 +1802,7 @@ if (isAuthenticated && user && !isStudent) {
     onChange={handleChange}
     disabled={!editing}
     className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm 
-       focus:outline-none focus:ring-2 focus:ring-[#EB5A0D]"
+       focus:outline-none focus:ring-2 focus:ring-[#facb01]"
     placeholder="Ví dụ: HCM, HN, Miền Nam..."
   />
 </div>
@@ -1817,7 +1817,7 @@ if (isAuthenticated && user && !isStudent) {
                         value={form.riasecCode}
                         onChange={handleChange}
                         disabled={!editing}
-                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D]"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01]"
                       />
                     </div> */}
 
@@ -1838,7 +1838,7 @@ if (isAuthenticated && user && !isStudent) {
                         <>
                           <button
                             type="submit"
-                            className="px-5 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600"
+                            className="px-5 py-2 rounded-md bg-yellow-500 text-white hover:bg-yellow-600"
                           >
                             Lưu
                           </button>
@@ -1862,11 +1862,11 @@ if (isAuthenticated && user && !isStudent) {
   <div className="rounded-2xl border border-gray-200 bg-white grid grid-cols-12 overflow-hidden min-h-[600px]">
     {/* LEFT: danh sách phiên */}
     <aside className="col-span-12 md:col-span-4 border-r border-gray-100 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 bg-[#FFF3ED]">
-        <div className="font-semibold text-[#EB5A0D]">Đoạn chat</div>
+      <div className="flex items-center justify-between px-4 py-3 bg-[#FFFDE7]">
+        <div className="font-semibold text-[#facb01]">Đoạn chat</div>
         <button
           onClick={createConversation}
-          className="px-3 py-1 rounded-md bg-[#EB5A0D] text-white text-sm hover:opacity-90"
+          className="px-3 py-1 rounded-md bg-[#facb01] text-white text-sm hover:opacity-90"
         >
           + Phiên mới
         </button>
@@ -1878,7 +1878,7 @@ if (isAuthenticated && user && !isStudent) {
             <li
               key={c.id}
               className={`px-4 py-3 cursor-pointer hover:bg-gray-50 ${
-                c.id === activeId ? "bg-orange-50" : ""
+                c.id === activeId ? "bg-yellow-50" : ""
               }`}
               onClick={() => selectConversation(c.id)}
             >
@@ -1908,7 +1908,7 @@ if (isAuthenticated && user && !isStudent) {
 
     {/* RIGHT: khung chat */}
     <section className="col-span-12 md:col-span-8 flex flex-col">
-      <div className="bg-[#EB5A0D] text-white px-6 py-3 flex items-center justify-between">
+      <div className="bg-[#facb01] text-white px-6 py-3 flex items-center justify-between">
         <div className="text-lg font-semibold">ChatBot GTVT</div>
 
         {activeConv && (
@@ -1952,7 +1952,7 @@ if (isAuthenticated && user && !isStudent) {
               <div
                 className={`px-4 py-2 max-w-[70%] rounded-xl text-sm ${
                   m.sender === "user"
-                    ? "bg-[#EB5A0D] text-white"
+                    ? "bg-[#facb01] text-white"
                     : "bg-gray-200 text-gray-800"
                 }`}
               >
@@ -1994,7 +1994,7 @@ if (isAuthenticated && user && !isStudent) {
       handleSend(e);    
     }
   }}
-          className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D]"
+          className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01]"
         />
         <button
           type="submit"
@@ -2002,7 +2002,7 @@ if (isAuthenticated && user && !isStudent) {
           className={`px-4 py-2 rounded-md text-white ${
             !wsReady || !input.trim() || !activeId
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-[#EB5A0D] hover:opacity-90"
+              : "bg-[#facb01] hover:opacity-90"
           }`}
         >
           {wsReady ? "Gửi" : "Đang kết nối..."}
@@ -2016,7 +2016,7 @@ if (isAuthenticated && user && !isStudent) {
 {tab === "consultant" && (
   <div className="rounded-2xl border border-gray-200 bg-white flex flex-col min-h-[600px]">
     {/* Header */}
-    <div className="bg-[#EB5A0D] text-white px-6 py-3 flex items-center justify-between">
+    <div className="bg-[#facb01] text-white px-6 py-3 flex items-center justify-between">
       <div className="text-lg font-semibold">
         Live chat với tư vấn viên
       </div>
@@ -2042,7 +2042,7 @@ if (isAuthenticated && user && !isStudent) {
           <button
             onClick={handleJoinQueue}
             disabled={loading}
-            className="ml-auto bg-[#EB5A0D] text-white px-4 py-2 rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ml-auto bg-[#facb01] text-white px-4 py-2 rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Đang vào hàng chờ..." : "Bắt đầu chat"}
           </button>
@@ -2089,7 +2089,7 @@ if (isAuthenticated && user && !isStudent) {
           <p>Phiên chat đã kết thúc. Bạn có thể bắt đầu lại nếu cần.</p>
           <button
             onClick={handleJoinQueue}
-            className="ml-auto bg-[#EB5A0D] text-white px-4 py-2 rounded-md hover:opacity-90"
+            className="ml-auto bg-[#facb01] text-white px-4 py-2 rounded-md hover:opacity-90"
           >
             Bắt đầu lại
           </button>
@@ -2118,7 +2118,7 @@ if (isAuthenticated && user && !isStudent) {
               <div
                 className={`px-4 py-2 max-w-[70%] rounded-xl text-sm ${
                   isMyMessage
-                    ? "bg-[#EB5A0D] text-white"
+                    ? "bg-[#facb01] text-white"
                     : "bg-white text-gray-800 border border-gray-200"
                 }`}
               >
@@ -2151,7 +2151,7 @@ if (isAuthenticated && user && !isStudent) {
     }
   }}
         disabled={queueStatus !== "chatting" || !isConnected}
-        className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB5A0D] disabled:bg-gray-100"
+        className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#facb01] disabled:bg-gray-100"
       />
       <button
         type="submit"
@@ -2161,7 +2161,7 @@ if (isAuthenticated && user && !isStudent) {
         className={`px-4 py-2 rounded-md text-white ${
           queueStatus !== "chatting" || !liveInput.trim() || !isConnected
             ? "bg-gray-300 cursor-not-allowed"
-            : "bg-[#EB5A0D] hover:opacity-90"
+            : "bg-[#facb01] hover:opacity-90"
         }`}
       >
         Gửi
@@ -2188,7 +2188,7 @@ if (isAuthenticated && user && !isStudent) {
         <button
           type="button"
           onClick={handleReconnectAfterTimeout}
-          className="px-4 py-2 text-sm rounded-md bg-[#EB5A0D] text-white hover:opacity-90"
+          className="px-4 py-2 text-sm rounded-md bg-[#facb01] text-white hover:opacity-90"
         >
           Kết nối lại
         </button>
@@ -2237,7 +2237,7 @@ if (isAuthenticated && user && !isStudent) {
         <button
           type="button"
           onClick={handleSubmitLiveRating}
-          className="px-4 py-2 text-sm rounded-md bg-[#EB5A0D] text-white hover:opacity-90"
+          className="px-4 py-2 text-sm rounded-md bg-[#facb01] text-white hover:opacity-90"
         >
           Gửi đánh giá
         </button>
@@ -2257,7 +2257,7 @@ if (isAuthenticated && user && !isStudent) {
             {/* TRANSCRIPT TAB */}
             {tab === "transcript" && (
 <div className="rounded-2xl border border-gray-200 bg-white p-6">
-    <div className="bg-orange-500 p-6 rounded-lg text-white">
+    <div className="bg-yellow-500 p-6 rounded-lg text-white">
       <p className="mb-6 text-sm">
         Cần nhập tối thiểu 06 môn cho cả bảng điểm, nếu điểm là số
         thập phân, sử dụng dấu chấm

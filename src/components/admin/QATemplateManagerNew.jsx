@@ -184,7 +184,7 @@ const QATemplateManagerNew = () => {
             resetForm();
             setIsDialogOpen(true);
           }}
-          className="bg-[#EB5A0D] text-white px-4 py-2 rounded-lg hover:bg-[#d14f0a]"
+          className="bg-[#facb01] text-white px-4 py-2 rounded-lg hover:bg-[#d14f0a]"
         >
           Tạo Mẫu Mới
         </button>
@@ -319,7 +319,7 @@ const QATemplateManagerNew = () => {
                 </label>
                 <button
                   onClick={addQAPair}
-                  className="bg-[#EB5A0D] text-white px-3 py-1 rounded text-sm hover:bg-[#d14f0a]"
+                  className="bg-[#facb01] text-white px-3 py-1 rounded text-sm hover:bg-[#d14f0a]"
                 >
                   + Thêm Q&A
                 </button>
@@ -390,7 +390,7 @@ const QATemplateManagerNew = () => {
               <button
                 onClick={handleCreateOrUpdate}
                 disabled={loading}
-                className="bg-[#EB5A0D] text-white px-4 py-2 rounded hover:bg-[#d14f0a] disabled:opacity-50"
+                className="bg-[#facb01] text-white px-4 py-2 rounded hover:bg-[#d14f0a] disabled:opacity-50"
               >
                 {loading ? 'Đang lưu...' : (editingTemplate ? 'Cập nhật' : 'Tạo')}
               </button>

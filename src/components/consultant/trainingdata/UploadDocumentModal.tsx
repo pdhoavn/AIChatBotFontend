@@ -18,7 +18,7 @@ const AUDIENCE_COLORS: Record<string, string> = {
   'Viên chức/Người lao động': 'bg-blue-100 text-blue-700 border-blue-200',
   'Sinh viên':                 'bg-green-100 text-green-700 border-green-200',
   'Phụ huynh':                 'bg-purple-100 text-purple-700 border-purple-200',
-  'Tuyển sinh':                'bg-orange-100 text-orange-700 border-orange-200',
+  'Tuyển sinh':                'bg-yellow-100 text-yellow-700 border-yellow-200',
 };
 
 const AUDIENCE_VALUE_MAP: Record<Audience, string> = {
@@ -123,10 +123,10 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
             <div className="mt-1">
               <label
                 htmlFor="file-upload"
-                className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-[#EB5A0D] rounded-lg cursor-pointer bg-white hover:bg-orange-50 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-[#facb01] rounded-lg cursor-pointer bg-white hover:bg-yellow-50 transition-colors"
               >
-                <Upload className="h-5 w-5 text-[#EB5A0D]" />
-                <span className="font-medium text-[#EB5A0D]">
+                <Upload className="h-5 w-5 text-[#facb01]" />
+                <span className="font-medium text-[#facb01]">
                   {file ? file.name : 'Chọn File'}
                 </span>
                 <input
@@ -171,7 +171,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
                       : [...AUDIENCE_OPTIONS]
                   )
                 }
-                className="text-xs text-[#EB5A0D] hover:underline"
+                className="text-xs text-[#facb01] hover:underline"
               >
                 {audiences.length === AUDIENCE_OPTIONS.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
               </button>
@@ -209,7 +209,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
                         onClick={() => toggleAudience(option)}
                         className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm select-none"
                       >
-                        <div className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 ${selected ? 'bg-[#EB5A0D] border-[#EB5A0D]' : 'border-gray-300'}`}>
+                        <div className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 ${selected ? 'bg-[#facb01] border-[#facb01]' : 'border-gray-300'}`}>
                           {selected && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
                         </div>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${AUDIENCE_COLORS[option]}`}>
@@ -257,7 +257,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
           </Button>
           <Button
             onClick={handleSubmit}
-            className="bg-[#EB5A0D] hover:bg-[#d14f0a]"
+            className="bg-[#facb01] hover:bg-[#d14f0a]"
             disabled={loading}
           >
             {loading ? 'Đang tải lên...' : 'Tải Lên'}

@@ -104,7 +104,7 @@ export function UserTable({
                           isAdminUser(user) 
                             ? "text-gray-400 cursor-not-allowed" 
                             : user.status === 'active' 
-                              ? "text-orange-600" 
+                              ? "text-yellow-600" 
                               : "text-green-600"
                         }
                       >

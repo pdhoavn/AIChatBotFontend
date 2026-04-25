@@ -93,7 +93,7 @@ export default function ArticlePage() {
         {/* Danh sách bài viết */}
         {!loading && !error && !selected && (
           <>
-            <h1 className="text-3xl mt-10 font-semibold mb-6 text-center text-[#EB5A0D]">
+            <h1 className="text-3xl mt-10 font-semibold mb-6 text-center text-[#facb01]">
               Tin tức & Bài viết
             </h1>
 
@@ -159,7 +159,7 @@ export default function ArticlePage() {
             </div>
             <button
               onClick={() => setSelected(null)}
-              className="mb-4 text-sm text-[#EB5A0D] hover:underline"
+              className="mb-4 text-sm text-[#facb01] hover:underline"
             >
               ← Quay lại danh sách
             </button>
@@ -199,7 +199,7 @@ export default function ArticlePage() {
       href={selected.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-[#EB5A0D] underline break-all"
+      className="text-[#facb01] underline break-all"
     >
       {selected.url}
     </a>

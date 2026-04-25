@@ -387,14 +387,14 @@ export default function RiasecGuestForm() {
                     key={opt.value}
                     className={`flex items-center gap-2 rounded-lg border p-2 cursor-pointer hover:bg-gray-50 ${
                       answers[q.id] === opt.value
-                        ? "border-[#EB5A0D]"
+                        ? "border-[#facb01]"
                         : "border-gray-200"
                     }`}
                   >
                     <input
                       type="radio"
                       name={q.id}
-                      className="accent-[#EB5A0D]"
+                      className="accent-[#facb01]"
                       checked={answers[q.id] === opt.value}
                       onChange={() => handleChange(q.id, opt.value)}
                     />
@@ -414,7 +414,7 @@ export default function RiasecGuestForm() {
               disabled={!allAnswered}
               className={`px-4 py-2 rounded-md text-white ${
                 allAnswered
-                  ? "bg-[#EB5A0D] hover:opacity-90"
+                  ? "bg-[#facb01] hover:opacity-90"
                   : "bg-gray-300 cursor-not-allowed"
               }`}
             >

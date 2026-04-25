@@ -101,7 +101,7 @@ navigate('/loginprivate');
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Quy trình{' '}
-            <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
               Tuyển sinh
             </span>
           </h2>
@@ -115,13 +115,13 @@ navigate('/loginprivate');
           {steps.map((step, index) => (
             <div key={index} className="relative">
               {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-orange-300 to-transparent -z-10"></div>
+                <div className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-yellow-300 to-transparent -z-10"></div>
               )}
               <div className="text-center group">
-                <div className="bg-gradient-to-br from-orange-500 to-orange-600 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
                   <step.icon className="h-12 w-12 text-white" />
                 </div>
-                <div className="bg-orange-100 text-orange-600 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-sm">
+                <div className="bg-yellow-100 text-yellow-600 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-sm">
                   {index + 1}
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -138,14 +138,14 @@ navigate('/loginprivate');
         {/* Registration Form */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-10 text-white relative overflow-hidden">
+            <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-3xl p-10 text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
               <div className="relative z-10">
                 <GraduationCap className="h-16 w-16 mb-6" />
                 <h3 className="text-3xl font-bold mb-4">
                   Đăng ký tuyển sinh ngay hôm nay!
                 </h3>
-                {/* <p className="text-orange-50 mb-6 leading-relaxed text-lg">
+                {/* <p className="text-yellow-50 mb-6 leading-relaxed text-lg">
                   Tuyển sinh đợt 1: <span className="font-semibold">Tháng 3 - Tháng 8, 2025</span>
                 </p> */}
                 <ul className="space-y-4">
@@ -188,7 +188,7 @@ navigate('/loginprivate');
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                     placeholder="Nguyễn Văn A"
                   />
                 </div>
@@ -207,7 +207,7 @@ navigate('/loginprivate');
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                     placeholder="nguyenvana@email.com"
                   />
                 </div>
@@ -226,7 +226,7 @@ navigate('/loginprivate');
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -245,7 +245,7 @@ navigate('/loginprivate');
                     value={formData.phone}
                     onChange={handleChange}
                     required
-                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                    className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                     placeholder="0912345678"
                   />
                 </div>
@@ -261,7 +261,7 @@ navigate('/loginprivate');
                   value={formData.program}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all appearance-none bg-white"
+                  className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all appearance-none bg-white"
                 >
                   <option value="">Chọn ngành học</option>
                   <option value="software">Kỹ thuật phần mềm</option>
@@ -283,7 +283,7 @@ navigate('/loginprivate');
                   value={formData.person}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all appearance-none bg-white"
+                  className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all appearance-none bg-white"
                 >
                   <option value="parent">Phụ huynh</option>
                   <option value="student">Học sinh</option>
@@ -292,7 +292,7 @@ navigate('/loginprivate');
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-semibold hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-4 rounded-xl font-semibold hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 Đăng ký ngay
               </button>

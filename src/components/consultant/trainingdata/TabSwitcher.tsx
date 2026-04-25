@@ -13,7 +13,7 @@ export function TabSwitcher({ activeTab, onTabChange }: TabSwitcherProps) {
         onClick={() => onTabChange('questions')}
         className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
           activeTab === 'questions'
-            ? 'bg-[#EB5A0D] text-white shadow-md'
+            ? 'bg-[#facb01] text-white shadow-md'
             : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
         }`}
       >
@@ -25,7 +25,7 @@ export function TabSwitcher({ activeTab, onTabChange }: TabSwitcherProps) {
         onClick={() => onTabChange('documents')}
         className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
           activeTab === 'documents'
-            ? 'bg-[#EB5A0D] text-white shadow-md'
+            ? 'bg-[#facb01] text-white shadow-md'
             : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
         }`}
       >

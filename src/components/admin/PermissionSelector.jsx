@@ -84,7 +84,7 @@ export function PermissionSelector({ role, selectedPermissions, onPermissionsCha
             variant="outline"
             size="sm"
             onClick={selectAllPermissions}
-            className="text-xs border-[#EB5A0D] text-[#EB5A0D] hover:bg-[#FFF8F3]"
+            className="text-xs border-[#facb01] text-[#facb01] hover:bg-[#FFFFF0]"
           >
             <Plus className="h-3 w-3 mr-1" />Tất Cả</Button>
           <Button
@@ -92,7 +92,7 @@ export function PermissionSelector({ role, selectedPermissions, onPermissionsCha
             variant="outline"
             size="sm"
             onClick={clearAllPermissions}
-            className="text-xs border-[#EB5A0D] text-[#EB5A0D] hover:bg-[#FFF8F3]"
+            className="text-xs border-[#facb01] text-[#facb01] hover:bg-[#FFFFF0]"
           >
             <Minus className="h-3 w-3 mr-1" />Xóa</Button>
         </div>

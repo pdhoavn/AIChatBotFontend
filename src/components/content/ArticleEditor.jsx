@@ -208,7 +208,7 @@ export default function ArticleEditor({ initialData }) {
         <button 
           onClick={handleAddArticle}
           disabled={saving || loading}
-          className="px-4 py-2 rounded-md bg-[#EB5A0D] text-white text-sm hover:bg-[#d14f0a] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 rounded-md bg-[#facb01] text-white text-sm hover:bg-[#d14f0a] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? 'Đang Thêm...' : 'Thêm Bài Viết'}
         </button>

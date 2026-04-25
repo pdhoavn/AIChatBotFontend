@@ -34,7 +34,7 @@ export default function Contact() {
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Liên hệ{' '}
-            <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
               với chúng tôi
             </span>
           </h2>
@@ -47,7 +47,7 @@ export default function Contact() {
           {locations.map((location, index) => (
             <div
               key={index}
-              className="bg-gradient-to-br from-gray-50 to-orange-50 rounded-2xl p-8 border border-orange-100 hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-br from-gray-50 to-yellow-50 rounded-2xl p-8 border border-yellow-100 hover:shadow-xl transition-all duration-300"
             >
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
                 {location.city}
@@ -55,20 +55,20 @@ export default function Contact() {
 
               <div className="space-y-4">
                 <div className="flex items-start">
-                  <MapPin className="h-5 w-5 text-orange-600 mr-3 flex-shrink-0 mt-1" />
+                  <MapPin className="h-5 w-5 text-yellow-600 mr-3 flex-shrink-0 mt-1" />
                   <p className="text-gray-700">{location.address}</p>
                 </div>
 
                 <div className="flex items-center">
-                  <Phone className="h-5 w-5 text-orange-600 mr-3 flex-shrink-0" />
-                  <a href={`tel:${location.phone}`} className="text-gray-700 hover:text-orange-600 transition-colors">
+                  <Phone className="h-5 w-5 text-yellow-600 mr-3 flex-shrink-0" />
+                  <a href={`tel:${location.phone}`} className="text-gray-700 hover:text-yellow-600 transition-colors">
                     {location.phone}
                   </a>
                 </div>
 
                 <div className="flex items-center">
-                  <Mail className="h-5 w-5 text-orange-600 mr-3 flex-shrink-0" />
-                  <a href={`mailto:${location.email}`} className="text-gray-700 hover:text-orange-600 transition-colors">
+                  <Mail className="h-5 w-5 text-yellow-600 mr-3 flex-shrink-0" />
+                  <a href={`mailto:${location.email}`} className="text-gray-700 hover:text-yellow-600 transition-colors">
                     {location.email}
                   </a>
                 </div>
@@ -78,10 +78,10 @@ export default function Contact() {
         </div>
 
         {/* Working Hours */}
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-12 text-white text-center">
+        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-3xl p-12 text-white text-center">
           <Clock className="h-16 w-16 mx-auto mb-6" />
           <h3 className="text-3xl font-bold mb-4">Thời gian làm việc</h3>
-          <div className="max-w-2xl mx-auto space-y-2 text-lg text-orange-50">
+          <div className="max-w-2xl mx-auto space-y-2 text-lg text-yellow-50">
             <p>Thứ 2 - Thứ 6: 8:00 - 17:30</p>
             <p>Thứ 7 - Chủ nhật: 8:00 - 12:00</p>
             <p className="mt-6 text-white font-semibold">

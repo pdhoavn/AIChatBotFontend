@@ -1,14 +1,14 @@
 // src/components/chatbotguest/ChatEmptyState.jsx
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { Sparkle, BadgeCheck, School, Users, GraduationCap } from "lucide-react";
+import { Sparkle } from "lucide-react";
 import { resolveAudienceCode } from "../../api/audienceApi.ts";
 
 const AUDIENCE_META = {
-  CANBO: { icon: BadgeCheck, color: "blue", label: "Viên chức / Người lao động" },
-  SINHVIEN: { icon: School, color: "green", label: "Sinh viên" },
-  PHUHUYNH: { icon: Users, color: "purple", label: "Phụ huynh / Bên liên quan" },
-  TUYENSINH: { icon: GraduationCap, color: "orange", label: "Tuyển sinh" },
+  CANBO: { color: "blue", emoji: "👔", label: "Viên chức / Người lao động" },
+  SINHVIEN: { color: "green", emoji: "🎓", label: "Sinh viên" },
+  PHUHUYNH: { color: "purple", emoji: "👨‍👩‍👦", label: "Phụ huynh / Bên liên quan" },
+  TUYENSINH: { color: "orange", emoji: "🗒️", label: "Tuyển sinh" },
 };
 
 const COLOR_MAP = {
@@ -40,18 +40,17 @@ const COLOR_MAP = {
     labelText: "text-violet-700",
   },
   orange: {
-    bg: "bg-orange-50",
-    border: "border-orange-200",
-    iconBg: "bg-orange-100",
-    iconBorder: "border-orange-200",
-    iconText: "text-orange-600",
-    hoverBorder: "hover:border-orange-400",
-    labelText: "text-orange-700",
+    bg: "bg-yellow-50",
+    border: "border-yellow-200",
+    iconBg: "bg-yellow-100",
+    iconBorder: "border-yellow-200",
+    iconText: "text-yellow-600",
+    hoverBorder: "hover:border-yellow-400",
+    labelText: "text-yellow-700",
   },
 };
 
 const FALLBACK_COLOR = "blue";
-const FALLBACK_ICON = BadgeCheck;
 
 export default function ChatEmptyState({
   onSendMessage,
@@ -90,12 +89,11 @@ export default function ChatEmptyState({
             {audiences.map((audience) => {
               const audienceCode = resolveAudienceCode(audience);
               const meta = AUDIENCE_META[audienceCode] || {
-                icon: FALLBACK_ICON,
                 color: FALLBACK_COLOR,
+                emoji: "👤",
                 label: audience.name,
               };
               const c = COLOR_MAP[meta.color];
-              const IconComp = meta.icon;
               const isSelected = selectedAudience?.id === audience.id;
 
               return (
@@ -112,7 +110,7 @@ export default function ChatEmptyState({
                     <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-transform duration-200 ${
                       isSelected ? `bg-accent/10 border-accent/20 scale-110` : `${c.iconBorder} ${c.iconBg} group-hover:scale-110`
                     }`}>
-                      <IconComp size={20} className={isSelected ? "text-accent" : c.iconText} />
+                      <span style={{ fontSize: "22px", lineHeight: 1 }}>{meta.emoji}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`text-xs font-bold uppercase tracking-wide ${c.labelText} leading-tight`}>

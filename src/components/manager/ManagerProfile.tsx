@@ -172,7 +172,7 @@ export function ManagerProfile() {
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground">Trạng Thái</Label>
                       <Badge 
-                        className={`text-xs ${profileData.consultant_profile.status ? 'bg-[#EB5A0D] text-white hover:bg-[#d14f0a]' : 'bg-gray-200 text-gray-700'}`}
+                        className={`text-xs ${profileData.consultant_profile.status ? 'bg-[#facb01] text-white hover:bg-[#d14f0a]' : 'bg-gray-200 text-gray-700'}`}
                       >
                         {profileData.consultant_profile.status ? "Hoạt động" : "Không hoạt động"}
                       </Badge>
@@ -180,7 +180,7 @@ export function ManagerProfile() {
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground">Giám Sát</Label>
                       <Badge 
-                        className={`text-xs ${profileData.consultant_profile.is_leader ? 'bg-[#EB5A0D] text-white hover:bg-[#d14f0a]' : 'bg-gray-200 text-gray-700'}`}
+                        className={`text-xs ${profileData.consultant_profile.is_leader ? 'bg-[#facb01] text-white hover:bg-[#d14f0a]' : 'bg-gray-200 text-gray-700'}`}
                       >
                         {profileData.consultant_profile.is_leader ? "👑 Trưởng nhóm" : "👤 Thành viên"}
                       </Badge>
@@ -198,7 +198,7 @@ export function ManagerProfile() {
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">Giám Sát</Label>
                     <Badge 
-                      className={`text-xs ${profileData.content_manager_profile.is_leader ? 'bg-[#EB5A0D] text-white hover:bg-[#d14f0a]' : 'bg-gray-200 text-gray-700'}`}
+                      className={`text-xs ${profileData.content_manager_profile.is_leader ? 'bg-[#facb01] text-white hover:bg-[#d14f0a]' : 'bg-gray-200 text-gray-700'}`}
                     >
                       {profileData.content_manager_profile.is_leader ? "👑 Trưởng nhóm" : "👤 Thành viên"}
                     </Badge>

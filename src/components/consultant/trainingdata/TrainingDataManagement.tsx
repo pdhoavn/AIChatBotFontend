@@ -307,7 +307,7 @@ export function TrainingDataManagement() {
           </p>
         </div>
         <Button 
-          className="bg-[#EB5A0D] hover:bg-[#d14f0a]"
+          className="bg-[#facb01] hover:bg-[#d14f0a]"
           onClick={() => activeTab === 'questions' ? setShowAddQuestionModal(true) : setShowUploadDocumentModal(true)}
         >
           <Plus className="h-4 w-4 mr-2" />

@@ -61,7 +61,7 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
             loading="eager"
           />
           <div>
-            <div className="font-semibold text-[#EB5A0D] leading-tight">
+            <div className="font-semibold text-[#facb01] leading-tight">
               Trường ĐH Giao thông Vận tải
             </div>
             <div className="text-xs text-chat-text-muted -mt-0.5">Phân hiệu tại TP. Hồ Chí Minh</div>
@@ -126,13 +126,13 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
           {shouldShowRiasecLink && (
             <Link
               to="/riasec"
-              className="riasec-cta-reveal group inline-flex h-9 items-center gap-2 rounded-full border border-[#EB5A0D]/20 bg-[#EB5A0D] px-3 text-white transition hover:bg-[#d95208]"
+              className="riasec-cta-reveal group inline-flex h-9 items-center gap-2 rounded-full border border-[#facb01]/20 bg-[#facb01] px-3 text-white transition hover:bg-[#d95208]"
             >
               <PhIcon name="school" size={15} className="shrink-0" />
               <span className="text-sm font-medium">
                 Tìm ngành phù hợp
               </span>
-              <span className="hidden rounded-full bg-white/18 px-2 py-0.5 text-[10px] font-medium text-orange-50 md:inline-flex">
+              <span className="hidden rounded-full bg-white/18 px-2 py-0.5 text-[10px] font-medium text-yellow-50 md:inline-flex">
                 RIASEC 3-5 phút
               </span>
             </Link>

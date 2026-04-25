@@ -665,7 +665,7 @@ export function UserFormDialog({
           <Button type="button" variant="outline" onClick={onClose}>
             Hủy
           </Button>
-          <Button type="submit" onClick={handleSubmit} className="bg-[#EB5A0D] hover:bg-[#d14f0a] text-white">
+          <Button type="submit" onClick={handleSubmit} className="bg-[#facb01] hover:bg-[#d14f0a] text-white">
             {editingUser ? 'Cập Nhật Người Dùng' : 'Tạo Người Dùng'}
           </Button>
         </DialogFooter>

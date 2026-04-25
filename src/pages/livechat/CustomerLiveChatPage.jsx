@@ -192,7 +192,7 @@ export default function CustomerLiveChatPage() {
       <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Header */}
-          <div className="bg-[#EB5A0D] text-white px-6 py-4">
+          <div className="bg-[#facb01] text-white px-6 py-4">
             <h1 className="text-2xl font-bold">Live Chat with Admission Consultant</h1>
             <p className="text-sm opacity-90 mt-1">
               Status: {queueStatus === 'idle' && 'Not started'}
@@ -217,7 +217,7 @@ export default function CustomerLiveChatPage() {
                 <button
                   onClick={handleJoinQueue}
                   disabled={loading}
-                  className="bg-[#EB5A0D] text-white px-8 py-3 rounded-lg hover:bg-[#d94f0a] disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                  className="bg-[#facb01] text-white px-8 py-3 rounded-lg hover:bg-[#e0b500] disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
                 >
                   {loading ? 'Joining...' : 'Start Chat'}
                 </button>
@@ -291,7 +291,7 @@ export default function CustomerLiveChatPage() {
                           <div
                             className={`max-w-[70%] rounded-lg px-4 py-2 ${
                               isMyMessage
-                                ? 'bg-[#EB5A0D] text-white'
+                                ? 'bg-[#facb01] text-white'
                                 : 'bg-white border border-gray-200 text-gray-800'
                             }`}
                           >
@@ -314,12 +314,12 @@ export default function CustomerLiveChatPage() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your message..."
                     disabled={!isConnected}
-                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#EB5A0D] disabled:bg-gray-100"
+                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#facb01] disabled:bg-gray-100"
                   />
                   <button
                     type="submit"
                     disabled={!isConnected || !newMessage.trim()}
-                    className="bg-[#EB5A0D] text-white px-6 py-2 rounded-lg hover:bg-[#d94f0a] disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                    className="bg-[#facb01] text-white px-6 py-2 rounded-lg hover:bg-[#e0b500] disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
                   >
                     Send
                   </button>
@@ -342,7 +342,7 @@ export default function CustomerLiveChatPage() {
                     setQueueStatus('idle');
                     setMessages([]);
                   }}
-                  className="bg-[#EB5A0D] text-white px-8 py-3 rounded-lg hover:bg-[#d94f0a] font-semibold"
+                  className="bg-[#facb01] text-white px-8 py-3 rounded-lg hover:bg-[#e0b500] font-semibold"
                 >
                   Start New Chat
                 </button>

@@ -145,7 +145,7 @@ export function IntentManagement() {
           </div>
           <Button 
             onClick={() => setShowAddDialog(true)}
-            className="bg-[#EB5A0D] hover:bg-[#d64f0a]"
+            className="bg-[#facb01] hover:bg-[#d64f0a]"
           >
             <Plus className="h-4 w-4 mr-2" />
             Thêm Lĩnh Vực
@@ -170,21 +170,21 @@ export function IntentManagement() {
             <Button
               variant={filterType === 'all' ? 'default' : 'outline'}
               onClick={() => setFilterType('all')}
-              className={filterType === 'all' ? 'bg-[#EB5A0D] hover:bg-[#d64f0a]' : ''}
+              className={filterType === 'all' ? 'bg-[#facb01] hover:bg-[#d64f0a]' : ''}
             >
               Tất Cả
             </Button>
             <Button
               variant={filterType === 'active' ? 'default' : 'outline'}
               onClick={() => setFilterType('active')}
-              className={filterType === 'active' ? 'bg-[#EB5A0D] hover:bg-[#d64f0a]' : ''}
+              className={filterType === 'active' ? 'bg-[#facb01] hover:bg-[#d64f0a]' : ''}
             >
               Đang Sử Dụng
             </Button>
             <Button
               variant={filterType === 'deleted' ? 'default' : 'outline'}
               onClick={() => setFilterType('deleted')}
-              className={filterType === 'deleted' ? 'bg-[#EB5A0D] hover:bg-[#d64f0a]' : ''}
+              className={filterType === 'deleted' ? 'bg-[#facb01] hover:bg-[#d64f0a]' : ''}
             >
               Vô Hiệu Hóa
             </Button>
@@ -217,7 +217,7 @@ export function IntentManagement() {
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#EB5A0D]"></div>
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#facb01]"></div>
                   <p className="mt-2 text-sm text-gray-500">Đang tải lĩnh vực...</p>
                 </div>
               </div>

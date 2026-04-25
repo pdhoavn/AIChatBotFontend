@@ -94,7 +94,7 @@ export function EditIntentModal({ isOpen, onClose, intent, onEdit }: EditIntentM
           <Button
             onClick={handleSubmit}
             disabled={!intentName.trim() || submitting}
-            className="bg-[#EB5A0D] hover:bg-[#d64f0a]"
+            className="bg-[#facb01] hover:bg-[#d64f0a]"
           >
             {submitting ? 'Đang cập nhật...' : 'Cập Nhật'}
           </Button>

@@ -122,7 +122,7 @@ export function DocumentList({ filteredDocuments }) {
             ) : (
               <Button 
                 size="sm" 
-                className="w-full gap-2 bg-[#EB5A0D] hover:bg-[#d14f0a] text-white"
+                className="w-full gap-2 bg-[#facb01] hover:bg-[#d14f0a] text-white"
                 onClick={() => handleDownload(doc)}
               >
                 <Download className="h-4 w-4" />

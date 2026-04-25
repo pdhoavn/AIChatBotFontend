@@ -70,7 +70,7 @@ export default function Header({ minimal = false }) {
     "U";
 
   const navLinkClass = `text-sm font-medium transition-colors ${
-    isSolidHeader ? "text-gray-700 hover:text-orange-600" : "text-white hover:text-orange-200"
+    isSolidHeader ? "text-gray-700 hover:text-yellow-600" : "text-white hover:text-yellow-200"
   }`;
 
   return (
@@ -134,7 +134,7 @@ export default function Header({ minimal = false }) {
                     <>
                       <button
                         onClick={() => scrollToSection("admissions")}
-                        className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all duration-300"
+                        className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-6 py-2.5 rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all duration-300"
                       >
                         Đăng ký ngay
                       </button>
@@ -152,7 +152,7 @@ export default function Header({ minimal = false }) {
                         onClick={() => setIsUserMenuOpen((v) => !v)}
                         className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 shadow-sm hover:shadow-md transition"
                       >
-                        <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-semibold">
+                        <div className="w-8 h-8 rounded-full bg-yellow-500 text-white flex items-center justify-center text-sm font-semibold">
                           {userInitial}
                         </div>
                         <span className="text-sm font-medium text-gray-700 max-w-[120px] truncate">
@@ -164,14 +164,14 @@ export default function Header({ minimal = false }) {
                         <div className="absolute right-0 mt-2 w-44 rounded-lg bg-white shadow-lg border border-gray-100 py-1 z-50">
                           <button
                             onClick={goProfile}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600"
                           >
                             <UserIcon className="w-4 h-4" />
                             <span>Hồ sơ</span>
                           </button>
                           <button
                             onClick={handleLogout}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600"
                           >
                             <LogOut className="w-4 h-4" />
                             <span>Đăng xuất</span>
@@ -213,19 +213,19 @@ export default function Header({ minimal = false }) {
                 </div>
               ) : (
                 <>
-                  <button onClick={() => scrollToSection("home")} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">Trang chủ</button>
-                  <button onClick={() => scrollToSection("about")} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">Giới thiệu</button>
-                  <button onClick={() => scrollToSection("programs")} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">Ngành học</button>
-                  <button onClick={() => scrollToSection("admissions")} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">Tuyển sinh</button>
-                  <button onClick={() => scrollToSection("contact")} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">Liên hệ</button>
+                  <button onClick={() => scrollToSection("home")} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 rounded-lg transition-colors">Trang chủ</button>
+                  <button onClick={() => scrollToSection("about")} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 rounded-lg transition-colors">Giới thiệu</button>
+                  <button onClick={() => scrollToSection("programs")} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 rounded-lg transition-colors">Ngành học</button>
+                  <button onClick={() => scrollToSection("admissions")} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 rounded-lg transition-colors">Tuyển sinh</button>
+                  <button onClick={() => scrollToSection("contact")} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 rounded-lg transition-colors">Liên hệ</button>
                   {!isAuthenticated && (
-                    <button onClick={goChatbot} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">Chatbot</button>
+                    <button onClick={goChatbot} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 rounded-lg transition-colors">Chatbot</button>
                   )}
                   {!isAuthenticated ? (
                     <div className="pt-2 flex gap-3">
                       <button
                         onClick={() => scrollToSection("admissions")}
-                        className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-lg font-medium hover:shadow-lg transition-all"
+                        className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-4 py-3 rounded-lg font-medium hover:shadow-lg transition-all"
                       >
                         Đăng ký ngay
                       </button>
@@ -239,13 +239,13 @@ export default function Header({ minimal = false }) {
                   ) : (
                     <div className="pt-3 border-t border-gray-100">
                       <div className="flex items-center gap-3 px-4 py-2">
-                        <div className="w-9 h-9 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-semibold">
+                        <div className="w-9 h-9 rounded-full bg-yellow-500 text-white flex items-center justify-center text-sm font-semibold">
                           {userInitial}
                         </div>
                         <div className="text-sm font-semibold text-gray-800">{user?.name || user?.email}</div>
                       </div>
-                      <button onClick={goProfile} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">Profile</button>
-                      <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">Đăng xuất</button>
+                      <button onClick={goProfile} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 rounded-lg transition-colors">Profile</button>
+                      <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 rounded-lg transition-colors">Đăng xuất</button>
                     </div>
                   )}
                 </>

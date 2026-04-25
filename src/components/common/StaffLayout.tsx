@@ -120,7 +120,7 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
         <div className={`p-4 ${STAFF_COLORS.brand.border} border-b flex-shrink-0`}>
           <div className="flex items-center justify-center">
             <img
-              src="https://utc2.edu.vn/wp-content/uploads/2024/06/Logo-UTC2.png"
+              src="https://utc2.edu.vn/images/030820230730_U09Tn.png"
               alt="UTC2 Logo"
               className="w-full h-auto object-contain max-h-16"
             />
