@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../../contexts/Auth';
@@ -18,12 +19,16 @@ import { Pagination } from '../../common/Pagination';
 export function TrainingDataManagement() {
   const { user, isConsultantLeader } = useAuth();
   const isLeader = isConsultantLeader();
+  const location = useLocation();
+  const locationState = location.state as { tab?: string; categoryFilter?: string } | null;
 
-  const [activeTab, setActiveTab] = useState<TabType>('questions');
+  const [activeTab, setActiveTab] = useState<TabType>(
+    locationState?.tab === 'documents' ? 'documents' : 'questions'
+  );
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState(locationState?.categoryFilter || 'all');
   const [audienceFilter, setAudienceFilter] = useState<string[]>([]);
   const [intents, setIntents] = useState<Intent[]>([]);
   const [loading, setLoading] = useState(true);
