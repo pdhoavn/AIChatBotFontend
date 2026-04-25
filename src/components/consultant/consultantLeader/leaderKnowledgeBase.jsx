@@ -44,6 +44,97 @@ function AudienceBadges({ audiences }) {
   );
 }
 
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleDateString('vi-VN', { year: 'numeric', month: 'short', day: 'numeric' });
+};
+
+function TrainingQuestionCard({ question, approvingId, rejectingId, onApprove, onReject }) {
+  const isApproving = approvingId === question.question_id;
+  const isRejecting = rejectingId === question.question_id;
+  return (
+    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3 flex-1">
+          <MessageCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <h3 className="font-medium truncate">Training Question {question.question_id}</h3>
+            <p className="text-sm text-muted-foreground">Tạo: {formatDate(question.created_at)}</p>
+          </div>
+        </div>
+        <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800 flex-shrink-0">Nháp</span>
+      </div>
+      <div className="flex flex-col gap-1.5 mb-3">
+        <AudienceBadges audiences={question.target_audiences} />
+        {question.intent_name && (
+          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full self-start">
+            Lĩnh vực: {question.intent_name}
+          </span>
+        )}
+      </div>
+      <div className="mb-4 space-y-3">
+        <div>
+          <div className="text-sm font-medium text-gray-700 mb-1">Câu hỏi:</div>
+          <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">{question.question}</p>
+        </div>
+        <div>
+          <div className="text-sm font-medium text-gray-700 mb-1">Câu trả lời:</div>
+          <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded whitespace-pre-wrap">{question.answer}</p>
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => onReject(question.question_id, 'qa')} disabled={isApproving || isRejecting}>
+          {isRejecting ? <><Loader2 className="h-4 w-4 animate-spin" />Đang xử lý...</> : <><X className="h-4 w-4" />Từ Chối</>}
+        </Button>
+        <Button size="sm" className="gap-2 bg-[#EB5A0D] hover:bg-[#d14f0a]" onClick={() => onApprove(question.question_id, 'qa')} disabled={isApproving || isRejecting}>
+          {isApproving ? <><Loader2 className="h-4 w-4 animate-spin" />Đang duyệt...</> : <><Check className="h-4 w-4" />Phê Duyệt</>}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function DocumentCard({ document, approvingId, rejectingId, onApprove, onReject }) {
+  const isApproving = approvingId === document.document_id;
+  const isRejecting = rejectingId === document.document_id;
+  return (
+    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3 flex-1">
+          <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <h3 className="font-medium truncate">{document.title}</h3>
+            <p className="text-sm text-muted-foreground">Tạo: {formatDate(document.created_at)}</p>
+          </div>
+        </div>
+        <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800 flex-shrink-0">Nháp</span>
+      </div>
+      <div className="flex flex-col gap-1.5 mb-3">
+        <AudienceBadges audiences={document.target_audiences} />
+        {document.intent_name && (
+          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full self-start">
+            Lĩnh vực: {document.intent_name}
+          </span>
+        )}
+      </div>
+      <div className="mb-4 space-y-2">
+        <div>
+          <div className="text-sm font-medium text-gray-700">File:</div>
+          <p className="text-sm text-gray-600">{document.file_path?.split('/').pop() || 'N/A'}</p>
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => onReject(document.document_id, 'document')} disabled={isApproving || isRejecting}>
+          {isRejecting ? <><Loader2 className="h-4 w-4 animate-spin" />Đang xử lý...</> : <><X className="h-4 w-4" />Từ Chối</>}
+        </Button>
+        <Button size="sm" className="gap-2 bg-[#EB5A0D] hover:bg-[#d14f0a]" onClick={() => onApprove(document.document_id, 'document')} disabled={isApproving || isRejecting}>
+          {isApproving ? <><Loader2 className="h-4 w-4 animate-spin" />Đang duyệt...</> : <><Check className="h-4 w-4" />Phê Duyệt</>}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function LeaderKnowledgeBase() {
   const [activeTab, setActiveTab] = useState('qa');
   const [trainingQuestions, setTrainingQuestions] = useState([]);
@@ -97,12 +188,12 @@ export function LeaderKnowledgeBase() {
       if (type === 'qa') {
         await knowledgeAPI.approveTrainingQuestion(id);
         toast.success('Đã duyệt câu hỏi huấn luyện!');
+        setTrainingQuestions(prev => prev.filter(q => q.question_id !== id));
       } else {
         await knowledgeAPI.approveDocument(id);
         toast.success('Đã duyệt tài liệu!');
+        setDocuments(prev => prev.filter(d => d.document_id !== id));
       }
-
-      await fetchPendingItems();
     } catch (error) {
       toast.error('Không thể duyệt. Vui lòng thử lại.');
     } finally {
@@ -127,12 +218,12 @@ export function LeaderKnowledgeBase() {
       if (selectedItemType === 'qa') {
         await knowledgeAPI.rejectTrainingQuestion(selectedItem, rejectReason);
         toast.success('Đã từ chối câu hỏi huấn luyện!');
+        setTrainingQuestions(prev => prev.filter(q => q.question_id !== selectedItem));
       } else {
         await knowledgeAPI.rejectDocument(selectedItem, rejectReason);
         toast.success('Đã từ chối tài liệu!');
+        setDocuments(prev => prev.filter(d => d.document_id !== selectedItem));
       }
-
-      await fetchPendingItems();
 
       setShowRejectDialog(false);
       setRejectReason('');
@@ -143,190 +234,6 @@ export function LeaderKnowledgeBase() {
     } finally {
       setRejectingId(null);
     }
-  };
-
-  const TrainingQuestionCard = ({ question }) => {
-    const formatDate = (dateString) => {
-      if (!dateString) return 'N/A';
-      return new Date(dateString).toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    };
-
-    const isApproving = approvingId === question.question_id;
-    const isRejecting = rejectingId === question.question_id;
-
-    return (
-      <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3 flex-1">
-            <MessageCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium truncate">Training Question {question.question_id}</h3>
-              <p className="text-sm text-muted-foreground">
-                Tạo: {formatDate(question.created_at)}
-              </p>
-            </div>
-          </div>
-          <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800 flex-shrink-0">
-            Nháp
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-1.5 mb-3">
-          <AudienceBadges audiences={question.target_audiences} />
-          {question.intent_name && (
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full self-start">
-              Lĩnh vực: {question.intent_name}
-            </span>
-          )}
-        </div>
-
-        <div className="mb-4 space-y-3">
-          <div>
-            <div className="text-sm font-medium text-gray-700 mb-1">Câu hỏi:</div>
-            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">{question.question}</p>
-          </div>
-          <div>
-            <div className="text-sm font-medium text-gray-700 mb-1">Câu trả lời:</div>
-            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded whitespace-pre-wrap">
-              {question.answer}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="gap-2"
-            onClick={() => openRejectDialog(question.question_id, 'qa')}
-            disabled={isApproving || isRejecting}
-          >
-            {isRejecting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Đang xử lý...
-              </>
-            ) : (
-              <>
-                <X className="h-4 w-4" />
-                Từ Chối
-              </>
-            )}
-          </Button>
-          <Button 
-            size="sm"
-            className="gap-2 bg-[#EB5A0D] hover:bg-[#d14f0a]"
-            onClick={() => handleApprove(question.question_id, 'qa')}
-            disabled={isApproving || isRejecting}
-          >
-            {isApproving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Đang duyệt...
-              </>
-            ) : (
-              <>
-                <Check className="h-4 w-4" />
-                Phê Duyệt
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
-  const DocumentCard = ({ document }) => {
-    const formatDate = (dateString) => {
-      if (!dateString) return 'N/A';
-      return new Date(dateString).toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    };
-
-    const isApproving = approvingId === document.document_id;
-    const isRejecting = rejectingId === document.document_id;
-
-    return (
-      <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3 flex-1">
-            <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium truncate">{document.title}</h3>
-              <p className="text-sm text-muted-foreground">
-                Tạo: {formatDate(document.created_at)}
-              </p>
-            </div>
-          </div>
-          <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800 flex-shrink-0">
-            Nháp
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-1.5 mb-3">
-          <AudienceBadges audiences={document.target_audiences} />
-          {document.intent_name && (
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full self-start">
-              Lĩnh vực: {document.intent_name}
-            </span>
-          )}
-        </div>
-
-        <div className="mb-4 space-y-2">
-          <div>
-            <div className="text-sm font-medium text-gray-700">File:</div>
-            <p className="text-sm text-gray-600">{document.file_path?.split('/').pop() || 'N/A'}</p>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="gap-2"
-            onClick={() => openRejectDialog(document.document_id, 'document')}
-            disabled={isApproving || isRejecting}
-          >
-            {isRejecting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Đang xử lý...
-              </>
-            ) : (
-              <>
-                <X className="h-4 w-4" />
-                Từ Chối
-              </>
-            )}
-          </Button>
-          <Button 
-            size="sm"
-            className="gap-2 bg-[#EB5A0D] hover:bg-[#d14f0a]"
-            onClick={() => handleApprove(document.document_id, 'document')}
-            disabled={isApproving || isRejecting}
-          >
-            {isApproving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Đang duyệt...
-              </>
-            ) : (
-              <>
-                <Check className="h-4 w-4" />
-                Phê Duyệt
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    );
   };
 
   const toggleAudience = (value) => {
@@ -454,7 +361,7 @@ export function LeaderKnowledgeBase() {
         </TabsList>
 
         <TabsContent value="qa" className="mt-0">
-          <ScrollArea className="h-[calc(100vh-200px)]">
+          <div className="h-[calc(100vh-300px)] overflow-y-auto pr-1">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
@@ -468,7 +375,14 @@ export function LeaderKnowledgeBase() {
             ) : (
               <div className="space-y-4">
                 {paginatedQuestions.map(question => (
-                  <TrainingQuestionCard key={question.question_id} question={question} />
+                  <TrainingQuestionCard
+                    key={question.question_id}
+                    question={question}
+                    approvingId={approvingId}
+                    rejectingId={rejectingId}
+                    onApprove={handleApprove}
+                    onReject={openRejectDialog}
+                  />
                 ))}
                 {trainingQuestions.length > 0 && (
                   <Pagination
@@ -479,11 +393,11 @@ export function LeaderKnowledgeBase() {
                 )}
               </div>
             )}
-          </ScrollArea>
+          </div>
         </TabsContent>
 
         <TabsContent value="documents" className="mt-0">
-          <ScrollArea className="h-[calc(100vh-200px)]">
+          <div className="h-[calc(100vh-300px)] overflow-y-auto pr-1">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
@@ -497,7 +411,14 @@ export function LeaderKnowledgeBase() {
             ) : (
               <div className="space-y-4">
                 {paginatedDocuments.map(document => (
-                  <DocumentCard key={document.document_id} document={document} />
+                  <DocumentCard
+                    key={document.document_id}
+                    document={document}
+                    approvingId={approvingId}
+                    rejectingId={rejectingId}
+                    onApprove={handleApprove}
+                    onReject={openRejectDialog}
+                  />
                 ))}
                 {documents.length > 0 && (
                   <Pagination
@@ -508,7 +429,7 @@ export function LeaderKnowledgeBase() {
                 )}
               </div>
             )}
-          </ScrollArea>
+          </div>
         </TabsContent>
       </Tabs>
 
