@@ -1,4 +1,4 @@
-import { Trash2, Tag, Ban } from 'lucide-react';
+import { Trash2, Tag, Ban, FileText, Eye } from 'lucide-react';
 import { Button } from '../../ui/system_users/button';
 import { Card } from '../../ui/system_users/card';
 import { Intent } from '../../../utils/fastapi-client';
@@ -8,10 +8,12 @@ interface IntentListProps {
   onEdit: (intent: Intent) => void;
   onDelete: (intent: Intent) => void;
   onClick: (intent: Intent) => void;
+  onViewDetail?: (intent: Intent) => void;
   isLeader: boolean;
+  documentCounts?: Record<number, number>;
 }
 
-export function IntentList({ intents, onEdit, onDelete, onClick, isLeader }: IntentListProps) {
+export function IntentList({ intents, onEdit, onDelete, onClick, onViewDetail, isLeader, documentCounts = {} }: IntentListProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {intents.map((intent) => (
@@ -51,15 +53,30 @@ export function IntentList({ intents, onEdit, onDelete, onClick, isLeader }: Int
             </p>
           )}
 
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>ID: {intent.intent_id}</span>
-            {}
-            {intent.is_deleted && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded font-medium">
+          <div className="flex items-center justify-between">
+            {intent.is_deleted ? (
+              <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">
                 <Ban className="h-3 w-3" />
                 Vô Hiệu Hóa
               </div>
+            ) : (
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <FileText className="h-3.5 w-3.5" />
+                <span>{documentCounts[intent.intent_id] ?? 0} tài liệu</span>
+              </div>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs h-7 border-[#EB5A0D] text-[#EB5A0D] hover:bg-orange-50"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetail ? onViewDetail(intent) : onClick(intent);
+              }}
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Xem chi tiết
+            </Button>
           </div>
         </Card>
       ))}

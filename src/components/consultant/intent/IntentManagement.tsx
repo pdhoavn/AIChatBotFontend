@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Tag } from 'lucide-react';
 import { ScrollArea } from '../../ui/system_users/scroll-area';
 import { Input } from '../../ui/system_users/input';
 import { Button } from '../../ui/system_users/button';
 import { useAuth } from '../../../contexts/Auth';
-import { intentAPI } from '../../../services/fastapi';
+import { intentAPI, knowledgeAPI } from '../../../services/fastapi';
 import { Intent } from '../../../utils/fastapi-client';
 import { toast } from 'react-toastify';
 import { IntentList } from './IntentList';
@@ -25,14 +26,34 @@ export function IntentManagement() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [documentCounts, setDocumentCounts] = useState<Record<number, number>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
   const isLeader = isConsultantLeader();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchIntents();
+    fetchDocumentCounts();
   }, []);
+
+  const fetchDocumentCounts = async () => {
+    try {
+      const docs = await knowledgeAPI.getDocuments();
+      const counts: Record<number, number> = {};
+      (docs || []).forEach((d: any) => {
+        if (d.intent_id) counts[d.intent_id] = (counts[d.intent_id] || 0) + 1;
+      });
+      setDocumentCounts(counts);
+    } catch {}
+  };
+
+  const handleViewDetail = (intent: Intent) => {
+    navigate('/consultant/trainingdata', {
+      state: { tab: 'documents', categoryFilter: intent.intent_id.toString() },
+    });
+  };
 
   const fetchIntents = async () => {
     setLoading(true);
@@ -240,7 +261,9 @@ export function IntentManagement() {
                   onEdit={openEditDialog}
                   onDelete={openDeleteDialog}
                   onClick={openEditDialog}
+                  onViewDetail={handleViewDetail}
                   isLeader={isLeader}
+                  documentCounts={documentCounts}
                 />
                 {filteredIntents.length > 0 && (
                   <Pagination
