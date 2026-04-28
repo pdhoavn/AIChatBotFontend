@@ -129,7 +129,7 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
 
     try {
       setLoading(true);
-      const resolvedIntentId = intentId ?? intents.find(i => i.intent_name === 'N/A')?.intent_id;
+      const resolvedIntentId = intentId ?? 0;
       await onSubmit({ question, answer, intent_id: resolvedIntentId, target_audiences: audiences.map(a => AUDIENCE_VALUE_MAP[a]) });
       onClose();
     } catch (error) {
