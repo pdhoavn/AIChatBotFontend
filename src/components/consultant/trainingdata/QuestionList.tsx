@@ -101,7 +101,7 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
 
           {question.created_at && (
             <p className="text-xs text-gray-400 mt-2">
-              {new Date(question.created_at).toLocaleDateString('vi-VN')}
+              {new Date(question.created_at as string).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
             </p>
           )}
         </div>

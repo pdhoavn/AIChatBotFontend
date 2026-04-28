@@ -90,7 +90,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
       formData.append('file', file);
       formData.append('title', title);
 
-      const resolvedIntentId = intentId ?? intents.find(i => i.intent_name === 'N/A')?.intent_id;
+      const resolvedIntentId = intentId ?? 0;
       await onSubmit(formData, resolvedIntentId, audiences.map(a => AUDIENCE_VALUE_MAP[a]));
       onClose();
     } catch (error) {

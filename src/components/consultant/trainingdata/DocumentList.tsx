@@ -106,7 +106,7 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
 
               {doc.created_at && (
                 <p className="text-xs text-gray-400 mt-1">
-                  {new Date(doc.created_at).toLocaleDateString('vi-VN')}
+                  {new Date(doc.created_at as string).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                 </p>
               )}
             </div>
