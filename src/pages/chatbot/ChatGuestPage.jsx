@@ -422,7 +422,36 @@ export default function ChatGuestPage() {
     setSelectedIntent(intent);
   };
 
-  const handleMicClick = () => {
+  const requestMicrophoneAccess = async () => {
+    if (!window.isSecureContext) {
+      alert("Microphone chỉ hoạt động trên HTTPS hoặc localhost.");
+      return false;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      alert("Trình duyệt của bạn không hỗ trợ truy cập microphone.");
+      return false;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+      return true;
+    } catch (error) {
+      if (error?.name === "NotAllowedError" || error?.name === "PermissionDeniedError") {
+        alert("Bạn đã chặn quyền microphone. Vui lòng mở cài đặt trình duyệt để cấp lại quyền.");
+        return false;
+      }
+      if (error?.name === "NotFoundError" || error?.name === "DevicesNotFoundError") {
+        alert("Không tìm thấy microphone trên thiết bị.");
+        return false;
+      }
+      alert("Không thể truy cập microphone. Vui lòng kiểm tra quyền trình duyệt.");
+      return false;
+    }
+  };
+
+  const handleMicClick = async () => {
     if (!isSpeechSupported) {
       alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.");
       return;
@@ -431,6 +460,9 @@ export default function ChatGuestPage() {
       alert("Vui lòng cho phép truy cập microphone trong trình duyệt.");
       return;
     }
+    const hasMicrophoneAccess = await requestMicrophoneAccess();
+    if (!hasMicrophoneAccess) return;
+
     isStartingRef.current = true;
     inputBeforeMicRef.current = input;
     setInput("");
