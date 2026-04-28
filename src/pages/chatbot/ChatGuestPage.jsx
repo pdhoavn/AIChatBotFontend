@@ -18,10 +18,38 @@ const GUEST_SESSION_KEY = "guest_session_id_v1";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const SAFARI_WS_CONNECT_DELAY_MS = 500;
+const SAFARI_WS_RETRY_DELAY_MS = 1200;
 
 function generateNumericId() {
   const max = 2_000_000_000;
   return Math.floor(Math.random() * max);
+}
+
+function isSafariBrowser() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return /safari/i.test(ua) && !/chrome|chromium|crios|fxios|edg/i.test(ua);
+}
+
+function buildWebSocketUrl(baseUrl, path) {
+  const fallbackOrigin =
+    typeof window !== "undefined" ? window.location.origin : "http://localhost";
+  const url = new URL(baseUrl || fallbackOrigin, fallbackOrigin);
+  const isSecurePage =
+    typeof window !== "undefined" && window.location.protocol === "https:";
+  const isLoopback = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(
+    url.hostname
+  );
+
+  url.protocol = url.protocol === "https:" || (isSecurePage && !isLoopback)
+    ? "wss:"
+    : "ws:";
+  url.pathname = `${url.pathname.replace(/\/$/, "")}${path}`;
+  url.search = "";
+  url.hash = "";
+
+  return url.toString();
 }
 
 function normalizeWsSources(sources) {
@@ -136,6 +164,8 @@ export default function ChatGuestPage() {
   const [greeting, setGreeting] = useState(null);
 
   const [audiences, setAudiences] = useState([]);
+  const [audiencesLoaded, setAudiencesLoaded] = useState(false);
+  const [wsAttempt, setWsAttempt] = useState(0);
   const [intents, setIntents] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [selectedAudience, setSelectedAudience] = useState(null);
@@ -197,12 +227,27 @@ export default function ChatGuestPage() {
 
   // Fetch audiences on mount; intents loaded per-audience via /knowledge/intentbyid
   useEffect(() => {
+    let isActive = true;
+
     audienceAPI
       .getAudiences()
-      .then((data) => setAudiences(data || []))
+      .then((data) => {
+        if (!isActive) return;
+        setAudiences(data || []);
+      })
       .catch(() => {
+        if (!isActive) return;
         toast.error("Không thể tải danh sách đối tượng.");
+      })
+      .finally(() => {
+        if (isActive) {
+          setAudiencesLoaded(true);
+        }
       });
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -278,95 +323,136 @@ export default function ChatGuestPage() {
   }, [messages, partial]);
 
   useEffect(() => {
-    const wsUrl = API_BASE_URL.replace(/^http/, "ws") + "/chat/ws/chat";
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+    const isSafari = isSafariBrowser();
+    let isUnmounted = false;
+    let connectTimer = null;
+    let retryTimer = null;
+    let ws = null;
+    let hasOpened = false;
+    let retryScheduled = false;
 
-    ws.onopen = () => {
-      if (wsRef.current !== ws) return;
-      setWsReady(true);
-      setHasWelcomed(false);
-      prefillSentRef.current = false;
-      isStoppedRef.current = false;
-      ws.send(JSON.stringify({}));
-    };
+    if (isSafari && !audiencesLoaded) {
+      return;
+    }
 
-    ws.onmessage = (e) => {
-      if (wsRef.current !== ws) return;
-      if (isStoppedRef.current) return;
-      try {
-        const data = JSON.parse(e.data);
-        switch (data.event) {
-          case "chunk":
-            setPartial((prev) => {
-              const next = prev + (data.content ?? "");
-              partialRef.current = next;
-              return next;
-            });
-            break;
-          case "go":
-            if (typeof data.confidence === "number") {
-              // keep for parity with backend flow; final value is attached on done
-            }
-            setHasWelcomed(true);
-            break;
-          case "done": {
-            if (isStoppedRef.current) return;
-            const finalText = (partialRef.current || "").trim();
-            const confidence =
-              typeof data.confidence === "number" ? data.confidence : null;
-            const normalizedSources = normalizeWsSources(data.sources);
-
-            if (finalText) {
-              setMessages((prev) => {
-                if (prev.length === 0) {
-                  setGreeting(finalText);
-                  return prev;
-                }
-                return [
-                  ...prev,
-                  {
-                    sender: "bot",
-                    text: finalText,
-                    confidence,
-                    sources: normalizedSources,
-                  },
-                ];
-              });
-            }
-
-            partialRef.current = "";
-            setPartial("");
-            setIsLoading(false);
-            break;
-          }
-          case "error":
-            setIsLoading(false);
-            break;
-          default:
-            break;
-        }
-      } catch {
-        // ignore non-JSON
+    const scheduleRetry = () => {
+      if (!isSafari || wsAttempt > 0 || hasOpened || retryScheduled || isUnmounted) {
+        return;
       }
+      retryScheduled = true;
+      retryTimer = window.setTimeout(() => {
+        if (!isUnmounted) {
+          setWsAttempt((attempt) => attempt + 1);
+        }
+      }, SAFARI_WS_RETRY_DELAY_MS);
     };
 
-    ws.onclose = () => {
-      if (wsRef.current !== ws) return;
-      setWsReady(false);
+    const connect = () => {
+      if (isUnmounted) return;
+
+      const wsUrl = buildWebSocketUrl(API_BASE_URL, "/chat/ws/chat");
+      ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        if (wsRef.current !== ws) return;
+        hasOpened = true;
+        setWsReady(true);
+        setHasWelcomed(false);
+        prefillSentRef.current = false;
+        isStoppedRef.current = false;
+        ws.send(JSON.stringify({}));
+      };
+
+      ws.onmessage = (e) => {
+        if (wsRef.current !== ws) return;
+        if (isStoppedRef.current) return;
+        try {
+          const data = JSON.parse(e.data);
+          switch (data.event) {
+            case "chunk":
+              setPartial((prev) => {
+                const next = prev + (data.content ?? "");
+                partialRef.current = next;
+                return next;
+              });
+              break;
+            case "go":
+              if (typeof data.confidence === "number") {
+                // keep for parity with backend flow; final value is attached on done
+              }
+              setHasWelcomed(true);
+              break;
+            case "done": {
+              if (isStoppedRef.current) return;
+              const finalText = (partialRef.current || "").trim();
+              const confidence =
+                typeof data.confidence === "number" ? data.confidence : null;
+              const normalizedSources = normalizeWsSources(data.sources);
+
+              if (finalText) {
+                setMessages((prev) => {
+                  if (prev.length === 0) {
+                    setGreeting(finalText);
+                    return prev;
+                  }
+                  return [
+                    ...prev,
+                    {
+                      sender: "bot",
+                      text: finalText,
+                      confidence,
+                      sources: normalizedSources,
+                    },
+                  ];
+                });
+              }
+
+              partialRef.current = "";
+              setPartial("");
+              setIsLoading(false);
+              break;
+            }
+            case "error":
+              setIsLoading(false);
+              break;
+            default:
+              break;
+          }
+        } catch {
+          // ignore non-JSON
+        }
+      };
+
+      ws.onclose = () => {
+        if (wsRef.current !== ws) return;
+        setWsReady(false);
+        scheduleRetry();
+      };
+      ws.onerror = () => {
+        if (wsRef.current !== ws) return;
+        setWsReady(false);
+        scheduleRetry();
+      };
     };
-    ws.onerror = () => {
-      if (wsRef.current !== ws) return;
-      setWsReady(false);
-    };
+
+    connectTimer = window.setTimeout(
+      connect,
+      isSafari ? SAFARI_WS_CONNECT_DELAY_MS : 0
+    );
 
     return () => {
+      isUnmounted = true;
+      if (connectTimer) window.clearTimeout(connectTimer);
+      if (retryTimer) window.clearTimeout(retryTimer);
       if (wsRef.current === ws) {
         wsRef.current = null;
       }
-      ws.close();
+      if (ws) {
+        ws.close();
+      }
     };
-  }, [guestId, sessionId]);
+  }, [audiencesLoaded, guestId, sessionId, wsAttempt]);
 
   useEffect(() => {
     if (!wsReady || !prefillMessage || !hasWelcomed) return;
