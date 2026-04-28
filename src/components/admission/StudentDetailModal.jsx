@@ -135,7 +135,7 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
       <div className="relative w-full h-full max-w-6xl max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col">
         
         {}
-        <div className="flex-shrink-0 bg-[#EB5A0D] text-white px-6 py-4">
+        <div className="flex-shrink-0 bg-[#facb01] text-white px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
@@ -160,8 +160,8 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
           {loading && (
             <div className="flex flex-col items-center justify-center h-full p-12">
               <div className="relative">
-                <div className="w-16 h-16 border-6 border-orange-200 border-t-[#EB5A0D] rounded-full animate-spin"></div>
-                <User className="absolute inset-0 m-auto h-8 w-8 text-[#EB5A0D]" />
+                <div className="w-16 h-16 border-6 border-yellow-200 border-t-[#facb01] rounded-full animate-spin"></div>
+                <User className="absolute inset-0 m-auto h-8 w-8 text-[#facb01]" />
               </div>
               <h3 className="mt-4 text-lg font-semibold text-gray-800">Đang tải thông tin...</h3>
               <p className="mt-1 text-sm text-gray-500">Vui lòng đợi trong giây lát</p>
@@ -189,7 +189,7 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
           {student && !loading && !error && (
             <div className="p-6 space-y-4">
               {}
-              <div className="bg-white rounded-xl border-2 border-orange-100 shadow-lg p-5">
+              <div className="bg-white rounded-xl border-2 border-yellow-100 shadow-lg p-5">
                 <div className="flex items-start gap-6">
                   {}
                   <div className="flex-1">
@@ -214,30 +214,30 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
 
                     {}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                      <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-orange-100">
-                        <div className="p-1.5 bg-orange-50 rounded-lg">
-                          <Mail className="h-4 w-4 text-[#EB5A0D]" />
+                      <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-yellow-100">
+                        <div className="p-1.5 bg-yellow-50 rounded-lg">
+                          <Mail className="h-4 w-4 text-[#facb01]" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">Email</p>
                           <a 
                             href={`mailto:${student.email}`}
-                            className="text-xs font-medium text-[#EB5A0D] hover:text-orange-700 truncate block"
+                            className="text-xs font-medium text-[#facb01] hover:text-yellow-700 truncate block"
                           >
                             {student.email || 'Chưa cập nhật'}
                           </a>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-orange-100">
-                        <div className="p-1.5 bg-orange-50 rounded-lg">
-                          <Phone className="h-4 w-4 text-[#EB5A0D]" />
+                      <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-yellow-100">
+                        <div className="p-1.5 bg-yellow-50 rounded-lg">
+                          <Phone className="h-4 w-4 text-[#facb01]" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">Số điện thoại</p>
                           <a 
                             href={`tel:${student.phone_number}`}
-                            className="text-xs font-medium text-[#EB5A0D] hover:text-orange-700 truncate block"
+                            className="text-xs font-medium text-[#facb01] hover:text-yellow-700 truncate block"
                           >
                             {student.phone_number || 'Chưa cập nhật'}
                           </a>
@@ -245,9 +245,9 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
                       </div>
 
                       {student.created_at && (
-                        <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-orange-100">
-                          <div className="p-1.5 bg-orange-50 rounded-lg">
-                            <Calendar className="h-4 w-4 text-[#EB5A0D]" />
+                        <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-yellow-100">
+                          <div className="p-1.5 bg-yellow-50 rounded-lg">
+                            <Calendar className="h-4 w-4 text-[#facb01]" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">Ngày đăng ký</p>
@@ -267,8 +267,8 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
               </div>
 
               {}
-              <div className="bg-white rounded-xl border-2 border-orange-100 shadow-lg overflow-hidden">
-                <div className="bg-[#EB5A0D] px-5 py-3.5 text-white">
+              <div className="bg-white rounded-xl border-2 border-yellow-100 shadow-lg overflow-hidden">
+                <div className="bg-[#facb01] px-5 py-3.5 text-white">
                   <div className="flex items-center gap-2.5">
                     <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
                       <Brain className="h-5 w-5" />
@@ -283,8 +283,8 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
                   {riasecLoading && (
                     <div className="flex flex-col items-center justify-center py-12">
                       <div className="relative">
-                        <div className="w-12 h-12 border-6 border-orange-200 border-t-[#EB5A0D] rounded-full animate-spin"></div>
-                        <Brain className="absolute inset-0 m-auto h-6 w-6 text-[#EB5A0D]" />
+                        <div className="w-12 h-12 border-6 border-yellow-200 border-t-[#facb01] rounded-full animate-spin"></div>
+                        <Brain className="absolute inset-0 m-auto h-6 w-6 text-[#facb01]" />
                       </div>
                       <p className="mt-3 text-sm text-gray-600 font-medium">Đang tải kết quả RIASEC...</p>
                     </div>
@@ -292,8 +292,8 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
 
                   {!riasecLoading && riasecResults.length === 0 && (
                     <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Brain className="h-8 w-8 text-orange-400" />
+                      <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Brain className="h-8 w-8 text-yellow-400" />
                       </div>
                       <h4 className="text-lg font-bold text-gray-900 mb-1.5">Chưa có kết quả</h4>
                       <p className="text-sm text-gray-600">Học sinh chưa thực hiện bài trắc nghiệm RIASEC</p>
@@ -307,11 +307,11 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
                         const isExpanded = expandedResults[uniqueKey] || false;
                         
                         return (
-                          <div key={uniqueKey} className="border-2 border-orange-100 rounded-lg overflow-hidden">
+                          <div key={uniqueKey} className="border-2 border-yellow-100 rounded-lg overflow-hidden">
                             {}
                             <button
                               onClick={() => toggleExpand(uniqueKey)}
-                              className="w-full bg-orange-50 px-4 py-2.5 border-b-2 border-orange-100 hover:bg-orange-100 transition-colors"
+                              className="w-full bg-yellow-50 px-4 py-2.5 border-b-2 border-yellow-100 hover:bg-yellow-100 transition-colors"
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex flex-col items-start gap-1">
@@ -338,7 +338,7 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
                                 {}
                                 <div className="space-y-4">
                                   <div className="flex items-center gap-1.5 mb-3">
-                                    <TrendingUp className="h-4 w-4 text-[#EB5A0D]" />
+                                    <TrendingUp className="h-4 w-4 text-[#facb01]" />
                                     <h5 className="text-sm font-bold text-gray-900">Biểu Đồ Điểm Số Chi Tiết</h5>
                                   </div>
 
@@ -367,9 +367,9 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
                                     { 
                                       key: 'score_social', 
                                       label: 'Xã Hội (Social)', 
-                                      color: 'from-orange-500 to-amber-600',
-                                      bg: 'bg-orange-50',
-                                      border: 'border-orange-200'
+                                      color: 'from-yellow-500 to-amber-600',
+                                      bg: 'bg-yellow-50',
+                                      border: 'border-yellow-200'
                                     },
                                     { 
                                       key: 'score_enterprising', 
@@ -428,8 +428,8 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
               </div>
 
               {}
-              <div className="bg-white rounded-xl border-2 border-orange-100 shadow-lg overflow-hidden">
-                <div className="bg-[#EB5A0D] px-5 py-3.5 text-white">
+              <div className="bg-white rounded-xl border-2 border-yellow-100 shadow-lg overflow-hidden">
+                <div className="bg-[#facb01] px-5 py-3.5 text-white">
                   <div className="flex items-center gap-2.5">
                     <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
                       <BookOpen className="h-5 w-5" />
@@ -444,8 +444,8 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
                   {scoresLoading && (
                     <div className="flex flex-col items-center justify-center py-12">
                       <div className="relative">
-                        <div className="w-12 h-12 border-6 border-orange-200 border-t-[#EB5A0D] rounded-full animate-spin"></div>
-                        <BookOpen className="absolute inset-0 m-auto h-6 w-6 text-[#EB5A0D]" />
+                        <div className="w-12 h-12 border-6 border-yellow-200 border-t-[#facb01] rounded-full animate-spin"></div>
+                        <BookOpen className="absolute inset-0 m-auto h-6 w-6 text-[#facb01]" />
                       </div>
                       <p className="mt-3 text-sm text-gray-600 font-medium">Đang tải kết quả học tập...</p>
                     </div>
@@ -453,8 +453,8 @@ export function StudentDetailModal({ isOpen, onClose, userId }) {
 
                   {!scoresLoading && !academicScores && (
                     <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <BookOpen className="h-8 w-8 text-orange-400" />
+                      <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <BookOpen className="h-8 w-8 text-yellow-400" />
                       </div>
                       <h4 className="text-lg font-bold text-gray-900 mb-1.5">Chưa có dữ liệu</h4>
                       <p className="text-sm text-gray-600">Học sinh chưa cập nhật kết quả học tập</p>

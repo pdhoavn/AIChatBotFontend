@@ -219,14 +219,14 @@ export default function AllArticles({ onCreate, onNavigateToEditor, onNavigateTo
         ) : onNavigateToEditor ? (
           <button
             onClick={onNavigateToEditor}
-            className="px-3 py-2 rounded-md text-white text-sm transition-colors bg-[#EB5A0D] hover:bg-[#d14f0a]"
+            className="px-3 py-2 rounded-md text-white text-sm transition-colors bg-[#facb01] hover:bg-[#d14f0a]"
           >
             + Tạo Bài Viết
           </button>
         ) : (
           <a
             href="/content?tab=editor"
-            className="px-3 py-2 rounded-md text-white text-sm transition-colors bg-[#EB5A0D] hover:bg-[#d14f0a]"
+            className="px-3 py-2 rounded-md text-white text-sm transition-colors bg-[#facb01] hover:bg-[#d14f0a]"
           >
             + Tạo Bài Viết
           </a>

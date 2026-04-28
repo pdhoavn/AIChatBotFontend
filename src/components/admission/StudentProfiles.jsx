@@ -62,7 +62,7 @@ export function StudentProfile({ studentId, onBack }) {
       approved: { label: 'Đã Duyệt', variant: 'default', icon: CheckCircle2, color: 'bg-green-500' },
       rejected: { label: 'Từ Chối', variant: 'destructive', icon: XCircle, color: 'bg-red-500' },
       reviewing: { label: 'Đang Xét', variant: 'secondary', icon: Clock, color: 'bg-blue-500' },
-      pending: { label: 'Chờ Xử Lý', variant: 'outline', icon: Clock, color: 'bg-orange-500' },
+      pending: { label: 'Chờ Xử Lý', variant: 'outline', icon: Clock, color: 'bg-yellow-500' },
     };
     return configs[status];
   };

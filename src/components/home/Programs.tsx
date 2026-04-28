@@ -125,7 +125,7 @@ const programs = [
     description: 'Kết hợp công nghệ và kinh doanh để xây dựng các mô hình kinh doanh hiện đại',
     duration: '4 năm',
     opportunities: 'Digital Marketer, Business Analyst, Product Manager',
-    gradient: 'from-orange-500 to-orange-600',
+    gradient: 'from-yellow-500 to-yellow-600',
     details: {
       intro:
         'Ngành Kinh doanh số giúp bạn hiểu cách vận hành doanh nghiệp trong kỷ nguyên số, biết cách ứng dụng công nghệ, dữ liệu và nền tảng số để tạo ra giá trị kinh doanh.',
@@ -227,7 +227,7 @@ function ProgramDetailModal({ program, onClose }) {
               <ul className="space-y-2 text-gray-700 text-sm">
                 {program.details.highlights.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-orange-500" />
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-yellow-500" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -241,7 +241,7 @@ function ProgramDetailModal({ program, onClose }) {
               <ul className="space-y-2 text-gray-700 text-sm">
                 {program.details.suitableFor.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-orange-500" />
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-yellow-500" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -256,7 +256,7 @@ function ProgramDetailModal({ program, onClose }) {
             <ul className="space-y-2 text-gray-700 text-sm">
               {program.details.coreSubjects.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-orange-500" />
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-yellow-500" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -309,7 +309,7 @@ export default function Programs() {
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Các{' '}
-            <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
               Ngành học
             </span>
           </h2>
@@ -365,7 +365,7 @@ export default function Programs() {
 
         {/* Additional Info */}
         <div className="mt-20 text-center">
-          <div className="bg-gradient-to-r from-gray-50 to-orange-50 rounded-3xl p-12 border border-orange-100">
+          <div className="bg-gradient-to-r from-gray-50 to-yellow-50 rounded-3xl p-12 border border-yellow-100">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Chưa chắc chắn về ngành học?
             </h3>
@@ -375,7 +375,7 @@ export default function Programs() {
             </p>
             <button 
             onClick={handleScrollToAdmissions}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105">
+            className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105">
               Đặt lịch tư vấn miễn phí
             </button>
           </div>

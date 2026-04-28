@@ -79,7 +79,7 @@ export function KnowledgeBaseManagement() {
         <div className="p-4 border-b border-gray-200 space-y-4">
           <div className="flex items-center justify-between">
             <h2>Cơ Sở Tri Thức</h2>
-            <Button size="sm" className="bg-[#EB5A0D] hover:bg-[#d14f0a]">
+            <Button size="sm" className="bg-[#facb01] hover:bg-[#d14f0a]">
               <Plus className="h-4 w-4 mr-1" />
               Thêm Mới
             </Button>

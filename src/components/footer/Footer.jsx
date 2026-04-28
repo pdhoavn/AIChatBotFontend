@@ -18,7 +18,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center space-x-3 mb-6">
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-xl">
+              <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 p-2 rounded-xl">
                 <GraduationCap className="h-8 w-8 text-white" />
               </div>
               <div>
@@ -30,16 +30,16 @@ export default function Footer() {
               Đại học công nghệ hàng đầu Việt Nam, đào tạo nguồn nhân lực chất lượng cao cho kỷ nguyên số.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="bg-white/10 hover:bg-orange-600 p-2.5 rounded-lg transition-all duration-300">
+              <a href="#" className="bg-white/10 hover:bg-yellow-600 p-2.5 rounded-lg transition-all duration-300">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-white/10 hover:bg-orange-600 p-2.5 rounded-lg transition-all duration-300">
+              <a href="#" className="bg-white/10 hover:bg-yellow-600 p-2.5 rounded-lg transition-all duration-300">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-white/10 hover:bg-orange-600 p-2.5 rounded-lg transition-all duration-300">
+              <a href="#" className="bg-white/10 hover:bg-yellow-600 p-2.5 rounded-lg transition-all duration-300">
                 <Youtube className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-white/10 hover:bg-orange-600 p-2.5 rounded-lg transition-all duration-300">
+              <a href="#" className="bg-white/10 hover:bg-yellow-600 p-2.5 rounded-lg transition-all duration-300">
                 <Linkedin className="h-5 w-5" />
               </a>
             </div>
@@ -50,27 +50,27 @@ export default function Footer() {
             <h4 className="text-lg font-bold mb-6">Liên kết nhanh</h4>
             <ul className="space-y-3">
               <li>
-                <button onClick={() => scrollToSection('home')} className="text-gray-400 hover:text-orange-400 transition-colors">
+                <button onClick={() => scrollToSection('home')} className="text-gray-400 hover:text-yellow-400 transition-colors">
                   Trang chủ
                 </button>
               </li>
               <li>
-                <button onClick={() => scrollToSection('about')} className="text-gray-400 hover:text-orange-400 transition-colors">
+                <button onClick={() => scrollToSection('about')} className="text-gray-400 hover:text-yellow-400 transition-colors">
                   Giới thiệu
                 </button>
               </li>
               <li>
-                <button onClick={() => scrollToSection('programs')} className="text-gray-400 hover:text-orange-400 transition-colors">
+                <button onClick={() => scrollToSection('programs')} className="text-gray-400 hover:text-yellow-400 transition-colors">
                   Ngành học
                 </button>
               </li>
               <li>
-                <button onClick={() => scrollToSection('admissions')} className="text-gray-400 hover:text-orange-400 transition-colors">
+                <button onClick={() => scrollToSection('admissions')} className="text-gray-400 hover:text-yellow-400 transition-colors">
                   Tuyển sinh
                 </button>
               </li>
               <li>
-                <button onClick={() => scrollToSection('contact')} className="text-gray-400 hover:text-orange-400 transition-colors">
+                <button onClick={() => scrollToSection('contact')} className="text-gray-400 hover:text-yellow-400 transition-colors">
                   Liên hệ
                 </button>
               </li>
@@ -82,27 +82,27 @@ export default function Footer() {
             <h4 className="text-lg font-bold mb-6">Ngành học</h4>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors">
                   Kỹ thuật phần mềm
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors">
                   Thiết kế đồ họa
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors">
                   Trí tuệ nhân tạo
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors">
                   An ninh mạng
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">
+                <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors">
                   Kinh doanh số
                 </a>
               </li>
@@ -115,13 +115,13 @@ export default function Footer() {
             <ul className="space-y-3 text-gray-400">
               <li>
                 <span className="font-semibold text-white">Hotline:</span><br />
-                <a href="tel:19006612" className="hover:text-orange-400 transition-colors">
+                <a href="tel:19006612" className="hover:text-yellow-400 transition-colors">
                   1900 6612
                 </a>
               </li>
               <li>
                 <span className="font-semibold text-white">Email:</span><br />
-                <a href="mailto:tuyensinh@utc2.edu.vn" className="hover:text-orange-400 transition-colors">
+                <a href="mailto:tuyensinh@utc2.edu.vn" className="hover:text-yellow-400 transition-colors">
                   tuyensinh@utc2.edu.vn
                 </a>
               </li>
@@ -141,13 +141,13 @@ export default function Footer() {
               © 2025 ĐH Giao thông Vận tải. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
-              <a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors">
                 Chính sách bảo mật
               </a>
-              <a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors">
                 Điều khoản sử dụng
               </a>
-              <a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-yellow-400 transition-colors">
                 Sitemap
               </a>
             </div>

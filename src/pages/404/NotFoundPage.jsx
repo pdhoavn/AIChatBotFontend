@@ -21,11 +21,11 @@ export default function NotFoundPage() {
 
       <main className="min-h-[70vh] flex items-center justify-center bg-gradient-to-b from-gray-50 to-white px-4">
         <div className="max-w-xl w-full text-center">
-          <div className="inline-flex items-center justify-center rounded-full bg-orange-50 px-4 py-1 mb-4 border border-orange-100">
+          <div className="inline-flex items-center justify-center rounded-full bg-yellow-50 px-4 py-1 mb-4 border border-yellow-100">
           </div>
-          <h1 className="text-6xl md:text-7xl font-extrabold text-[#EB5A0D] tracking-tight mb-3">
+          <h1 className="text-6xl md:text-7xl font-extrabold text-[#facb01] tracking-tight mb-3">
             4
-            <span className="text-[#EB5A0D]">0</span>
+            <span className="text-[#facb01]">0</span>
             4
           </h1>
 
@@ -46,7 +46,7 @@ export default function NotFoundPage() {
 
             <Link
               to="/"
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#EB5A0D] text-white text-sm font-semibold hover:bg-[#d24d07] shadow-sm hover:shadow-md transition"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#facb01] text-white text-sm font-semibold hover:bg-[#e0b500] shadow-sm hover:shadow-md transition"
             >
               Về trang chủ
             </Link>

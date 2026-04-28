@@ -130,7 +130,7 @@ const handleLogin = async (event) => {
   <div className="text-center text-sm mt-4">
     <span>Chưa có tài khoản? <Link
       to="/#admissions"
-      className="text-[#EB5A0D] hover:underline font-medium ml-1"
+      className="text-[#facb01] hover:underline font-medium ml-1"
     >
       Đăng ký ngay
     </Link> </span>

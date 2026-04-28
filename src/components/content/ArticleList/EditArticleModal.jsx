@@ -265,7 +265,7 @@ export default function EditArticleModal({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-[#EB5A0D] text-white rounded-lg hover:bg-[#d14f0a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-[#facb01] text-white rounded-lg hover:bg-[#d14f0a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Đang lưu...' : 'Lưu Thay Đổi'}
             </button>

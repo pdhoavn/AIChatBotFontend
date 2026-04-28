@@ -23,10 +23,10 @@ export function ChatHeader({
         >
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-semibold group-hover:text-[#EB5A0D] transition-colors">
+              <h2 className="font-semibold group-hover:text-[#facb01] transition-colors">
                 {customerInfo?.name || currentSession?.customer_name || 'Student'}
               </h2>
-              <Info className="h-4 w-4 text-gray-400 group-hover:text-[#EB5A0D] transition-colors" />
+              <Info className="h-4 w-4 text-gray-400 group-hover:text-[#facb01] transition-colors" />
             </div>
             <div className="flex items-center space-x-2">
               <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>

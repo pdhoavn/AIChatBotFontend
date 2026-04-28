@@ -49,7 +49,7 @@ export default function ArticleDetailsModal({
             {article && !loading && !error && (
               <button
                 onClick={() => setPreviewMode(!previewMode)}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-[#EB5A0D] text-white rounded-lg hover:bg-[#d14f0a] transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm bg-[#facb01] text-white rounded-lg hover:bg-[#d14f0a] transition-colors"
               >
                 <Eye className="h-4 w-4" />
                 {previewMode ? 'Chi Tiết' : 'Xem Thử'}
@@ -78,7 +78,7 @@ export default function ArticleDetailsModal({
               <div className="text-red-600 mb-4">❌ {error}</div>
               <button
                 onClick={onRetry}
-                className="px-4 py-2 bg-[#EB5A0D] text-white rounded-lg hover:bg-[#d14f0a]"
+                className="px-4 py-2 bg-[#facb01] text-white rounded-lg hover:bg-[#d14f0a]"
               >
                 Thử Lại
               </button>
@@ -124,7 +124,7 @@ export default function ArticleDetailsModal({
                         href={article.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#EB5A0D] underline break-all"
+                        className="text-[#facb01] underline break-all"
                       >
                         {article.url}
                       </a>

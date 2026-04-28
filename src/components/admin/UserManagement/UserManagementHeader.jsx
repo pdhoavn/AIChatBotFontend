@@ -11,7 +11,7 @@ export function UserManagementHeader({ onAddUser }) {
       </div>
       <Dialog>
         <DialogTrigger asChild>
-          <Button onClick={onAddUser} className="bg-[#EB5A0D] hover:bg-[#d14f0a] text-white">
+          <Button onClick={onAddUser} className="bg-[#facb01] hover:bg-[#d14f0a] text-white">
             <Plus className="h-4 w-4 mr-2" />Thêm Người Dùng</Button>
         </DialogTrigger>
       </Dialog>

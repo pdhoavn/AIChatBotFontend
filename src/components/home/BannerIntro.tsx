@@ -14,7 +14,7 @@ export default function BannerIntro() {
   };
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-orange-900/20 to-slate-900">
+    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-yellow-900/20 to-slate-900">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
@@ -26,20 +26,20 @@ export default function BannerIntro() {
         <div className="space-y-8 animate-fade-in">
           {/* Badge */}
           <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2 text-white">
-            <TrendingUp className="h-4 w-4 text-orange-400" />
+            <TrendingUp className="h-4 w-4 text-yellow-400" />
             <span className="text-sm font-medium">Xếp hạng #1 Đại học Tư thục Việt Nam</span>
           </div>
 
           {/* Main Heading */}
           <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight">
             Khởi đầu hành trình
-            <span className="block mt-2 pb-5 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+            <span className="block mt-2 pb-5 bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
               Thành công cùng ĐH GTVT
             </span>
           </h1>
 
           {/* Subheading */}
-          <p className="text-xl md:text-2xl text-orange-700 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-yellow-700 max-w-3xl mx-auto leading-relaxed">
             Nơi đào tạo nhân tài công nghệ hàng đầu Việt Nam với phương pháp học tập hiện đại, môi trường quốc tế và cơ hội việc làm 100%
           </p>
 
@@ -47,7 +47,7 @@ export default function BannerIntro() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <button
               onClick={() => { navigate('/riasec'); }}
-              className="group bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center space-x-2"
+              className="group bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center space-x-2"
             >
               <span>khảo sát ngay!</span>
               <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -71,17 +71,17 @@ export default function BannerIntro() {
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-16 max-w-4xl mx-auto">
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
-              <Users className="h-10 w-10 text-orange-400 mx-auto mb-3" />
+              <Users className="h-10 w-10 text-yellow-400 mx-auto mb-3" />
               <div className="text-3xl font-bold text-white mb-1">30,000+</div>
               <div className="text-gray-300">Sinh viên</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
-              <Award className="h-10 w-10 text-orange-400 mx-auto mb-3" />
+              <Award className="h-10 w-10 text-yellow-400 mx-auto mb-3" />
               <div className="text-3xl font-bold text-white mb-1">100%</div>
               <div className="text-gray-300">Cơ hội việc làm</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
-              <TrendingUp className="h-10 w-10 text-orange-400 mx-auto mb-3" />
+              <TrendingUp className="h-10 w-10 text-yellow-400 mx-auto mb-3" />
               <div className="text-3xl font-bold text-white mb-1">20+</div>
               <div className="text-gray-300">Năm kinh nghiệm</div>
             </div>
@@ -90,7 +90,7 @@ export default function BannerIntro() {
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-orange-500/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-20 left-10 w-72 h-72 bg-yellow-500/20 rounded-full blur-3xl"></div>
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
     </section>
   );

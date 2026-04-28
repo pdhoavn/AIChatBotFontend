@@ -102,7 +102,7 @@ export function RequestQueue({ requests, onTakeRequest, acceptingRequestId }) {
                           </div>
                           <Button
                             onClick={() => onTakeRequest(request.id)}
-                            className="gap-2 flex-shrink-0 bg-[#EB5A0D] hover:bg-[#d14f0a] text-white"
+                            className="gap-2 flex-shrink-0 bg-[#facb01] hover:bg-[#d14f0a] text-white"
                             disabled={acceptingRequestId === request.id}
                           >
                             <UserPlus className="h-4 w-4" />

@@ -761,7 +761,7 @@ export function UserManagement() {
             onClick={() => onPageChange(page)}
             className={`px-3 py-1 rounded border ${
               currentPage === page
-                ? 'bg-orange-500 text-white border-orange-500'
+                ? 'bg-yellow-500 text-white border-yellow-500'
                 : 'border-gray-300 hover:bg-gray-50'
             }`}
           >
@@ -798,7 +798,7 @@ export function UserManagement() {
             onClick={() => setSectionFilter('all')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               sectionFilter === 'all'
-                ? 'bg-orange-500 text-white'
+                ? 'bg-yellow-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -808,7 +808,7 @@ export function UserManagement() {
             onClick={() => setSectionFilter('staff')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               sectionFilter === 'staff'
-                ? 'bg-orange-500 text-white'
+                ? 'bg-yellow-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -818,7 +818,7 @@ export function UserManagement() {
             onClick={() => setSectionFilter('customer')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               sectionFilter === 'customer'
-                ? 'bg-orange-500 text-white'
+                ? 'bg-yellow-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >

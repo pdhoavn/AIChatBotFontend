@@ -192,7 +192,7 @@ export function RequestQueuePage() {
               <p className="text-red-600 mb-4">Error: {error}</p>
               <button 
                 onClick={handleRetry}
-                className="px-4 py-2 bg-[#EB5A0D] text-white rounded hover:bg-[#d14f0a]"
+                className="px-4 py-2 bg-[#facb01] text-white rounded hover:bg-[#d14f0a]"
               >
                 Retry
               </button>

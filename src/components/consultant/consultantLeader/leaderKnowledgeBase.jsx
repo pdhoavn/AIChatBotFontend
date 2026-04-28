@@ -11,7 +11,7 @@ const AUDIENCE_FILTER_OPTIONS = [
   { value: 'CANBO',     label: 'Viên chức/NLĐ', inactive: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',   active: 'bg-blue-600 text-white border-blue-600 shadow-sm',   dot: 'bg-blue-500' },
   { value: 'SINHVIEN',  label: 'Sinh viên',      inactive: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100', active: 'bg-green-600 text-white border-green-600 shadow-sm', dot: 'bg-green-500' },
   { value: 'PHUHUYNH',  label: 'Phụ huynh',      inactive: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100', active: 'bg-purple-600 text-white border-purple-600 shadow-sm', dot: 'bg-purple-500' },
-  { value: 'TUYENSINH', label: 'Tuyển sinh',     inactive: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100', active: 'bg-orange-600 text-white border-orange-600 shadow-sm', dot: 'bg-orange-500' },
+  { value: 'TUYENSINH', label: 'Tuyển sinh',     inactive: 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100', active: 'bg-yellow-600 text-white border-yellow-600 shadow-sm', dot: 'bg-yellow-500' },
 ];
 import { knowledgeAPI, intentAPI } from '../../../services/fastapi';
 import { toast } from 'react-toastify';
@@ -21,7 +21,7 @@ const AUDIENCE_DISPLAY = {
   CANBO:     { label: 'Viên chức/NLĐ', color: 'bg-blue-100 text-blue-700 border-blue-200' },
   SINHVIEN:  { label: 'Sinh viên',      color: 'bg-green-100 text-green-700 border-green-200' },
   PHUHUYNH:  { label: 'Phụ huynh',     color: 'bg-purple-100 text-purple-700 border-purple-200' },
-  TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-orange-100 text-orange-700 border-orange-200' },
+  TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
 };
 
 function AudienceBadges({ audiences }) {
@@ -86,7 +86,7 @@ function TrainingQuestionCard({ question, approvingId, rejectingId, onApprove, o
         <Button variant="outline" size="sm" className="gap-2" onClick={() => onReject(question.question_id, 'qa')} disabled={isApproving || isRejecting}>
           {isRejecting ? <><Loader2 className="h-4 w-4 animate-spin" />Đang xử lý...</> : <><X className="h-4 w-4" />Từ Chối</>}
         </Button>
-        <Button size="sm" className="gap-2 bg-[#EB5A0D] hover:bg-[#d14f0a]" onClick={() => onApprove(question.question_id, 'qa')} disabled={isApproving || isRejecting}>
+        <Button size="sm" className="gap-2 bg-[#facb01] hover:bg-[#d14f0a]" onClick={() => onApprove(question.question_id, 'qa')} disabled={isApproving || isRejecting}>
           {isApproving ? <><Loader2 className="h-4 w-4 animate-spin" />Đang duyệt...</> : <><Check className="h-4 w-4" />Phê Duyệt</>}
         </Button>
       </div>
@@ -127,7 +127,7 @@ function DocumentCard({ document, approvingId, rejectingId, onApprove, onReject 
         <Button variant="outline" size="sm" className="gap-2" onClick={() => onReject(document.document_id, 'document')} disabled={isApproving || isRejecting}>
           {isRejecting ? <><Loader2 className="h-4 w-4 animate-spin" />Đang xử lý...</> : <><X className="h-4 w-4" />Từ Chối</>}
         </Button>
-        <Button size="sm" className="gap-2 bg-[#EB5A0D] hover:bg-[#d14f0a]" onClick={() => onApprove(document.document_id, 'document')} disabled={isApproving || isRejecting}>
+        <Button size="sm" className="gap-2 bg-[#facb01] hover:bg-[#d14f0a]" onClick={() => onApprove(document.document_id, 'document')} disabled={isApproving || isRejecting}>
           {isApproving ? <><Loader2 className="h-4 w-4 animate-spin" />Đang duyệt...</> : <><Check className="h-4 w-4" />Phê Duyệt</>}
         </Button>
       </div>
@@ -293,7 +293,7 @@ export function LeaderKnowledgeBase() {
             placeholder="Tìm kiếm..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EB5A0D] focus:border-transparent text-sm"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#facb01] focus:border-transparent text-sm"
           />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>

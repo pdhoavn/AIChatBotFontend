@@ -1,50 +1,50 @@
 /**
  * Staff Pages Color Theme Constants
  * Centralized color configuration for all staff dashboards
- * Theme: Orange and White
+ * Theme: Yellow and White
  */
 
 export const STAFF_COLORS = {
   // Primary Brand Colors
-  primary: '#EB5A0D',           // Main orange color
-  primaryLight: '#FFF3ED',      // Light orange background
-  primaryLighter: '#FFF8F3',    // Very light orange hover
+  primary: '#facb01',           // Main yellow color
+  primaryLight: '#FFFDE7',      // Light yellow background
+  primaryLighter: '#FFFFF0',    // Very light yellow hover
   
   // Sidebar Colors
   sidebar: {
     background: 'white',
-    border: 'border-orange-200',
-    borderColor: 'orange-200',
+    border: 'border-yellow-200',
+    borderColor: 'yellow-200',
     shadow: 'shadow-sm',
   },
   
   // Logo/Brand Section
   brand: {
-    logoBackground: 'bg-[#EB5A0D]',
-    logoBackgroundColor: '#EB5A0D',
+    logoBackground: 'bg-[#facb01]',
+    logoBackgroundColor: '#facb01',
     titleText: 'text-gray-900',
-    subtitleText: 'text-[#EB5A0D]',
-    subtitleColor: '#EB5A0D',
-    border: 'border-orange-100',
-    borderColor: 'orange-100',
+    subtitleText: 'text-[#facb01]',
+    subtitleColor: '#facb01',
+    border: 'border-yellow-100',
+    borderColor: 'yellow-100',
   },
   
   // Navigation Items
   navigation: {
     // Active state
     active: {
-      background: 'bg-[#EB5A0D]',
-      backgroundColor: '#EB5A0D',
+      background: 'bg-[#facb01]',
+      backgroundColor: '#facb01',
       text: 'text-white',
       shadow: 'shadow-sm',
     },
     // Inactive state
     inactive: {
       text: 'text-gray-700',
-      hoverBackground: 'hover:bg-[#FFF8F3]',
-      hoverBackgroundColor: '#FFF8F3',
-      hoverText: 'hover:text-[#EB5A0D]',
-      hoverTextColor: '#EB5A0D',
+      hoverBackground: 'hover:bg-[#FFFFF0]',
+      hoverBackgroundColor: '#FFFFF0',
+      hoverText: 'hover:text-[#facb01]',
+      hoverTextColor: '#facb01',
     },
     // Disabled state
     disabled: {
@@ -56,40 +56,40 @@ export const STAFF_COLORS = {
   
   // Section Headers
   sectionHeader: {
-    text: 'text-[#EB5A0D]',
-    textColor: '#EB5A0D',
+    text: 'text-[#facb01]',
+    textColor: '#facb01',
     font: 'font-medium',
   },
   
   // Buttons
   button: {
-    hover: 'hover:bg-orange-50',
-    hoverColor: 'orange-50',
+    hover: 'hover:bg-yellow-50',
+    hoverColor: 'yellow-50',
   },
   
   // Dividers
   divider: {
-    border: 'border-orange-100',
-    borderColor: 'orange-100',
+    border: 'border-yellow-100',
+    borderColor: 'yellow-100',
   },
   
   // Role Switching
   roleSwitching: {
-    border: 'border-orange-100',
-    headerText: 'text-[#EB5A0D]',
+    border: 'border-yellow-100',
+    headerText: 'text-[#facb01]',
     // Active role button (current role)
     active: {
-      background: 'bg-[#EB5A0D]',
+      background: 'bg-[#facb01]',
       text: 'text-white',
-      border: 'border-orange-300',
+      border: 'border-yellow-300',
     },
     // Inactive role button
     inactive: {
       background: 'bg-white',
       text: 'text-gray-700',
-      border: 'border-orange-200',
-      hoverBackground: 'hover:bg-[#FFF8F3]',
-      hoverText: 'hover:text-[#EB5A0D]',
+      border: 'border-yellow-200',
+      hoverBackground: 'hover:bg-[#FFFFF0]',
+      hoverText: 'hover:text-[#facb01]',
     }
   },
   

@@ -73,7 +73,7 @@ export function QATemplateList({
                   <Button
                     size="sm"
                     onClick={() => handleViewQA(template)}
-                    className="gap-2 flex-shrink-0 bg-[#EB5A0D] hover:bg-[#d14f0a] text-white"
+                    className="gap-2 flex-shrink-0 bg-[#facb01] hover:bg-[#d14f0a] text-white"
                   >
                     <Eye className="h-4 w-4" />
                     Xem

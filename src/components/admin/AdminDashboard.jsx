@@ -190,7 +190,7 @@ export function AdminDashboard() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-orange-500" />
+                <Users className="h-4 w-4 text-yellow-500" />
                 <span className="text-sm">Tổng Số Người Dùng</span>
               </div>
               <span className="text-2xl font-bold">{systemHealth?.total_users || 0}</span>

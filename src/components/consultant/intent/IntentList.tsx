@@ -24,8 +24,8 @@ export function IntentList({ intents, onEdit, onDelete, onClick, onViewDetail, i
         >
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2 flex-1">
-              <div className={`p-2 rounded-lg ${intent.is_deleted ? 'bg-gray-100' : 'bg-orange-50'}`}>
-                <Tag className={`h-4 w-4 ${intent.is_deleted ? 'text-gray-400' : 'text-[#EB5A0D]'}`} />
+              <div className={`p-2 rounded-lg ${intent.is_deleted ? 'bg-gray-100' : 'bg-yellow-50'}`}>
+                <Tag className={`h-4 w-4 ${intent.is_deleted ? 'text-gray-400' : 'text-[#facb01]'}`} />
               </div>
               <h3 className={`font-semibold ${intent.is_deleted ? 'text-gray-400' : 'text-gray-900'}`}>
                 {intent.intent_name}

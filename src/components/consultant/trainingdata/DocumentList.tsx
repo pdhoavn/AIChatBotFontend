@@ -5,7 +5,7 @@ const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
   CANBO:     { label: 'Viên chức/NLĐ', color: 'bg-blue-100 text-blue-700 border-blue-200' },
   SINHVIEN:  { label: 'Sinh viên',      color: 'bg-green-100 text-green-700 border-green-200' },
   PHUHUYNH:  { label: 'Phụ huynh',     color: 'bg-purple-100 text-purple-700 border-purple-200' },
-  TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-orange-100 text-orange-700 border-orange-200' },
+  TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
 };
 
 interface DocumentListProps {
@@ -43,7 +43,7 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
           onClick={() => onSelectDocument(doc)}
           className={`p-4 rounded-lg border cursor-pointer transition-all ${
             selectedDocument?.document_id === doc.document_id
-              ? 'bg-orange-50 border-[#EB5A0D] shadow-sm'
+              ? 'bg-yellow-50 border-[#facb01] shadow-sm'
               : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
           }`}
         >

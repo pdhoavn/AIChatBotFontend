@@ -32,9 +32,9 @@ const AUDIENCE_FILTER_OPTIONS = [
   {
     value: 'TUYENSINH',
     label: 'Tuyển sinh',
-    inactive: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
-    active:   'bg-orange-600 text-white border-orange-600 shadow-sm',
-    dot:      'bg-orange-500',
+    inactive: 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
+    active:   'bg-yellow-600 text-white border-yellow-600 shadow-sm',
+    dot:      'bg-yellow-500',
   },
 ] as const;
 
@@ -88,7 +88,7 @@ export function SearchAndFilter({
             placeholder="Tìm kiếm..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EB5A0D] focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#facb01] focus:border-transparent"
           />
         </div>
 

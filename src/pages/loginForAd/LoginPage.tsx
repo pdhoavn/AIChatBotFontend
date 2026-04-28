@@ -44,7 +44,7 @@ export default function LoginPage() {
   >
       <div className="w-full max-w-md bg-white rounded-2xl shadow border p-6">
         <div className="flex items-center gap-3 mb-6">
-          <Shield className="h-6 w-6 text-orange-600" />
+          <Shield className="h-6 w-6 text-yellow-600" />
           <div>
             <div className="text-lg font-semibold text-[#f97316]">Đăng nhập</div>
             <div className="text-xs text-gray-500">Nền tảng ĐH GTVT</div>
