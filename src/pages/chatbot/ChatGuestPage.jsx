@@ -95,6 +95,34 @@ function buildRiasecPrefillMessage(answers) {
   ].join(" ");
 }
 
+function normalizeSuggestionQuestions(data) {
+  const candidates = Array.isArray(data)
+    ? data
+    : data?.suggestions || data?.questions || data?.data || data?.items || [];
+
+  if (!Array.isArray(candidates)) return [];
+
+  return candidates
+    .map((item) => {
+      if (typeof item === "string") {
+        return item.trim();
+      }
+      if (!item || typeof item !== "object") {
+        return "";
+      }
+      const value =
+        item.text ||
+        item.question ||
+        item.question_text ||
+        item.content ||
+        item.title ||
+        "";
+      return String(value).trim();
+    })
+    .filter(Boolean)
+    .map((text) => ({ text }));
+}
+
 export default function ChatGuestPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -109,6 +137,7 @@ export default function ChatGuestPage() {
 
   const [audiences, setAudiences] = useState([]);
   const [intents, setIntents] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
   const [selectedAudience, setSelectedAudience] = useState(null);
   const [selectedIntent, setSelectedIntent] = useState(null);
   const [prefillAudienceCode, setPrefillAudienceCode] = useState(null);
@@ -195,6 +224,7 @@ export default function ChatGuestPage() {
   useEffect(() => {
     if (!selectedAudience) {
       setIntents([]);
+      setSuggestions([]);
       return;
     }
 
@@ -212,6 +242,31 @@ export default function ChatGuestPage() {
         setIntents([]);
       });
   }, [selectedAudience]);
+
+  useEffect(() => {
+    if (!selectedAudience?.id) {
+      setSuggestions([]);
+      return;
+    }
+
+    let isActive = true;
+    const intentId = selectedIntent?.intent_id || 0;
+
+    audienceAPI
+      .getSuggestionQuestions(selectedAudience.id, intentId)
+      .then((data) => {
+        if (!isActive) return;
+        setSuggestions(normalizeSuggestionQuestions(data));
+      })
+      .catch(() => {
+        if (!isActive) return;
+        setSuggestions([]);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [selectedAudience, selectedIntent]);
 
   useEffect(() => {
     if (autoScrollRef.current) {
@@ -512,6 +567,7 @@ export default function ChatGuestPage() {
               <ChatEmptyState
                 greeting={greeting}
                 onSendMessage={handleSuggestionClick}
+                suggestions={suggestions}
                 onAudienceChange={handleAudienceChange}
                 selectedAudience={selectedAudience}
                 audiences={audiences}
