@@ -22,13 +22,10 @@ export default function ChatInput({
 }) {
   const textareaRef = useRef(null);
   const wrapperRef = useRef(null);
-  const fileInputRef = useRef(null);
   const [isToolMenuOpen, setIsToolMenuOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [attachedFile, setAttachedFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
 
-  const isExpanded = isFocused || !!input.trim() || !!attachedFile || isLoading;
+  const isExpanded = isFocused || !!input.trim() || isLoading;
 
   const availableIntents = selectedAudience
     ? intents.filter((intent) => {
@@ -44,54 +41,21 @@ export default function ChatInput({
     const handleClickOutside = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
         setIsToolMenuOpen(false);
-        if (!input.trim() && !attachedFile) {
+        if (!input.trim()) {
           setIsFocused(false);
         }
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isToolMenuOpen, isFocused, input, attachedFile]);
-
-  const handleFileSelect = async (file) => {
-    const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!["pdf", "docx", "txt"].includes(ext || "")) {
-      alert("Chỉ hỗ trợ file PDF, DOCX, TXT");
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      alert("File quá lớn. Giới hạn 10MB.");
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/chat/upload", { method: "POST", body: formData });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "Upload thất bại" }));
-        alert(err.error || "Không thể đọc file");
-        return;
-      }
-      const data = await res.json();
-      setAttachedFile({ name: data.fileName || file.name, text: data.text || "", type: ext });
-    } catch {
-      alert("Lỗi khi upload file.");
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
+  }, [isToolMenuOpen, isFocused, input]);
 
   const handleSubmit = (e) => {
     e?.preventDefault();
-    if (!input.trim() && !attachedFile) return;
+    if (!input.trim()) return;
     if (!wsReady) return;
 
-    const fileContent = attachedFile ? attachedFile.text : null;
-    onSubmit(fileContent, selectedIntent?.intent_id || null);
-    setAttachedFile(null);
+    onSubmit(selectedIntent?.intent_id || null);
     setIsToolMenuOpen(false);
   };
 
@@ -107,7 +71,7 @@ export default function ChatInput({
         onBlur={(e) => {
           if (wrapperRef.current?.contains(e.relatedTarget)) return;
           setTimeout(() => {
-            if (!input.trim() && !attachedFile && !isToolMenuOpen) {
+            if (!input.trim() && !isToolMenuOpen) {
               setIsFocused(false);
             }
           }, 150);
@@ -121,37 +85,6 @@ export default function ChatInput({
           }`}
           onClick={() => !isFocused && setIsFocused(true)}
         >
-          {/* Attached file badge */}
-          {attachedFile && (
-            <div className="mx-2 md:mx-3 mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/8 border border-accent/20">
-              {attachedFile.type === "pdf" ? (
-                <PhIcon name="picture_as_pdf" size={16} className="text-accent" />
-              ) : attachedFile.type === "docx" ? (
-                <PhIcon name="article" size={16} className="text-accent" />
-              ) : (
-                <PhIcon name="text_snippet" size={16} className="text-accent" />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="text-[12px] font-medium text-text-main truncate">
-                  {attachedFile.name}
-                </div>
-                <div className="text-[10px] text-text-muted">
-                  Sẵn sàng gửi
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setAttachedFile(null);
-                }}
-                className="w-5 h-5 rounded-md hover:bg-red-500/10 flex items-center justify-center text-text-muted hover:text-red-400 transition-colors"
-              >
-                <PhIcon name="close" size={14} />
-              </button>
-            </div>
-          )}
-
           {/* Live transcript banner */}
           {isListening && (
             <div className="mx-2 md:mx-3 mb-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-400/30">
@@ -182,14 +115,6 @@ export default function ChatInput({
             </div>
           )}
 
-          {/* Uploading indicator */}
-          {isUploading && (
-            <div className="mx-2 md:mx-3 mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/50 border border-border-main/70">
-              <div className="w-4 h-4 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-              <span className="text-[11px] text-text-muted">Đang trích xuất nội dung file...</span>
-            </div>
-          )}
-
           <div
             className={`flex items-center gap-2 transition-all duration-300 ease-out ${
               isExpanded ? "px-2 md:px-3 pt-2.5 pb-1.5" : "px-2 md:px-2 py-0.5"
@@ -203,25 +128,6 @@ export default function ChatInput({
             >
               <button
                 type="button"
-                title="Đính kèm tệp"
-                aria-label="Đính kèm tệp"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading || isLoading}
-                className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full border border-border-main/60 text-text-muted hover:text-accent hover:border-accent/30 hover:bg-accent/10 transition-colors disabled:opacity-40"
-              >
-                <PhIcon name="attach_file" size={15} />
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.docx,.txt"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-              />
-
-              <button
-                type="button"
                 title={isListening ? "Dừng ghi âm" : "Trao đổi giọng nói"}
                 aria-label={isListening ? "Dừng ghi âm" : "Trao đổi giọng nói"}
                 onMouseDown={(e) => e.preventDefault()}
@@ -232,7 +138,7 @@ export default function ChatInput({
                     onMicClick?.();
                   }
                 }}
-                disabled={isLoading || isUploading}
+                disabled={isLoading}
                 className={`w-9 h-9 shrink-0 flex items-center justify-center rounded-full border transition-all disabled:opacity-40 ${
                   isListening
                     ? "border-red-400/50 bg-red-500/15 text-red-400 animate-pulse"
@@ -253,7 +159,7 @@ export default function ChatInput({
                   aria-label="Chọn lĩnh vực tra cứu"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => setIsToolMenuOpen((prev) => !prev)}
-                  disabled={isLoading || isUploading}
+                  disabled={isLoading}
                   className={`h-9 px-2.5 shrink-0 inline-flex items-center gap-1.5 rounded-full border transition-colors disabled:opacity-40 ${
                     selectedIntent
                       ? "border-accent/40 bg-accent/10 text-accent"
@@ -276,9 +182,7 @@ export default function ChatInput({
                 isExpanded ? "text-[15px] md:text-base" : "text-[14px] md:text-[15px]"
               }`}
               placeholder={
-                attachedFile
-                  ? "Bạn muốn mình hỗ trợ gì với tài liệu này?"
-                  : isExpanded
+                isExpanded
                   ? "Nêu vấn đề theo cách của bạn..."
                   : "Nhập câu hỏi..."
               }
@@ -303,7 +207,7 @@ export default function ChatInput({
                 }
               }}
               onFocus={() => setIsFocused(true)}
-              disabled={isLoading || isUploading}
+              disabled={isLoading}
             />
 
             {/* Send / Stop button */}
@@ -321,7 +225,7 @@ export default function ChatInput({
             ) : (
               <button
                 type="submit"
-                disabled={isUploading || (!input.trim() && !attachedFile) || !wsReady}
+                disabled={!input.trim() || !wsReady}
                 className={`shrink-0 rounded-full bg-accent text-white flex items-center justify-center hover:brightness-110 transition-all disabled:opacity-35 disabled:cursor-not-allowed shadow-[0_10px_22px_-14px_rgba(19,91,236,0.8)] ${
                   isExpanded ? "w-9 h-9" : "w-8 h-8"
                 }`}

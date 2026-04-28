@@ -392,13 +392,13 @@ export default function ChatGuestPage() {
     }
   };
 
-  const handleSubmit = (fileContent, intentId) => {
+  const handleSubmit = (intentId) => {
     if (!selectedAudience) {
       toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-audience-submit" });
       return;
     }
-    if (!input.trim() && !fileContent) return;
-    send(fileContent || input, intentId);
+    if (!input.trim()) return;
+    send(input, intentId);
   };
 
   const handleSuggestionClick = (text) => {
