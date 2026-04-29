@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/system_users/
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../ui/system_users/dialog';
 import { Textarea } from '../../ui/system_users/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/system_users/select';
-import { MessageCircle, FileText, Check, X, Loader2, Users, Search } from 'lucide-react';
+import { MessageCircle, FileText, Check, X, Loader2, Users, Search, Download } from 'lucide-react';
 
 const AUDIENCE_FILTER_OPTIONS = [
   { value: 'CANBO',     label: 'Viên chức/NLĐ', inactive: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',   active: 'bg-blue-600 text-white border-blue-600 shadow-sm',   dot: 'bg-blue-500' },
@@ -94,9 +94,10 @@ function TrainingQuestionCard({ question, approvingId, rejectingId, onApprove, o
   );
 }
 
-function DocumentCard({ document, approvingId, rejectingId, onApprove, onReject }) {
+function DocumentCard({ document, approvingId, rejectingId, downloadingId, onApprove, onReject, onDownload }) {
   const isApproving = approvingId === document.document_id;
   const isRejecting = rejectingId === document.document_id;
+  const isDownloading = downloadingId === document.document_id;
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
       <div className="flex items-start justify-between mb-4">
@@ -123,13 +124,18 @@ function DocumentCard({ document, approvingId, rejectingId, onApprove, onReject 
           <p className="text-sm text-gray-600">{document.file_path?.split('/').pop() || 'N/A'}</p>
         </div>
       </div>
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => onReject(document.document_id, 'document')} disabled={isApproving || isRejecting}>
-          {isRejecting ? <><Loader2 className="h-4 w-4 animate-spin" />Đang xử lý...</> : <><X className="h-4 w-4" />Từ Chối</>}
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-2 text-blue-600 hover:bg-blue-50" onClick={() => onDownload(document)} disabled={isDownloading || isApproving || isRejecting}>
+          {isDownloading ? <><Loader2 className="h-4 w-4 animate-spin" />Đang tải...</> : <><Download className="h-4 w-4" />Tải Xuống</>}
         </Button>
-        <Button size="sm" className="gap-2 bg-[#facb01] hover:bg-[#d14f0a]" onClick={() => onApprove(document.document_id, 'document')} disabled={isApproving || isRejecting}>
-          {isApproving ? <><Loader2 className="h-4 w-4 animate-spin" />Đang duyệt...</> : <><Check className="h-4 w-4" />Phê Duyệt</>}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => onReject(document.document_id, 'document')} disabled={isApproving || isRejecting || isDownloading}>
+            {isRejecting ? <><Loader2 className="h-4 w-4 animate-spin" />Đang xử lý...</> : <><X className="h-4 w-4" />Từ Chối</>}
+          </Button>
+          <Button size="sm" className="gap-2 bg-[#facb01] hover:bg-[#d14f0a]" onClick={() => onApprove(document.document_id, 'document')} disabled={isApproving || isRejecting || isDownloading}>
+            {isApproving ? <><Loader2 className="h-4 w-4 animate-spin" />Đang duyệt...</> : <><Check className="h-4 w-4" />Phê Duyệt</>}
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -146,6 +152,7 @@ export function LeaderKnowledgeBase() {
   const [selectedItemType, setSelectedItemType] = useState(null);
   const [approvingId, setApprovingId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
+  const [downloadingId, setDownloadingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [intents, setIntents] = useState([]);
@@ -205,6 +212,26 @@ export function LeaderKnowledgeBase() {
     setSelectedItem(id);
     setSelectedItemType(type);
     setShowRejectDialog(true);
+  };
+
+  const handleDownloadDocument = async (document) => {
+    try {
+      setDownloadingId(document.document_id);
+      const blob = await knowledgeAPI.downloadDocument(document.document_id);
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement('a');
+      a.href = url;
+      a.download = document.title || `document-${document.document_id}`;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      toast.success('Tải tài liệu thành công!');
+    } catch {
+      toast.error('Không thể tải xuống tài liệu.');
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   const handleReject = async () => {
@@ -416,8 +443,10 @@ export function LeaderKnowledgeBase() {
                     document={document}
                     approvingId={approvingId}
                     rejectingId={rejectingId}
+                    downloadingId={downloadingId}
                     onApprove={handleApprove}
                     onReject={openRejectDialog}
+                    onDownload={handleDownloadDocument}
                   />
                 ))}
                 {documents.length > 0 && (
