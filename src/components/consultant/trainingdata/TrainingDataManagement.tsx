@@ -122,11 +122,10 @@ export function TrainingDataManagement() {
 
   const handleSelectDocument = async (document: TrainingDocument) => {
     try {
-
-      const fullDoc = await knowledgeAPI.getDocumentById(document.document_id);
-      setSelectedDocument({ 
-        ...fullDoc, 
-        file_size: 0, 
+      const fullDoc = await knowledgeAPI.getDocumentDetail(document.document_id);
+      setSelectedDocument({
+        ...fullDoc,
+        file_size: 0,
         file_type: fullDoc.file_path.split('.').pop() || 'unknown',
         reject_reason: fullDoc.reject_reason || undefined
       });
@@ -170,10 +169,10 @@ export function TrainingDataManagement() {
       toast.success('Duyệt tài liệu thành công');
       await fetchDocuments();
 
-      const fullDoc = await knowledgeAPI.getDocumentById(documentId);
-      setSelectedDocument({ 
-        ...fullDoc, 
-        file_size: 0, 
+      const fullDoc = await knowledgeAPI.getDocumentDetail(documentId);
+      setSelectedDocument({
+        ...fullDoc,
+        file_size: 0,
         file_type: fullDoc.file_path.split('.').pop() || 'unknown',
         reject_reason: fullDoc.reject_reason || undefined
       });
@@ -192,10 +191,10 @@ export function TrainingDataManagement() {
       toast.success('Từ chối tài liệu thành công');
       await fetchDocuments();
 
-      const fullDoc = await knowledgeAPI.getDocumentById(documentId);
-      setSelectedDocument({ 
-        ...fullDoc, 
-        file_size: 0, 
+      const fullDoc = await knowledgeAPI.getDocumentDetail(documentId);
+      setSelectedDocument({
+        ...fullDoc,
+        file_size: 0,
         file_type: fullDoc.file_path.split('.').pop() || 'unknown',
         reject_reason: fullDoc.reject_reason || undefined
       });
@@ -454,6 +453,7 @@ export function TrainingDataManagement() {
           onSubmit={handleUploadDocument}
         />
       )}
+
     </div>
   );
 }

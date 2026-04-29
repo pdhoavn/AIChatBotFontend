@@ -275,6 +275,9 @@ export const knowledgeAPI = {
     return fastAPIClient.get<KnowledgeDocument[]>(`/knowledge/documents${params}`);
   },
   getDocumentById: (id: number) => fastAPIClient.get<KnowledgeDocument>(`/knowledge/documents/${id}`),
+  getDocumentDetail: (id: number) => fastAPIClient.get<KnowledgeDocument>(`/knowledge/documents/${id}/detail`),
+  getDocumentChunks: (id: number, source: 'db' | 'qdrant' = 'qdrant') =>
+    fastAPIClient.get<{ chunk_id: number | null; point_id: string | null; chunk_index: number; chunk_text: string; char_count: number }[]>(`/knowledge/documents/${id}/chunks?source=${source}`),
   
   // Get training questions with optional status filter
   getTrainingQuestions: (status?: string) => {

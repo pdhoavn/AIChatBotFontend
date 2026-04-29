@@ -65,11 +65,9 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
                 <span className="text-xs text-gray-500 font-medium">
                   {doc.file_type?.toUpperCase() || 'FILE'}
                 </span>
-                {doc.intent_name && (
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                    Lĩnh vực: {doc.intent_name}
-                  </span>
-                )}
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                  Lĩnh vực: {(doc.intent_name && doc.intent_name !== 'None') ? doc.intent_name : 'Chung'}
+                </span>
               </div>
 
               {}
@@ -109,6 +107,7 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
                   {new Date(doc.created_at as string).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                 </p>
               )}
+
             </div>
           </div>
         </div>
