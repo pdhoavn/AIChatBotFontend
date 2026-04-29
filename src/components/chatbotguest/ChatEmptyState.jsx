@@ -147,29 +147,26 @@ export default function ChatEmptyState({
             <div className="text-sm md:text-[15px] text-text-main mt-3 leading-relaxed prose prose-sm max-w-none">
               <ReactMarkdown>{greeting}</ReactMarkdown>
             </div>
+            {items.length > 0 && (
+              <div className="mt-5">
+                <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted">
+                  <Sparkle size={13} className="text-accent" />
+                  Câu hỏi gợi ý
+                </div>
+                <div className="flex flex-wrap gap-2.5">
+                  {items.map((btn, i) => (
+                    <button
+                      key={i}
+                      onClick={() => onSendMessage(btn.text)}
+                      className="rounded-2xl border border-border-main bg-surface/40 px-3.5 py-2 text-left text-sm text-text-muted transition-all hover:border-accent/40 hover:bg-accent/8 hover:text-text-main"
+                    >
+                      {btn.text}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-
-      {/* Suggestion buttons */}
-      {items.length > 0 && (
-        <div className="flex flex-wrap justify-center gap-3">
-          {items.map((btn, i) => (
-            <button
-              key={i}
-              onClick={() => onSendMessage(btn.text)}
-              className="px-4 py-2.5 rounded-2xl border border-border-main bg-surface/30 hover:bg-surface hover:border-text-muted/50 transition-all text-sm flex items-center gap-2.5 group"
-            >
-              <span className="text-accent group-hover:scale-110 transition-transform">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-              </span>
-              <span className="text-text-muted group-hover:text-text-main transition-colors">
-                {btn.text}
-              </span>
-            </button>
-          ))}
         </div>
       )}
     </div>

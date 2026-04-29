@@ -17,6 +17,33 @@ import { Navigate } from "react-router-dom";
 
 
 const API_BASE_URL = API_CONFIG.FASTAPI_BASE_URL;
+const SAFARI_WS_CONNECT_DELAY_MS = 500;
+
+function isSafariBrowser() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return /safari/i.test(ua) && !/chrome|chromium|crios|fxios|edg/i.test(ua);
+}
+
+function buildWebSocketUrl(baseUrl, path) {
+  const fallbackOrigin =
+    typeof window !== "undefined" ? window.location.origin : "http://localhost";
+  const url = new URL(baseUrl || fallbackOrigin, fallbackOrigin);
+  const isSecurePage =
+    typeof window !== "undefined" && window.location.protocol === "https:";
+  const isLoopback = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(
+    url.hostname
+  );
+
+  url.protocol = url.protocol === "https:" || (isSecurePage && !isLoopback)
+    ? "wss:"
+    : "ws:";
+  url.pathname = `${url.pathname.replace(/\/$/, "")}${path}`;
+  url.search = "";
+  url.hash = "";
+
+  return url.toString();
+}
 
 const authHeaders = () => {
   const token = localStorage.getItem("access_token");
@@ -1220,88 +1247,97 @@ setForm({
     return;
   }
 
-  // đã có session_id -> mở WS mới cho phiên đó
-  const wsUrl = API_BASE_URL.replace(/^http/, "ws") + "/chat/ws/chat";
-  const ws = new WebSocket(wsUrl);
-  wsRef.current = ws;
+  let ws = null;
+  const connectTimer = window.setTimeout(
+    () => {
+      // đã có session_id -> mở WS mới cho phiên đó
+      const wsUrl = buildWebSocketUrl(API_BASE_URL, "/chat/ws/chat");
+      ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
 
-  ws.onopen = () => {
-    ws.send(
-      JSON.stringify({
-        user_id: user.id,
-        session_id: chatSessionIdRef.current,    
-      })
-    );
-    setWsReady(true);
-  };
+      ws.onopen = () => {
+        ws.send(
+          JSON.stringify({
+            user_id: user.id,
+            session_id: chatSessionIdRef.current,
+          })
+        );
+        setWsReady(true);
+      };
 
-    ws.onmessage = (event) => {
+      ws.onmessage = (event) => {
+        let data;
+        try {
+          data = JSON.parse(event.data);
+        } catch (err) {
+          return;
+        }
 
-      let data;
-      try {
-        data = JSON.parse(event.data);
-      } catch (err) {
-        return;
-      }
+        const ev = data.event || data.type;
 
-      const ev = data.event || data.type;
-
-      switch (ev) {
-        case "session_created": {
-          if (data.session_id) {
-            setChatSessionId(data.session_id);
+        switch (ev) {
+          case "session_created": {
+            if (data.session_id) {
+              setChatSessionId(data.session_id);
+            }
+            break;
           }
-          break;
+
+          case "chunk": {
+            const chunk = data.content ?? data.text ?? data.message ?? "";
+            setPartialResponse((prev) => {
+              const updated = prev + chunk;
+              partialRef.current = updated;
+              return updated;
+            });
+            setIsLoading(true);
+            break;
+          }
+
+          case "done": {
+            const finalText = (partialRef.current || "").trim();
+            if (finalText) {
+              const botMsg = { sender: "bot", text: finalText };
+              setMessages((prev) => [...prev, botMsg]);
+              pushToActive(botMsg);
+            }
+
+            partialRef.current = "";
+            setPartialResponse("");
+            setIsLoading(false);
+            break;
+          }
+
+          case "error": {
+            const errText =
+              data.message ||
+              "Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý câu hỏi. Bạn hãy thử lại sau hoặc thử một câu hỏi khác nhé.";
+            const botMsg = { sender: "bot", text: errText };
+            setMessages((prev) => [...prev, botMsg]);
+            pushToActive(botMsg);
+            setIsLoading(false);
+            break;
+          }
+
+          default:
         }
+      };
 
-        case "chunk": {
-          const chunk = data.content ?? data.text ?? data.message ?? "";
-          setPartialResponse((prev) => {
-            const updated = prev + chunk;
-            partialRef.current = updated;
-            return updated;
-          });
-          setIsLoading(true);
-          break;
-        }
-
-case "done": {
-  const finalText = (partialRef.current || "").trim();
-  if (finalText) {
-    const botMsg = { sender: "bot", text: finalText };
-    setMessages((prev) => [...prev, botMsg]);
-    pushToActive(botMsg);
-  }
-
-  partialRef.current = "";
-  setPartialResponse("");
-  setIsLoading(false);
-  break;
-}
-
-        case "error": {
-          const errText =
-            data.message ||
-            "Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý câu hỏi. Bạn hãy thử lại sau hoặc thử một câu hỏi khác nhé.";
-          const botMsg = { sender: "bot", text: errText };
-          setMessages((prev) => [...prev, botMsg]);
-          pushToActive(botMsg);
-          setIsLoading(false);
-          break;
-        }
-
-        default:
-      }
-    };
-
-    ws.onclose = () => {
-    setWsReady(false);
-    setIsLoading(false);
-    setPartialResponse("");
-    partialRef.current = "";
-  };
+      ws.onclose = () => {
+        setWsReady(false);
+        setIsLoading(false);
+        setPartialResponse("");
+        partialRef.current = "";
+      };
+    },
+    isSafariBrowser() ? SAFARI_WS_CONNECT_DELAY_MS : 0
+  );
 
   return () => {
+    window.clearTimeout(connectTimer);
+    if (wsRef.current === ws) {
+      wsRef.current = null;
+    }
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.close();
     }
