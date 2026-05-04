@@ -268,13 +268,14 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
           <Button
             onClick={onClose}
             variant="outline"
+            className="hover:bg-gray-100 hover:border-gray-400"
             disabled={loading}
           >
             Hủy
           </Button>
           <Button
             onClick={handleSubmit}
-            className="bg-[#facb01] hover:bg-[#d14f0a]"
+            className="bg-[#facb01] hover:bg-[#e8b800]"
             disabled={loading}
           >
             {loading ? 'Đang tải lên...' : 'Tải Lên'}
