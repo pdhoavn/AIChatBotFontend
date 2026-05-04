@@ -59,11 +59,28 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
     );
   };
 
+  const ALLOWED_TYPES = [
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ];
+  const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.txt', '.xlsx'];
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      setFile(selectedFile);
+      const ext = '.' + selectedFile.name.split('.').pop()?.toLowerCase();
+      const validType = ALLOWED_TYPES.includes(selectedFile.type);
+      const validExt = ALLOWED_EXTENSIONS.includes(ext);
 
+      if (!validType || !validExt) {
+        alert('Định dạng file không hợp lệ. Chỉ chấp nhận: PDF, DOCX, TXT, XLSX');
+        e.target.value = '';
+        return;
+      }
+
+      setFile(selectedFile);
       if (!title) {
         setTitle(selectedFile.name.replace(/\.[^/.]+$/, ''));
       }
@@ -135,11 +152,11 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
                   type="file"
                   className="sr-only"
                   onChange={handleFileChange}
-                  accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                  accept=".pdf,.docx,.txt,.xlsx"
                 />
               </label>
               <p className="text-xs text-gray-500 mt-2">
-                Định dạng: PDF, DOC, DOCX, TXT, XLS, XLSX
+                Định dạng: PDF, DOCX, TXT, XLSX
               </p>
             </div>
           </div>
