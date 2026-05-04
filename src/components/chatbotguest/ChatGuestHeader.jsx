@@ -1,7 +1,7 @@
 // src/components/chatbotguest/ChatGuestHeader.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { BadgeCheck, GraduationCap, School, Users } from "lucide-react";
+import { Briefcase, GraduationCap, HeartHandshake, ClipboardList } from "lucide-react";
 import PhIcon from "../ui/PhIcon.jsx";
 import { resolveAudienceCode } from "../../api/audienceApi.ts";
 
@@ -13,10 +13,10 @@ const AUDIENCE_LABELS = {
 };
 
 const AUDIENCE_META = {
-  CANBO: { label: "Viên chức / Người lao động", icon: BadgeCheck },
-  SINHVIEN: { label: "Sinh viên", icon: School },
-  PHUHUYNH: { label: "Phụ huynh / Bên liên quan", icon: Users },
-  TUYENSINH: { label: "Tuyển sinh", icon: GraduationCap },
+  CANBO: { label: "Viên chức / Người lao động", icon: Briefcase },
+  SINHVIEN: { label: "Sinh viên", icon: GraduationCap },
+  PHUHUYNH: { label: "Phụ huynh / Bên liên quan", icon: HeartHandshake },
+  TUYENSINH: { label: "Tuyển sinh", icon: ClipboardList },
 };
 
 export default function ChatGuestHeader({ selectedAudience, onAudienceChange, audiences = [] }) {
@@ -40,11 +40,11 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
   const shouldShowRiasecLink = activeAudienceCode === "TUYENSINH";
   const activeAudienceMeta = activeAudienceCode
     ? AUDIENCE_META[activeAudienceCode] || {
-        label: AUDIENCE_LABELS[activeAudienceCode] || activeAudienceObj?.name,
-        icon: BadgeCheck,
-      }
+      label: AUDIENCE_LABELS[activeAudienceCode] || activeAudienceObj?.name,
+      icon: BadgeCheck,
+    }
     : null;
-  const ActiveAudienceIcon = activeAudienceMeta?.icon || BadgeCheck;
+  const ActiveAudienceIcon = activeAudienceMeta?.icon || Briefcase;
 
   return (
     <header className="w-full bg-transparent">
@@ -70,7 +70,10 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
 
         {/* Right side badges */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="relative" ref={menuRef}>
+          <div className="relative flex flex-col items-start gap-0.5" ref={menuRef}>
+            <span className="text-[10px] font-medium text-text-muted uppercase tracking-wider px-0.5">
+              Đối tượng:
+            </span>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center gap-1.5 rounded-xl border border-border-main bg-surface/55 px-2.5 py-1.5 text-[11px] font-medium text-text-main hover:bg-surface transition-colors focus:outline-none"
@@ -81,7 +84,7 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
               </span>
               <PhIcon name="expand_more" size={13} className="text-text-muted ml-0.5" />
             </button>
-            
+
             {isMenuOpen && audiences.length > 0 && (
               <div className="absolute top-full right-0 mt-2 w-56 rounded-xl border border-border-main/70 bg-sidebar shadow-2xl p-1.5 z-50">
                 <div className="px-2 py-1.5 mb-1 text-[10px] font-semibold text-text-muted uppercase tracking-wider">
@@ -102,9 +105,8 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
                         onAudienceChange && onAudienceChange(audience);
                         setIsMenuOpen(false);
                       }}
-                      className={`w-full text-left px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors ${
-                        selectedAudience?.id === audience.id ? "bg-accent/12 text-accent" : "text-text-main hover:bg-primary/45"
-                      }`}
+                      className={`w-full text-left px-2.5 py-2 rounded-lg text-[12px] flex items-center justify-between transition-colors ${selectedAudience?.id === audience.id ? "bg-accent/12 text-accent" : "text-text-main hover:bg-primary/45"
+                        }`}
                     >
                       <span className="flex min-w-0 items-center gap-2 pr-2">
                         <AudienceIcon size={13} className="shrink-0" />

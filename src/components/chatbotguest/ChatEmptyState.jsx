@@ -1,14 +1,14 @@
 // src/components/chatbotguest/ChatEmptyState.jsx
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { Sparkle } from "lucide-react";
+import { Sparkle, Briefcase, GraduationCap, HeartHandshake, ClipboardList } from "lucide-react";
 import { resolveAudienceCode } from "../../api/audienceApi.ts";
 
 const AUDIENCE_META = {
-  CANBO: { color: "blue", emoji: "👔", label: "Viên chức / Người lao động" },
-  SINHVIEN: { color: "green", emoji: "🎓", label: "Sinh viên" },
-  PHUHUYNH: { color: "purple", emoji: "👨‍👩‍👦", label: "Phụ huynh / Bên liên quan" },
-  TUYENSINH: { color: "orange", emoji: "🗒️", label: "Tuyển sinh" },
+  CANBO: { color: "blue", icon: Briefcase, label: "Viên chức / Người lao động" },
+  SINHVIEN: { color: "green", icon: GraduationCap, label: "Sinh viên" },
+  PHUHUYNH: { color: "purple", icon: HeartHandshake, label: "Phụ huynh / Bên liên quan" },
+  TUYENSINH: { color: "orange", icon: ClipboardList, label: "Tuyển sinh" },
 };
 
 const COLOR_MAP = {
@@ -90,10 +90,11 @@ export default function ChatEmptyState({
               const audienceCode = resolveAudienceCode(audience);
               const meta = AUDIENCE_META[audienceCode] || {
                 color: FALLBACK_COLOR,
-                emoji: "👤",
+                icon: Briefcase,
                 label: audience.name,
               };
               const c = COLOR_MAP[meta.color];
+              const AudienceIcon = meta.icon;
               const isSelected = selectedAudience?.id === audience.id;
 
               return (
@@ -110,7 +111,7 @@ export default function ChatEmptyState({
                     <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-transform duration-200 ${
                       isSelected ? `bg-accent/10 border-accent/20 scale-110` : `${c.iconBorder} ${c.iconBg} group-hover:scale-110`
                     }`}>
-                      <span style={{ fontSize: "22px", lineHeight: 1 }}>{meta.emoji}</span>
+                      <AudienceIcon size={22} className={isSelected ? "text-accent" : c.iconText} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`text-xs font-bold uppercase tracking-wide ${c.labelText} leading-tight`}>
