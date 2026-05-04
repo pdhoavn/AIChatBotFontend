@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, Trash2, Download, FileText, FileType, FileSpreadsheet, Copy, Check } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { X, Trash2, Download, FileText, FileType, FileSpreadsheet, Copy, Check, Search, AlertTriangle, RefreshCw, ChevronUp, ChevronDown } from 'lucide-react';
 import { TrainingDocument, Intent } from './types';
 import { Button } from '../../ui/system_users/button';
 import { knowledgeAPI } from '../../../services/fastapi';
@@ -43,23 +43,46 @@ export function DocumentDetailModal({
   type Chunk = { chunk_id: number | null; point_id: string | null; chunk_index: number; chunk_text: string; char_count: number };
   const [chunks, setChunks] = useState<Chunk[]>([]);
   const [chunksLoading, setChunksLoading] = useState(false);
+  const [chunksError, setChunksError] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const chunkRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const parseChunksError = (err: unknown): string => {
+    if (err instanceof Error) {
+      const msg = err.message;
+      if (msg.includes('10054') || msg.toLowerCase().includes('forcibly closed') || msg.toLowerCase().includes('connection') ) {
+        return 'Kết nối tới máy chủ Qdrant bị ngắt đột ngột. Vui lòng thử lại.';
+      }
+      if (msg.toLowerCase().includes('qdrant')) return `Lỗi Qdrant: ${msg}`;
+      if (msg.includes('500') || msg.toLowerCase().includes('server error')) return 'Máy chủ gặp sự cố. Vui lòng thử lại sau.';
+      if (msg.includes('timeout') || msg.includes('408')) return 'Yêu cầu quá thời gian chờ. Vui lòng thử lại.';
+      return msg;
+    }
+    return 'Không thể tải nội dung. Vui lòng thử lại.';
+  };
+
+  const fetchChunks = useCallback(async () => {
+    try {
+      setChunksLoading(true);
+      setChunksError(null);
+      setChunks([]);
+      const data = await knowledgeAPI.getDocumentChunks(document.document_id, 'qdrant');
+      setChunks(data);
+    } catch (err) {
+      setChunks([]);
+      setChunksError(parseChunksError(err));
+    } finally {
+      setChunksLoading(false);
+    }
+  }, [document.document_id]);
 
   useEffect(() => {
-    if (activeTab !== 'content' || chunks.length > 0) return;
-    const fetchChunks = async () => {
-      try {
-        setChunksLoading(true);
-        const data = await knowledgeAPI.getDocumentChunks(document.document_id, 'qdrant');
-        setChunks(data);
-      } catch {
-        setChunks([]);
-      } finally {
-        setChunksLoading(false);
-      }
-    };
+    if (activeTab !== 'content') return;
     fetchChunks();
-  }, [activeTab]);
+  }, [activeTab, fetchChunks]);
 
   const handleCopyChunk = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
@@ -138,6 +161,41 @@ export function DocumentDetailModal({
     ? 'text-green-600'
     : 'text-gray-500';
 
+  const highlightText = (text: string, query: string) => {
+    if (!query.trim()) return <>{text}</>;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+    return (
+      <>
+        {parts.map((part, i) =>
+          regex.test(part) ? (
+            <mark key={i} className="bg-yellow-200 text-yellow-900 rounded-sm px-0.5">{part}</mark>
+          ) : (
+            part
+          )
+        )}
+      </>
+    );
+  };
+
+  const filteredChunks = searchQuery.trim()
+    ? chunks.filter(c => c.chunk_text.toLowerCase().includes(searchQuery.toLowerCase()))
+    : chunks;
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentMatchIndex(0);
+  };
+
+  const navigateMatch = (dir: 'prev' | 'next') => {
+    if (filteredChunks.length === 0) return;
+    const next = dir === 'next'
+      ? (currentMatchIndex + 1) % filteredChunks.length
+      : (currentMatchIndex - 1 + filteredChunks.length) % filteredChunks.length;
+    setCurrentMatchIndex(next);
+    chunkRefs.current[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
   const formatDateTime = (val?: string) =>
     val
       ? new Date(val).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
@@ -168,7 +226,7 @@ export function DocumentDetailModal({
           {tabs.map(tab => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => { setActiveTab(tab.key); setSearchQuery(''); setChunksError(null); }}
               className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.key
                   ? 'border-[#facb01] text-gray-900'
@@ -281,21 +339,104 @@ export function DocumentDetailModal({
                 )}
               </div>
 
+              {/* Search input — hiển thị khi đã tải xong và có dữ liệu */}
+              {!chunksLoading && chunks.length > 0 && (
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => handleSearchChange(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') navigateMatch(e.shiftKey ? 'prev' : 'next');
+                      if (e.key === 'Escape') { handleSearchChange(''); searchInputRef.current?.blur(); }
+                    }}
+                    placeholder="Tìm kiếm trong nội dung..."
+                    className="w-full pl-9 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#facb01]/60 focus:border-[#facb01] transition"
+                    style={{ paddingRight: searchQuery ? '10rem' : '1rem' }}
+                  />
+                  {searchQuery && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                      {filteredChunks.length === 0 ? (
+                        <span className="text-xs font-medium text-red-500 px-1">Không khớp</span>
+                      ) : (
+                        <>
+                          <span className="text-xs font-medium text-[#b59a00] px-1 tabular-nums">
+                            {currentMatchIndex + 1}/{filteredChunks.length}
+                          </span>
+                          <button
+                            onClick={() => navigateMatch('prev')}
+                            className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                            title="Kết quả trước (Shift+Enter)"
+                          >
+                            <ChevronUp className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={() => navigateMatch('next')}
+                            className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                            title="Kết quả tiếp (Enter)"
+                          >
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => { handleSearchChange(''); searchInputRef.current?.focus(); }}
+                        className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                        aria-label="Xóa tìm kiếm"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {chunksLoading ? (
-                <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
+                <div className="flex items-center justify-center py-16 text-gray-400 text-sm gap-2">
+                  <RefreshCw className="h-4 w-4 animate-spin" />
                   Đang tải nội dung...
+                </div>
+              ) : chunksError ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50">
+                    <AlertTriangle className="h-6 w-6 text-red-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-red-600 mb-1">Không thể tải nội dung</p>
+                    <p className="text-xs text-gray-500 max-w-sm">{chunksError}</p>
+                  </div>
+                  <button
+                    onClick={fetchChunks}
+                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    Thử lại
+                  </button>
                 </div>
               ) : chunks.length === 0 ? (
                 <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
                   Không có nội dung
                 </div>
+              ) : filteredChunks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-2 text-gray-400 text-sm">
+                  <Search className="h-8 w-8 text-gray-300" />
+                  <span>Không tìm thấy đoạn nào khớp với "<span className="font-medium text-gray-600">{searchQuery}</span>"</span>
+                </div>
               ) : (
                 <div className="space-y-3">
-                  {chunks.map((chunk, i) => {
-                    const start = chunks.slice(0, i).reduce((acc, c) => acc + c.char_count, 0);
+                  {filteredChunks.map((chunk, i) => {
+                    const originalIndex = chunks.indexOf(chunk);
+                    const start = chunks.slice(0, originalIndex).reduce((acc, c) => acc + c.char_count, 0);
                     const end = start + chunk.char_count - 1;
+                    const isActive = searchQuery.trim() && i === currentMatchIndex;
                     return (
-                      <div key={chunk.point_id ?? chunk.chunk_id ?? i} className="border border-gray-200 rounded-lg overflow-hidden">
+                      <div
+                        key={chunk.point_id ?? chunk.chunk_id ?? i}
+                        ref={el => { chunkRefs.current[i] = el; }}
+                        className={`border rounded-lg overflow-hidden transition-colors ${isActive ? 'border-[#facb01] ring-2 ring-[#facb01]/30' : 'border-gray-200'}`}
+                      >
                         <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
                           <div className="flex items-center gap-4">
                             <span className="text-sm font-semibold text-gray-700">Đoạn #{chunk.chunk_index + 1}</span>
@@ -303,15 +444,17 @@ export function DocumentDetailModal({
                             <span className="text-xs text-gray-400">Bắt đầu: {start.toLocaleString()}  Kết thúc: {end.toLocaleString()}</span>
                           </div>
                           <button
-                            onClick={() => handleCopyChunk(chunk.chunk_text, i)}
+                            onClick={() => handleCopyChunk(chunk.chunk_text, originalIndex)}
                             className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
                           >
-                            {copiedIndex === i ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
-                            {copiedIndex === i ? 'Đã sao chép' : 'Sao chép đoạn'}
+                            {copiedIndex === originalIndex ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                            {copiedIndex === originalIndex ? 'Đã sao chép' : 'Sao chép đoạn'}
                           </button>
                         </div>
                         <div className="px-4 py-3">
-                          <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">{chunk.chunk_text}</p>
+                          <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                            {highlightText(chunk.chunk_text, searchQuery)}
+                          </p>
                         </div>
                       </div>
                     );

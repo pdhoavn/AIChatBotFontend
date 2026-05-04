@@ -59,22 +59,22 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
       { id: 'users', label: 'Quản Lý Người Dùng', icon: Users, path: '/admin/users' },
       { id: 'profile', label: user?.name || 'Hồ Sơ', icon: User, path: '/admin/profile' },
     ],
-    'Content Manager': [
-      { id: "dashboard", label: "Tổng quan", icon: LayoutDashboard, path: '/content/dashboard', permission: "Content Manager" },
-      { id: "articles", label: "Danh Sách Bài Viết", icon: FileText, path: '/content/articles', permission: "Content Manager" },
-      { id: "editor", label: "Bài Viết Mới", icon: PenSquare, path: '/content/editor', permission: "Content Manager" },
-      ...(isContentManagerLeader?.() ? [
-        { id: "review", label: "Hàng Đợi Duyệt Bài", icon: ListChecks, path: "/content/review", permission: "Content Manager" }
-      ] : []),
-      { id: "profile", label: user?.name || "Hồ Sơ", icon: User, path: '/content/profile', permission: "Student" },
-    ],
-    'Admission Official': [
-      { id: 'students', label: 'Danh Sách Học Sinh', icon: Users, path: '/admission/students' },
-      { id: 'request-queue', label: 'Hàng Đợi Yêu Cầu', icon: Clock, path: '/admission/request-queue' },
-      { id: 'consultation', label: 'Tư Vấn Trực Tiếp', icon: MessageCircle, path: '/admission/consultation' },
-      { id: 'knowledge-base', label: 'Cơ Sở Tri Thức', icon: BookOpen, path: '/admission/knowledge-base' },
-      { id: 'profile', label: user?.name || 'Hồ Sơ', icon: User, path: '/admission/profile' },
-    ],
+    // 'Content Manager': [
+    //   { id: "dashboard", label: "Tổng quan", icon: LayoutDashboard, path: '/content/dashboard', permission: "Content Manager" },
+    //   { id: "articles", label: "Danh Sách Bài Viết", icon: FileText, path: '/content/articles', permission: "Content Manager" },
+    //   { id: "editor", label: "Bài Viết Mới", icon: PenSquare, path: '/content/editor', permission: "Content Manager" },
+    //   ...(isContentManagerLeader?.() ? [
+    //     { id: "review", label: "Hàng Đợi Duyệt Bài", icon: ListChecks, path: "/content/review", permission: "Content Manager" }
+    //   ] : []),
+    //   { id: "profile", label: user?.name || "Hồ Sơ", icon: User, path: '/content/profile', permission: "Student" },
+    // ],
+    // 'Admission Official': [
+    //   { id: 'students', label: 'Danh Sách Học Sinh', icon: Users, path: '/admission/students' },
+    //   { id: 'request-queue', label: 'Hàng Đợi Yêu Cầu', icon: Clock, path: '/admission/request-queue' },
+    //   { id: 'consultation', label: 'Tư Vấn Trực Tiếp', icon: MessageCircle, path: '/admission/consultation' },
+    //   { id: 'knowledge-base', label: 'Cơ Sở Tri Thức', icon: BookOpen, path: '/admission/knowledge-base' },
+    //   { id: 'profile', label: user?.name || 'Hồ Sơ', icon: User, path: '/admission/profile' },
+    // ],
     Consultant: [
       { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard, path: '/consultant/overview' },
       { id: 'analytics', label: 'Phân Tích Chatbot', icon: TrendingUp, path: '/consultant/analytics' },
@@ -95,9 +95,9 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
 
   // Role labels and icons for switching buttons - CENTRALIZED
   const roleLabels = {
-    Admin: { label: 'Quản Trị Viên', icon: Shield, color: 'bg-red-100 text-red-700 border-red-200' },
-    'Content Manager': { label: 'Quản Lý Nội Dung', icon: FileEdit, color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    'Admission Official': { label: 'Cán Bộ Tuyển Sinh', icon: GraduationCap, color: 'bg-green-100 text-green-700 border-green-200' },
+    Admin: { label: 'Admin', icon: Shield, color: 'bg-red-100 text-red-700 border-red-200' },
+    // 'Content Manager': { label: 'Quản Lý Nội Dung', icon: FileEdit, color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    // 'Admission Official': { label: 'Cán Bộ Tuyển Sinh', icon: GraduationCap, color: 'bg-green-100 text-green-700 border-green-200' },
     Consultant: { label: 'Quản Trị Viên', icon: TrendingUp, color: 'bg-purple-100 text-purple-700 border-purple-200' },
     Parent: { label: 'Phụ Huynh', icon: User, color: 'bg-gray-100 text-gray-700 border-gray-200' }
   };
@@ -168,6 +168,7 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
               {accessibleRoles.map((role) => {
                 const roleInfo = roleLabels[role];
                 if (!roleInfo) return null;
+                
 
                 const Icon = roleInfo.icon;
                 const isCurrentRole = role === (activeRole || roleKey);
