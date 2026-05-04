@@ -54,7 +54,7 @@ export function DocumentDetailModal({
     if (err instanceof Error) {
       const msg = err.message;
       if (msg.includes('10054') || msg.toLowerCase().includes('forcibly closed') || msg.toLowerCase().includes('connection') ) {
-        return 'Kết nối tới máy chủ Qdrant bị ngắt đột ngột. Vui lòng thử lại.';
+        return 'Kết nối tới máy chủ bị ngắt đột ngột. Vui lòng thử lại.';
       }
       if (msg.toLowerCase().includes('qdrant')) return `Lỗi Qdrant: ${msg}`;
       if (msg.includes('500') || msg.toLowerCase().includes('server error')) return 'Máy chủ gặp sự cố. Vui lòng thử lại sau.';
