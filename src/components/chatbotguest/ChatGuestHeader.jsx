@@ -70,9 +70,9 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
 
         {/* Right side badges */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="relative flex flex-col items-start gap-0.5" ref={menuRef}>
-            <span className="text-[10px] font-medium text-text-muted uppercase tracking-wider px-0.5">
-              Đối tượng:
+          <div className="relative flex items-center gap-2" ref={menuRef}>
+            <span className="text-[10px] font-medium text-text-muted uppercase tracking-wider">
+              Đối tượng
             </span>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}

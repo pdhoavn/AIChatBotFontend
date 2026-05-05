@@ -159,6 +159,7 @@ export default function ChatGuestPage() {
   const [prefillMessage, setPrefillMessage] = useState(null);
   const [hasWelcomed, setHasWelcomed] = useState(false);
   const [greeting, setGreeting] = useState(null);
+  const [hasError, setHasError] = useState(false);
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
@@ -423,6 +424,7 @@ export default function ChatGuestPage() {
             }
             case "error":
               setIsLoading(false);
+              setHasError(true);
               break;
             default:
               break;
@@ -435,11 +437,19 @@ export default function ChatGuestPage() {
       ws.onclose = () => {
         if (wsRef.current !== ws) return;
         setWsReady(false);
+        setIsLoading(prev => {
+          if (prev) setHasError(true);
+          return false;
+        });
         scheduleRetry();
       };
       ws.onerror = () => {
         if (wsRef.current !== ws) return;
         setWsReady(false);
+        setIsLoading(prev => {
+          if (prev) setHasError(true);
+          return false;
+        });
         scheduleRetry();
       };
     };
@@ -528,6 +538,7 @@ export default function ChatGuestPage() {
     setMessages((prev) => [...prev, { sender: "user", text: userMessage }]);
     setInput("");
     setIsLoading(true);
+    setHasError(false);
     setPartial("");
     partialRef.current = "";
     isStoppedRef.current = false;
@@ -690,6 +701,28 @@ export default function ChatGuestPage() {
                       <span className="inline-block w-1.5 h-1.5 bg-accent rounded-full animate-pulse [animation-delay:300ms]" />
                     </span>
                   )}
+                </div>
+              </div>
+            )}
+
+            {hasError && (
+              <div className="mb-4 flex justify-center">
+                <div className="bg-red-500/10 text-red-500 px-4 py-2 rounded-xl text-[13px] flex items-center gap-3 border border-red-500/20 shadow-sm max-w-[85%]">
+                  <PhIcon name="error" size={18} className="shrink-0" />
+                  <span>Kết nối bị gián đoạn. Vui lòng thử lại.</span>
+                  <button 
+                    onClick={() => {
+                      setHasError(false);
+                      const lastUserMsg = [...messages].reverse().find(m => m.sender === "user");
+                      if (lastUserMsg) {
+                        send(lastUserMsg.text);
+                      }
+                    }}
+                    className="shrink-0 px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold shadow-sm flex items-center gap-1.5 ml-2"
+                  >
+                    <PhIcon name="arrows_clockwise" size={14} />
+                    Thử lại
+                  </button>
                 </div>
               </div>
             )}
