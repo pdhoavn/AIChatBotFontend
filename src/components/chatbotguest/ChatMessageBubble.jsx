@@ -1,9 +1,10 @@
 // src/components/chatbotguest/ChatMessageBubble.jsx
-import React from "react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import PhIcon from "../ui/PhIcon.jsx";
 
 export default function ChatMessageBubble({ message }) {
+  const [isCopied, setIsCopied] = useState(false);
   const isUser = message.sender === "user";
   const hasLawyerSuggestion = message.text?.includes("[SUGGEST_LAWYER]");
   const cleanContent = message.text?.replace("[SUGGEST_LAWYER]", "").trim();
@@ -127,6 +128,24 @@ export default function ChatMessageBubble({ message }) {
                         </a>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* COPY BUTTON ROW */}
+                {cleanContent && (
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(cleanContent);
+                        setIsCopied(true);
+                        setTimeout(() => setIsCopied(false), 2000);
+                      }}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium text-text-muted hover:bg-surface/60 hover:text-text-main transition-all"
+                      title="Sao chép tin nhắn"
+                    >
+                      <PhIcon name={isCopied ? "check" : "content_copy"} size={14} className={isCopied ? "text-emerald-500" : ""} />
+                      {isCopied ? <span className="text-emerald-500">Đã lưu vào bộ nhớ tạm</span> : <span>Sao chép</span>}
+                    </button>
                   </div>
                 )}
               </>

@@ -6,7 +6,6 @@ import ChatGuestHeader from "../../components/chatbotguest/ChatGuestHeader.jsx";
 import ChatMessageBubble from "../../components/chatbotguest/ChatMessageBubble.jsx";
 import ChatEmptyState from "../../components/chatbotguest/ChatEmptyState.jsx";
 import ChatInput from "../../components/chatbotguest/ChatInput.jsx";
-import LawDetailModal from "../../components/chatbotguest/LawDetailModal.jsx";
 import PhIcon from "../../components/ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition.js";
@@ -159,9 +158,9 @@ export default function ChatGuestPage() {
   const [partial, setPartial] = useState("");
   const [prefillMessage, setPrefillMessage] = useState(null);
   const [hasWelcomed, setHasWelcomed] = useState(false);
-  const [selectedLaw, setSelectedLaw] = useState(null);
-  const [isLawModalOpen, setIsLawModalOpen] = useState(false);
   const [greeting, setGreeting] = useState(null);
+  const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   const [audiences, setAudiences] = useState([]);
   const [audiencesLoaded, setAudiencesLoaded] = useState(false);
@@ -314,13 +313,22 @@ export default function ChatGuestPage() {
   }, [selectedAudience, selectedIntent]);
 
   useEffect(() => {
-    if (autoScrollRef.current) {
+    if (isAutoScrollEnabled && autoScrollRef.current) {
       autoScrollRef.current.scrollTo({
         top: autoScrollRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
-  }, [messages, partial]);
+  }, [messages, partial, isAutoScrollEnabled]);
+
+  const handleScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    // Consider "near bottom" if within 150px of the bottom
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+    
+    setIsAutoScrollEnabled(isNearBottom);
+    setShowScrollButton(!isNearBottom);
+  };
 
   useEffect(() => {
     const isSafari = isSafariBrowser();
@@ -645,6 +653,7 @@ export default function ChatGuestPage() {
 
       <div
         ref={autoScrollRef}
+        onScroll={handleScroll}
         className="flex-1 overflow-y-auto w-full relative"
       >
         <div className="max-w-5xl mx-auto w-full px-3 md:px-6 flex flex-col pb-36 min-h-full">
@@ -689,7 +698,38 @@ export default function ChatGuestPage() {
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 w-full z-20 px-3 md:px-6 pb-3 pt-2 pointer-events-none">
-        <div className="mx-auto w-full max-w-5xl">
+        <div className="mx-auto w-full max-w-5xl relative">
+          
+          {/* Scroll to bottom button */}
+          {showScrollButton && (
+            <div className="absolute -top-14 left-1/2 -translate-x-1/2 pointer-events-auto">
+              <button
+                onClick={() => {
+                  if (autoScrollRef.current) {
+                    autoScrollRef.current.scrollTo({
+                      top: autoScrollRef.current.scrollHeight,
+                      behavior: "smooth",
+                    });
+                  }
+                }}
+                className={`rounded-full bg-surface/95 backdrop-blur-sm border border-border-main shadow-[0_4px_16px_rgba(0,0,0,0.1)] flex items-center justify-center text-text-muted hover:text-accent hover:border-accent/40 transition-all hover:scale-105 ${
+                  (isLoading || partial) ? "h-9 px-4 gap-2" : "w-9 h-9"
+                }`}
+                title="Cuộn xuống tin nhắn mới nhất"
+              >
+                {(isLoading || partial) ? (
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse [animation-delay:150ms]" />
+                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse [animation-delay:300ms]" />
+                  </span>
+                ) : (
+                  <PhIcon name="expand_more" size={18} />
+                )}
+              </button>
+            </div>
+          )}
+
           <ChatInput
             input={input}
             isLoading={isLoading}
@@ -715,12 +755,6 @@ export default function ChatGuestPage() {
           </div>
         </div>
       </div>
-
-      <LawDetailModal
-        isOpen={isLawModalOpen}
-        law={selectedLaw}
-        onClose={() => setIsLawModalOpen(false)}
-      />
     </div>
   );
 }
