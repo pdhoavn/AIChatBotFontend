@@ -258,12 +258,64 @@ export const knowledgeAPI = {
       if (!response.ok) {
         const errorBody = await response.json().catch(() => null);
         const message = errorBody?.detail || `HTTP error! status: ${response.status}`;
-        const error = new Error(message) as Error & { detail?: string };
+        const error = new Error(message) as Error & { detail?: string; apiStatus?: string };
         error.detail = errorBody?.detail;
+        error.apiStatus = errorBody?.status;
         throw error;
       }
       return response.json();
     });
+  },
+
+  uploadDocumentOCR: async (
+    formData: FormData,
+    intendId: number,
+    target_audiences: string[] = [],
+    onEvent?: (event: Record<string, unknown>) => void
+  ): Promise<void> => {
+    const token = localStorage.getItem("access_token");
+    const headers: HeadersInit = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    target_audiences.forEach(a => formData.append('target_audiences', a));
+    const url = `${API_CONFIG.FASTAPI_BASE_URL}/knowledge/upload/document-ocr?intend_id=${intendId}`;
+
+    const response = await fetch(url, { method: 'POST', headers, body: formData });
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => null);
+      const message = errorBody?.detail || `HTTP error! status: ${response.status}`;
+      const error = new Error(message) as Error & { detail?: string; apiStatus?: string };
+      error.detail = errorBody?.detail;
+      error.apiStatus = errorBody?.status;
+      throw error;
+    }
+
+    // Parse SSE stream từ backend
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const data = JSON.parse(line.slice(6));
+          onEvent?.(data);
+          if (data.event === 'error') throw new Error(data.message as string);
+        } catch (e) {
+          if (e instanceof SyntaxError) continue;
+          throw e;
+        }
+      }
+    }
   },
 
   uploadTrainingQuestion: (data: { question: string; answer: string; intent_id: number; target_audiences: string[] }) =>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useOCR } from '../../../contexts/OCRContext';
 import { useAuth } from '../../../contexts/Auth';
 import { knowledgeAPI, intentAPI } from '../../../services/fastapi';
 import { TabSwitcher } from './TabSwitcher';
@@ -18,6 +19,7 @@ import { Pagination } from '../../common/Pagination';
 
 export function TrainingDataManagement() {
   const { user, isConsultantLeader } = useAuth();
+  const { startOCR } = useOCR();
   const isLeader = isConsultantLeader();
   const location = useLocation();
   const locationState = location.state as { tab?: string; categoryFilter?: string } | null;
@@ -28,6 +30,7 @@ export function TrainingDataManagement() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
   const [categoryFilter, setCategoryFilter] = useState(locationState?.categoryFilter || 'all');
   const [audienceFilter, setAudienceFilter] = useState<string[]>([]);
   const [intents, setIntents] = useState<Intent[]>([]);
@@ -223,10 +226,16 @@ export function TrainingDataManagement() {
       toast.success('Tải lên tài liệu thành công! Đang chờ duyệt.');
       await fetchDocuments();
     } catch (error) {
-      const message = (error as Error).message;
-      toast.error(message || 'Không thể tải lên tài liệu');
+      const err = error as Error & { apiStatus?: string };
+      if (err.apiStatus !== 'SCANNED_PDF') {
+        toast.error(err.message || 'Không thể tải lên tài liệu');
+      }
       throw error;
     }
+  };
+
+  const handleStartOCR = (formData: FormData, intentId: number, target_audiences: string[]) => {
+    startOCR(formData, intentId, target_audiences, fetchDocuments);
   };
 
   const sortByDateAndStatus = <T extends { created_at?: string | Date; status?: string }>(items: T[]): T[] => {
@@ -451,8 +460,10 @@ export function TrainingDataManagement() {
           intents={intents}
           onClose={() => setShowUploadDocumentModal(false)}
           onSubmit={handleUploadDocument}
+          onStartOCR={handleStartOCR}
         />
       )}
+
 
     </div>
   );

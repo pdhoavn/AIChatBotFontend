@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Upload, ChevronDown, Check } from 'lucide-react';
+import { X, Upload, ChevronDown, Check, AlertTriangle, Loader2 } from 'lucide-react';
 import { Intent } from './types';
 import { Input } from '../../ui/system_users/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/system_users/select';
@@ -32,15 +32,18 @@ interface UploadDocumentModalProps {
   intents: Intent[];
   onClose: () => void;
   onSubmit: (formData: FormData, intentId: number, target_audiences: string[]) => Promise<void>;
+  // Sync — đóng modal ngay, OCR chạy nền ở TrainingDataManagement
+  onStartOCR?: (formData: FormData, intentId: number, target_audiences: string[]) => void;
 }
 
-export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocumentModalProps) {
+export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: UploadDocumentModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [intentId, setIntentId] = useState<number | undefined>(undefined);
   const [audiences, setAudiences] = useState<Audience[]>([]);
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showOCRPrompt, setShowOCRPrompt] = useState(false);
   const audienceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,6 +70,14 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
   ];
   const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.txt', '.xlsx'];
 
+  const detectScannedPDF = async (f: File): Promise<boolean> => {
+    const buffer = await f.arrayBuffer();
+    const slice = buffer.slice(0, Math.min(buffer.byteLength, 2_000_000));
+    const text = new TextDecoder('latin1').decode(slice);
+    const textOps = (text.match(/\)\s*Tj|\]\s*TJ/g) ?? []).length;
+    return textOps < 5;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -81,36 +92,43 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
       }
 
       setFile(selectedFile);
-      if (!title) {
-        setTitle(selectedFile.name.replace(/\.[^/.]+$/, ''));
+      setShowOCRPrompt(false);
+      if (!title) setTitle(selectedFile.name.replace(/\.[^/.]+$/, ''));
+
+      if (selectedFile.type === 'application/pdf') {
+        detectScannedPDF(selectedFile).then(isScanned => {
+          if (isScanned) setShowOCRPrompt(true);
+        });
       }
     }
   };
 
   const handleSubmit = async () => {
-    if (!file) {
-      alert('Vui lòng chọn file');
-      return;
-    }
-    if (!title.trim()) {
-      alert('Vui lòng nhập tiêu đề');
-      return;
-    }
-    if (audiences.length === 0) {
-      alert('Vui lòng chọn ít nhất một đối tượng');
+    if (!file) { alert('Vui lòng chọn file'); return; }
+    if (!title.trim()) { alert('Vui lòng nhập tiêu đề'); return; }
+    if (audiences.length === 0) { alert('Vui lòng chọn ít nhất một đối tượng'); return; }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('title', title);
+    const resolvedIntentId = intentId ?? 0;
+    const audienceValues = audiences.map(a => AUDIENCE_VALUE_MAP[a]);
+
+    // OCR: đóng modal ngay, widget chạy nền
+    if (showOCRPrompt && onStartOCR) {
+      onStartOCR(formData, resolvedIntentId, audienceValues);
+      onClose();
       return;
     }
 
+    // Upload thường
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('title', title);
-
-      const resolvedIntentId = intentId ?? 0;
-      await onSubmit(formData, resolvedIntentId, audiences.map(a => AUDIENCE_VALUE_MAP[a]));
+      await onSubmit(formData, resolvedIntentId, audienceValues);
       onClose();
     } catch (error) {
+      const err = error as Error & { apiStatus?: string };
+      if (err.apiStatus === 'SCANNED_PDF') setShowOCRPrompt(true);
     } finally {
       setLoading(false);
     }
@@ -119,20 +137,16 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        {}
-        <div className="flex items-center justify-between p-6 border-b">
+
+        <div className="flex items-center justify-between p-6 border-b shrink-0">
           <h2 className="text-2xl font-bold text-gray-900">Tải Lên Tài Liệu Mới</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {}
+          {/* File */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chọn File <span className="text-red-500">*</span>
@@ -155,25 +169,31 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
                   accept=".pdf,.docx,.txt,.xlsx"
                 />
               </label>
-              <p className="text-xs text-gray-500 mt-2">
-                Định dạng: PDF, DOCX, TXT, XLSX
-              </p>
+              <p className="text-xs text-gray-500 mt-2">Định dạng: PDF, DOCX, TXT, XLSX</p>
             </div>
+
+            {showOCRPrompt && (
+              <div className="flex items-start gap-2 p-3 mt-3 bg-amber-50 border border-amber-200 rounded-lg text-sm">
+                <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-amber-800">File PDF chứa ảnh scan</p>
+                  <p className="text-amber-700 mt-0.5">
+                    File này chứa ảnh scan, không thể trích xuất trực tiếp. Nhấn <strong>"Tải lên với OCR"</strong> để hệ thống tự động nhận dạng văn bản — quá trình chạy nền, bạn vẫn dùng được ứng dụng.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
-          {}
+          {/* Tiêu đề */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Tiêu Đề <span className="text-red-500">*</span>
             </label>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Nhập tiêu đề tài liệu..."
-            />
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Nhập tiêu đề tài liệu..." />
           </div>
 
-          {}
+          {/* Đối tượng */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -181,13 +201,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
               </label>
               <button
                 type="button"
-                onClick={() =>
-                  setAudiences(
-                    audiences.length === AUDIENCE_OPTIONS.length
-                      ? []
-                      : [...AUDIENCE_OPTIONS]
-                  )
-                }
+                onClick={() => setAudiences(audiences.length === AUDIENCE_OPTIONS.length ? [] : [...AUDIENCE_OPTIONS])}
                 className="text-xs text-[#facb01] hover:underline"
               >
                 {audiences.length === AUDIENCE_OPTIONS.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
@@ -204,10 +218,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
                 ) : (
                   <span className="flex flex-wrap gap-1">
                     {audiences.map(a => (
-                      <span
-                        key={a}
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${AUDIENCE_COLORS[a]}`}
-                      >
+                      <span key={a} className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${AUDIENCE_COLORS[a]}`}>
                         {a}
                       </span>
                     ))}
@@ -240,15 +251,10 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
             </div>
           </div>
 
-          {}
+          {/* Lĩnh vực */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Lĩnh vực
-            </label>
-            <Select
-              value={intentId?.toString() || ''}
-              onValueChange={(value) => setIntentId(parseInt(value))}
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-2">Lĩnh vực</label>
+            <Select value={intentId?.toString() || ''} onValueChange={(value) => setIntentId(parseInt(value))}>
               <SelectTrigger>
                 <SelectValue placeholder="Chọn lĩnh vực" />
               </SelectTrigger>
@@ -263,22 +269,17 @@ export function UploadDocumentModal({ intents, onClose, onSubmit }: UploadDocume
           </div>
         </div>
 
-        {}
-        <div className="flex items-center justify-end gap-2 p-6 border-t bg-gray-50">
-          <Button
-            onClick={onClose}
-            variant="outline"
-            className="hover:bg-gray-100 hover:border-gray-400"
-            disabled={loading}
-          >
+        <div className="flex items-center justify-end gap-2 p-6 border-t bg-gray-50 shrink-0">
+          <Button onClick={onClose} variant="outline" className="hover:bg-gray-100 hover:border-gray-400" disabled={loading}>
             Hủy
           </Button>
-          <Button
-            onClick={handleSubmit}
-            className="bg-[#facb01] hover:bg-[#e8b800]"
-            disabled={loading}
-          >
-            {loading ? 'Đang tải lên...' : 'Tải Lên'}
+          <Button onClick={handleSubmit} className="bg-[#facb01] hover:bg-[#e8b800]" disabled={loading}>
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang tải lên...
+              </span>
+            ) : showOCRPrompt ? 'Tải lên với OCR' : 'Tải Lên'}
           </Button>
         </div>
       </div>
