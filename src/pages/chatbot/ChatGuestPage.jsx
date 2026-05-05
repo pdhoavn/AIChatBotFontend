@@ -6,7 +6,6 @@ import ChatGuestHeader from "../../components/chatbotguest/ChatGuestHeader.jsx";
 import ChatMessageBubble from "../../components/chatbotguest/ChatMessageBubble.jsx";
 import ChatEmptyState from "../../components/chatbotguest/ChatEmptyState.jsx";
 import ChatInput from "../../components/chatbotguest/ChatInput.jsx";
-import LawDetailModal from "../../components/chatbotguest/LawDetailModal.jsx";
 import PhIcon from "../../components/ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition.js";
@@ -159,9 +158,10 @@ export default function ChatGuestPage() {
   const [partial, setPartial] = useState("");
   const [prefillMessage, setPrefillMessage] = useState(null);
   const [hasWelcomed, setHasWelcomed] = useState(false);
-  const [selectedLaw, setSelectedLaw] = useState(null);
-  const [isLawModalOpen, setIsLawModalOpen] = useState(false);
   const [greeting, setGreeting] = useState(null);
+  const [hasError, setHasError] = useState(false);
+  const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   const [audiences, setAudiences] = useState([]);
   const [audiencesLoaded, setAudiencesLoaded] = useState(false);
@@ -314,13 +314,22 @@ export default function ChatGuestPage() {
   }, [selectedAudience, selectedIntent]);
 
   useEffect(() => {
-    if (autoScrollRef.current) {
+    if (isAutoScrollEnabled && autoScrollRef.current) {
       autoScrollRef.current.scrollTo({
         top: autoScrollRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
-  }, [messages, partial]);
+  }, [messages, partial, isAutoScrollEnabled]);
+
+  const handleScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    // Consider "near bottom" if within 150px of the bottom
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+    
+    setIsAutoScrollEnabled(isNearBottom);
+    setShowScrollButton(!isNearBottom);
+  };
 
   useEffect(() => {
     const isSafari = isSafariBrowser();
@@ -415,6 +424,7 @@ export default function ChatGuestPage() {
             }
             case "error":
               setIsLoading(false);
+              setHasError(true);
               break;
             default:
               break;
@@ -427,11 +437,19 @@ export default function ChatGuestPage() {
       ws.onclose = () => {
         if (wsRef.current !== ws) return;
         setWsReady(false);
+        setIsLoading(prev => {
+          if (prev) setHasError(true);
+          return false;
+        });
         scheduleRetry();
       };
       ws.onerror = () => {
         if (wsRef.current !== ws) return;
         setWsReady(false);
+        setIsLoading(prev => {
+          if (prev) setHasError(true);
+          return false;
+        });
         scheduleRetry();
       };
     };
@@ -520,6 +538,7 @@ export default function ChatGuestPage() {
     setMessages((prev) => [...prev, { sender: "user", text: userMessage }]);
     setInput("");
     setIsLoading(true);
+    setHasError(false);
     setPartial("");
     partialRef.current = "";
     isStoppedRef.current = false;
@@ -645,6 +664,7 @@ export default function ChatGuestPage() {
 
       <div
         ref={autoScrollRef}
+        onScroll={handleScroll}
         className="flex-1 overflow-y-auto w-full relative"
       >
         <div className="max-w-5xl mx-auto w-full px-3 md:px-6 flex flex-col pb-36 min-h-full">
@@ -684,12 +704,65 @@ export default function ChatGuestPage() {
                 </div>
               </div>
             )}
+
+            {hasError && (
+              <div className="mb-4 flex justify-center">
+                <div className="bg-red-500/10 text-red-500 px-4 py-2 rounded-xl text-[13px] flex items-center gap-3 border border-red-500/20 shadow-sm max-w-[85%]">
+                  <PhIcon name="error" size={18} className="shrink-0" />
+                  <span>Kết nối bị gián đoạn. Vui lòng thử lại.</span>
+                  <button 
+                    onClick={() => {
+                      setHasError(false);
+                      const lastUserMsg = [...messages].reverse().find(m => m.sender === "user");
+                      if (lastUserMsg) {
+                        send(lastUserMsg.text);
+                      }
+                    }}
+                    className="shrink-0 px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold shadow-sm flex items-center gap-1.5 ml-2"
+                  >
+                    <PhIcon name="arrows_clockwise" size={14} />
+                    Thử lại
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 w-full z-20 px-3 md:px-6 pb-3 pt-2 pointer-events-none">
-        <div className="mx-auto w-full max-w-5xl">
+        <div className="mx-auto w-full max-w-5xl relative">
+          
+          {/* Scroll to bottom button */}
+          {showScrollButton && (
+            <div className="absolute -top-14 left-1/2 -translate-x-1/2 pointer-events-auto">
+              <button
+                onClick={() => {
+                  if (autoScrollRef.current) {
+                    autoScrollRef.current.scrollTo({
+                      top: autoScrollRef.current.scrollHeight,
+                      behavior: "smooth",
+                    });
+                  }
+                }}
+                className={`rounded-full bg-surface/95 backdrop-blur-sm border border-border-main shadow-[0_4px_16px_rgba(0,0,0,0.1)] flex items-center justify-center text-text-muted hover:text-accent hover:border-accent/40 transition-all hover:scale-105 ${
+                  (isLoading || partial) ? "h-9 px-4 gap-2" : "w-9 h-9"
+                }`}
+                title="Cuộn xuống tin nhắn mới nhất"
+              >
+                {(isLoading || partial) ? (
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse [animation-delay:150ms]" />
+                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse [animation-delay:300ms]" />
+                  </span>
+                ) : (
+                  <PhIcon name="expand_more" size={18} />
+                )}
+              </button>
+            </div>
+          )}
+
           <ChatInput
             input={input}
             isLoading={isLoading}
@@ -715,12 +788,6 @@ export default function ChatGuestPage() {
           </div>
         </div>
       </div>
-
-      <LawDetailModal
-        isOpen={isLawModalOpen}
-        law={selectedLaw}
-        onClose={() => setIsLawModalOpen(false)}
-      />
     </div>
   );
 }
