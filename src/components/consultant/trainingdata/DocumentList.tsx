@@ -1,5 +1,5 @@
 import { TrainingDocument } from './types';
-import { FileText } from 'lucide-react';
+import { FileText, ScanText } from 'lucide-react';
 
 const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
   CANBO:     { label: 'Viên chức/NLĐ', color: 'bg-blue-100 text-blue-700 border-blue-200' },
@@ -68,6 +68,12 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                   Lĩnh vực: {(doc.intent_name && doc.intent_name !== 'None') ? doc.intent_name : 'Chung'}
                 </span>
+                {doc.is_ocr && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-indigo-100 text-indigo-700 border border-indigo-200">
+                    <ScanText className="h-3 w-3" />
+                    OCR
+                  </span>
+                )}
               </div>
 
               {}

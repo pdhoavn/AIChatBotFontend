@@ -299,6 +299,7 @@ export interface KnowledgeDocument {
   reviewed_by?: number;
   reviewed_at?: string;
   reject_reason?: string;
+  is_ocr?: boolean;
 }
 
 export interface TrainingQuestion {

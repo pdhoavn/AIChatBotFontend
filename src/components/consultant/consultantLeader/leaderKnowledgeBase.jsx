@@ -221,7 +221,9 @@ export function LeaderKnowledgeBase() {
       const url = window.URL.createObjectURL(blob);
       const a = window.document.createElement('a');
       a.href = url;
-      a.download = document.title || `document-${document.document_id}`;
+      const rawExt = (document.file_path || '').split('/').pop()?.split('.').pop()?.toLowerCase() || '';
+      const base = document.title || `document-${document.document_id}`;
+      a.download = (rawExt && !base.toLowerCase().endsWith(`.${rawExt}`)) ? `${base}.${rawExt}` : base;
       window.document.body.appendChild(a);
       a.click();
       window.document.body.removeChild(a);

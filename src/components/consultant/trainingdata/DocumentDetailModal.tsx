@@ -109,7 +109,8 @@ export function DocumentDetailModal({
       const url = window.URL.createObjectURL(blob);
       const a = window.document.createElement('a');
       a.href = url;
-      a.download = document.title || `document-${document.document_id}`;
+      const base = document.title || `document-${document.document_id}`;
+      a.download = (ext && !base.toLowerCase().endsWith(`.${ext}`)) ? `${base}.${ext}` : base;
       window.document.body.appendChild(a);
       a.click();
       window.document.body.removeChild(a);
@@ -207,8 +208,10 @@ export function DocumentDetailModal({
   ];
 
   return (
+    <>
+    <style>{`.doc-chunk-list::-webkit-scrollbar{display:block!important;width:8px!important}.doc-chunk-list::-webkit-scrollbar-track{background:#e2e8f0;border-radius:9999px}.doc-chunk-list::-webkit-scrollbar-thumb{background:#64748b!important;border-radius:9999px}.doc-chunk-list::-webkit-scrollbar-thumb:hover{background:#334155!important}`}</style>
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-lg w-full max-w-5xl h-[90vh] overflow-hidden flex flex-col">
 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -239,8 +242,9 @@ export function DocumentDetailModal({
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-hidden flex flex-col">
           {activeTab === 'info' ? (
+            <div className="flex-1 overflow-y-auto p-6">
             <div className="space-y-5">
               {/* Dòng 1: Tiêu đề */}
               <div>
@@ -317,10 +321,11 @@ export function DocumentDetailModal({
                 </div>
               )}
             </div>
+          </div>
           ) : (
-            <div className="space-y-4">
-              {/* Tóm tắt */}
-              <div className="flex items-center gap-6 p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm">
+            <div className="flex-1 flex flex-col p-6 gap-4 min-h-0">
+              {/* Tóm tắt — cố định */}
+              <div className="shrink-0 flex items-center gap-6 p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm">
                 <div className="flex items-center gap-1.5">
                   <span className="text-gray-500">Tổng số đoạn:</span>
                   <span className="font-semibold text-gray-900">{(document as any).qdrant_points_count ?? '—'}</span>
@@ -339,9 +344,9 @@ export function DocumentDetailModal({
                 )}
               </div>
 
-              {/* Search input — hiển thị khi đã tải xong và có dữ liệu */}
+              {/* Search input — cố định, hiển thị khi đã tải xong và có dữ liệu */}
               {!chunksLoading && chunks.length > 0 && (
-                <div className="relative">
+                <div className="shrink-0 relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                   <input
                     ref={searchInputRef}
@@ -393,74 +398,77 @@ export function DocumentDetailModal({
                 </div>
               )}
 
-              {chunksLoading ? (
-                <div className="flex items-center justify-center py-16 text-gray-400 text-sm gap-2">
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  Đang tải nội dung...
-                </div>
-              ) : chunksError ? (
-                <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50">
-                    <AlertTriangle className="h-6 w-6 text-red-400" />
+              {/* Danh sách đoạn — có thanh cuộn riêng */}
+              <div className="overflow-y-auto doc-chunk-list" style={{ flex: '1 1 0', minHeight: 0, maxHeight: 'calc(90vh - 380px)' }}>
+                {chunksLoading ? (
+                  <div className="flex items-center justify-center py-16 text-gray-400 text-sm gap-2">
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Đang tải nội dung...
                   </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-red-600 mb-1">Không thể tải nội dung</p>
-                    <p className="text-xs text-gray-500 max-w-sm">{chunksError}</p>
+                ) : chunksError ? (
+                  <div className="flex flex-col items-center justify-center py-16 gap-3">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50">
+                      <AlertTriangle className="h-6 w-6 text-red-400" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-red-600 mb-1">Không thể tải nội dung</p>
+                      <p className="text-xs text-gray-500 max-w-sm">{chunksError}</p>
+                    </div>
+                    <button
+                      onClick={fetchChunks}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Thử lại
+                    </button>
                   </div>
-                  <button
-                    onClick={fetchChunks}
-                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5" />
-                    Thử lại
-                  </button>
-                </div>
-              ) : chunks.length === 0 ? (
-                <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
-                  Không có nội dung
-                </div>
-              ) : filteredChunks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 gap-2 text-gray-400 text-sm">
-                  <Search className="h-8 w-8 text-gray-300" />
-                  <span>Không tìm thấy đoạn nào khớp với "<span className="font-medium text-gray-600">{searchQuery}</span>"</span>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {filteredChunks.map((chunk, i) => {
-                    const originalIndex = chunks.indexOf(chunk);
-                    const start = chunks.slice(0, originalIndex).reduce((acc, c) => acc + c.char_count, 0);
-                    const end = start + chunk.char_count - 1;
-                    const isActive = searchQuery.trim() && i === currentMatchIndex;
-                    return (
-                      <div
-                        key={chunk.point_id ?? chunk.chunk_id ?? i}
-                        ref={el => { chunkRefs.current[i] = el; }}
-                        className={`border rounded-lg overflow-hidden transition-colors ${isActive ? 'border-[#facb01] ring-2 ring-[#facb01]/30' : 'border-gray-200'}`}
-                      >
-                        <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm font-semibold text-gray-700">Đoạn #{chunk.chunk_index + 1}</span>
-                            <span className="text-xs text-gray-400">{chunk.char_count.toLocaleString()} ký tự</span>
-                            <span className="text-xs text-gray-400">Bắt đầu: {start.toLocaleString()}  Kết thúc: {end.toLocaleString()}</span>
+                ) : chunks.length === 0 ? (
+                  <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
+                    Không có nội dung
+                  </div>
+                ) : filteredChunks.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 gap-2 text-gray-400 text-sm">
+                    <Search className="h-8 w-8 text-gray-300" />
+                    <span>Không tìm thấy đoạn nào khớp với "<span className="font-medium text-gray-600">{searchQuery}</span>"</span>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredChunks.map((chunk, i) => {
+                      const originalIndex = chunks.indexOf(chunk);
+                      const start = chunks.slice(0, originalIndex).reduce((acc, c) => acc + c.char_count, 0);
+                      const end = start + chunk.char_count - 1;
+                      const isActive = searchQuery.trim() && i === currentMatchIndex;
+                      return (
+                        <div
+                          key={chunk.point_id ?? chunk.chunk_id ?? i}
+                          ref={el => { chunkRefs.current[i] = el; }}
+                          className={`border rounded-lg overflow-hidden transition-colors ${isActive ? 'border-[#facb01] ring-2 ring-[#facb01]/30' : 'border-gray-200'}`}
+                        >
+                          <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm font-semibold text-gray-700">Đoạn #{chunk.chunk_index + 1}</span>
+                              <span className="text-xs text-gray-400">{chunk.char_count.toLocaleString()} ký tự</span>
+                              <span className="text-xs text-gray-400">Bắt đầu: {start.toLocaleString()}  Kết thúc: {end.toLocaleString()}</span>
+                            </div>
+                            <button
+                              onClick={() => handleCopyChunk(chunk.chunk_text, originalIndex)}
+                              className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                            >
+                              {copiedIndex === originalIndex ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                              {copiedIndex === originalIndex ? 'Đã sao chép' : 'Sao chép đoạn'}
+                            </button>
                           </div>
-                          <button
-                            onClick={() => handleCopyChunk(chunk.chunk_text, originalIndex)}
-                            className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                          >
-                            {copiedIndex === originalIndex ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
-                            {copiedIndex === originalIndex ? 'Đã sao chép' : 'Sao chép đoạn'}
-                          </button>
+                          <div className="px-4 py-3">
+                            <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                              {highlightText(chunk.chunk_text, searchQuery)}
+                            </p>
+                          </div>
                         </div>
-                        <div className="px-4 py-3">
-                          <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
-                            {highlightText(chunk.chunk_text, searchQuery)}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -482,5 +490,6 @@ export function DocumentDetailModal({
         </div>
       </div>
     </div>
+    </>
   );
 }

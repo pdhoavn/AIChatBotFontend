@@ -44,6 +44,8 @@ export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: 
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showOCRPrompt, setShowOCRPrompt] = useState(false);
+  const [useOCR, setUseOCR] = useState(false);
+  const [isPDF, setIsPDF] = useState(false);
   const audienceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -74,8 +76,11 @@ export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: 
     const buffer = await f.arrayBuffer();
     const slice = buffer.slice(0, Math.min(buffer.byteLength, 2_000_000));
     const text = new TextDecoder('latin1').decode(slice);
-    const textOps = (text.match(/\)\s*Tj|\]\s*TJ/g) ?? []).length;
-    return textOps < 5;
+    // PDF content streams thường bị nén (FlateDecode) nên không đọc được Tj/TJ trực tiếp.
+    // Tìm /BaseFont — chỉ xuất hiện trong object dictionary (không nén).
+    // PDF có text luôn có ít nhất 1 font; PDF scan thuần ảnh thì không có font nào.
+    const fontCount = (text.match(/\/BaseFont\s*\//g) ?? []).length;
+    return fontCount === 0;
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,11 +98,18 @@ export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: 
 
       setFile(selectedFile);
       setShowOCRPrompt(false);
+      setUseOCR(false);
       if (!title) setTitle(selectedFile.name.replace(/\.[^/.]+$/, ''));
 
-      if (selectedFile.type === 'application/pdf') {
+      const fileisPDF = selectedFile.type === 'application/pdf';
+      setIsPDF(fileisPDF);
+
+      if (fileisPDF) {
         detectScannedPDF(selectedFile).then(isScanned => {
-          if (isScanned) setShowOCRPrompt(true);
+          if (isScanned) {
+            setShowOCRPrompt(true);
+            setUseOCR(true);
+          }
         });
       }
     }
@@ -115,7 +127,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: 
     const audienceValues = audiences.map(a => AUDIENCE_VALUE_MAP[a]);
 
     // OCR: đóng modal ngay, widget chạy nền
-    if (showOCRPrompt && onStartOCR) {
+    if (useOCR && onStartOCR) {
       onStartOCR(formData, resolvedIntentId, audienceValues);
       onClose();
       return;
@@ -178,10 +190,24 @@ export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: 
                 <div>
                   <p className="font-medium text-amber-800">File PDF chứa ảnh scan</p>
                   <p className="text-amber-700 mt-0.5">
-                    File này chứa ảnh scan, không thể trích xuất trực tiếp. Nhấn <strong>"Tải lên với OCR"</strong> để hệ thống tự động nhận dạng văn bản — quá trình chạy nền, bạn vẫn dùng được ứng dụng.
+                    File này chứa ảnh scan, không thể trích xuất trực tiếp. Hệ thống đã tự động bật OCR.
                   </p>
                 </div>
               </div>
+            )}
+
+            {isPDF && (
+              <label className="flex items-center gap-2.5 mt-3 cursor-pointer select-none w-fit">
+                <div
+                  onClick={() => setUseOCR(prev => !prev)}
+                  className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 transition-colors ${useOCR ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'}`}
+                >
+                  {useOCR && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+                </div>
+                <span onClick={() => setUseOCR(prev => !prev)} className="text-sm text-gray-700">
+                  Sử dụng OCR để nhận dạng văn bản
+                </span>
+              </label>
             )}
           </div>
 
@@ -279,7 +305,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: 
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Đang tải lên...
               </span>
-            ) : showOCRPrompt ? 'Tải lên với OCR' : 'Tải Lên'}
+            ) : useOCR ? 'Tải lên với OCR' : 'Tải Lên'}
           </Button>
         </div>
       </div>
