@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { OCRProvider } from '../../contexts/OCRContext';
+import { ApproveProvider } from '../../contexts/ApproveContext';
 import {
   LayoutDashboard,
   FileText,
@@ -114,6 +115,7 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
   };
 
   return (
+    <ApproveProvider>
     <OCRProvider>
     <div className={`flex min-h-screen ${STAFF_COLORS.pageBackground}`}>
       {/* Sidebar */}
@@ -213,5 +215,6 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
       </div>
     </div>
     </OCRProvider>
+    </ApproveProvider>
   );
 }

@@ -16,6 +16,7 @@ const AUDIENCE_FILTER_OPTIONS = [
 import { knowledgeAPI, intentAPI } from '../../../services/fastapi';
 import { toast } from 'react-toastify';
 import { Pagination } from '../../common/Pagination';
+import { useApprove } from '../../../contexts/ApproveContext';
 
 const AUDIENCE_DISPLAY = {
   CANBO:     { label: 'Viên chức/NLĐ', color: 'bg-blue-100 text-blue-700 border-blue-200' },
@@ -142,6 +143,7 @@ function DocumentCard({ document, approvingId, rejectingId, downloadingId, onApp
 }
 
 export function LeaderKnowledgeBase() {
+  const { startApprove } = useApprove();
   const [activeTab, setActiveTab] = useState('qa');
   const [trainingQuestions, setTrainingQuestions] = useState([]);
   const [documents, setDocuments] = useState([]);
@@ -196,14 +198,17 @@ export function LeaderKnowledgeBase() {
         await knowledgeAPI.approveTrainingQuestion(id);
         toast.success('Đã duyệt câu hỏi huấn luyện!');
         setTrainingQuestions(prev => prev.filter(q => q.question_id !== id));
+        setApprovingId(null);
       } else {
-        await knowledgeAPI.approveDocument(id);
-        toast.success('Đã duyệt tài liệu!');
-        setDocuments(prev => prev.filter(d => d.document_id !== id));
+        const doc = documents.find(d => d.document_id === id);
+        const docTitle = doc?.title || `Tài liệu #${id}`;
+        startApprove(id, docTitle, () => {
+          setDocuments(prev => prev.filter(d => d.document_id !== id));
+        });
+        setApprovingId(null);
       }
     } catch (error) {
       toast.error('Không thể duyệt. Vui lòng thử lại.');
-    } finally {
       setApprovingId(null);
     }
   };

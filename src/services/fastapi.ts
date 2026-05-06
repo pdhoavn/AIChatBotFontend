@@ -345,6 +345,47 @@ export const knowledgeAPI = {
   getPendingDocuments: () => fastAPIClient.get<KnowledgeDocument[]>('/knowledge/documents/pending-review'),
   submitDocumentForReview: (id: number) => fastAPIClient.post(`/knowledge/documents/${id}/submit-review`, {}),
   approveDocument: (id: number) => fastAPIClient.post(`/knowledge/documents/${id}/approve`, {}),
+  approveDocumentStream: async (
+    id: number,
+    onEvent?: (event: Record<string, unknown>) => void
+  ): Promise<void> => {
+    const token = localStorage.getItem('access_token');
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const response = await fetch(
+      `${API_CONFIG.FASTAPI_BASE_URL}/knowledge/documents/${id}/approve`,
+      { method: 'POST', headers }
+    );
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => null);
+      throw new Error(errorBody?.detail || `HTTP error! status: ${response.status}`);
+    }
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const data = JSON.parse(line.slice(6));
+          onEvent?.(data);
+          if (data.event === 'error') throw new Error(data.message as string);
+        } catch (e) {
+          if (e instanceof SyntaxError) continue;
+          throw e;
+        }
+      }
+    }
+  },
   rejectDocument: (id: number, reason: string) => {
     const formData = new FormData();
     formData.append('reason', reason);
