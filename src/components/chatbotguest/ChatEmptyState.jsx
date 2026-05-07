@@ -73,7 +73,7 @@ export default function ChatEmptyState({
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-[0.16em] text-text-muted">
-                Trợ lý thông minh ĐH GTVT
+                Trợ lý ảo Trường Đại học Giao thông vận tải - Phân hiệu tại Thành Phố Hồ Chí Minh.
               </p>
               <h2 className="text-2xl md:text-[30px] font-semibold leading-tight text-text-main mt-1">
                 Chọn đối tượng của bạn để bắt đầu
@@ -143,7 +143,7 @@ export default function ChatEmptyState({
         <div className="chat-message">
           <div className="rounded-3xl border border-border-main/70 bg-[linear-gradient(145deg,rgba(19,91,236,0.08),rgba(19,91,236,0.02)_42%,rgba(255,255,255,0.01)_100%)] px-6 py-5 md:px-8 md:py-6 max-w-3xl">
             <p className="text-[11px] uppercase tracking-[0.16em] text-text-muted">
-              Trợ lý thông minh ĐH GTVT
+              Trợ lý ảo Trường Đại học Giao thông vận tải - Phân hiệu tại Thành Phố Hồ Chí Minh.
             </p>
             <div className="text-sm md:text-[15px] text-text-main mt-3 leading-relaxed prose prose-sm max-w-none">
               <ReactMarkdown>{greeting}</ReactMarkdown>
