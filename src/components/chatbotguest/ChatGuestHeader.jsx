@@ -1,6 +1,6 @@
 // src/components/chatbotguest/ChatGuestHeader.jsx
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Briefcase, GraduationCap, HeartHandshake, ClipboardList } from "lucide-react";
 import PhIcon from "../ui/PhIcon.jsx";
 import { resolveAudienceCode } from "../../api/audienceApi.ts";
@@ -21,6 +21,7 @@ const AUDIENCE_META = {
 
 export default function ChatGuestHeader({ selectedAudience, onAudienceChange, audiences = [] }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const schoolLogoUrl = "https://utc2.edu.vn/images/030820230730_U09Tn.png";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -46,13 +47,24 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
     : null;
   const ActiveAudienceIcon = activeAudienceMeta?.icon || Briefcase;
 
+  const handleLogoClick = (event) => {
+    if (location.pathname === "/") {
+      event.preventDefault();
+      window.location.reload();
+      return;
+    }
+
+    navigate("/");
+  };
+
   return (
     <header className="w-full bg-transparent">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 md:px-7 py-4">
         {/* Logo + Tên */}
-        <div
+        <Link
+          to="/"
           className="flex cursor-pointer items-center gap-3"
-          onClick={() => navigate("/")}
+          onClick={handleLogoClick}
         >
           <img
             src={schoolLogoUrl}
@@ -66,7 +78,7 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
             </div>
             <div className="text-xs text-chat-text-muted -mt-0.5">Phân hiệu tại TP. Hồ Chí Minh</div>
           </div>
-        </div>
+        </Link>
 
         {/* Right side badges */}
         <div className="flex items-center gap-2 shrink-0">
