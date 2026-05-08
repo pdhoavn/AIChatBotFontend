@@ -144,7 +144,7 @@ export default function ChatInput({
               <textarea
                 ref={textareaRef}
                 className={`flex-1 min-w-0 max-h-[120px] sm:max-h-40 bg-transparent border-none outline-none text-text-main placeholder-text-muted/95 focus:ring-0 p-0 transition-all duration-300 resize-none overflow-y-auto ${
-                  isExpanded ? "text-[15px] md:text-base leading-6" : "text-[14px] md:text-[15px]"
+                  isExpanded ? "text-base leading-6" : "text-base"
                 }`}
                 placeholder={
                   isExpanded
