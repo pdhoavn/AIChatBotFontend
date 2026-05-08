@@ -655,7 +655,7 @@ export default function ChatGuestPage() {
   };
 
   return (
-    <div className="chat-shell flex flex-col h-screen bg-sidebar relative w-full transition-colors duration-300 overflow-hidden">
+    <div className="chat-shell flex h-[100dvh] min-h-[100svh] flex-col bg-sidebar relative w-full transition-colors duration-300 overflow-hidden">
       <ChatGuestHeader
         audiences={audiences}
         selectedAudience={selectedAudience}
@@ -667,7 +667,7 @@ export default function ChatGuestPage() {
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto w-full relative"
       >
-        <div className="max-w-5xl mx-auto w-full px-3 md:px-6 flex flex-col pb-36 min-h-full">
+        <div className="max-w-5xl mx-auto w-full px-3 md:px-6 flex flex-col pb-52 sm:pb-44 min-h-full">
           <div className="w-full flex-1">
             {messages.length === 0 && (
               <ChatEmptyState
@@ -730,7 +730,7 @@ export default function ChatGuestPage() {
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 w-full z-20 px-3 md:px-6 pb-3 pt-2 pointer-events-none">
+      <div className="absolute bottom-0 left-0 right-0 w-full z-20 px-2 sm:px-3 md:px-6 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 pointer-events-none">
         <div className="mx-auto w-full max-w-5xl relative">
           
           {/* Scroll to bottom button */}

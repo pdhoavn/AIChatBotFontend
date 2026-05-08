@@ -1,5 +1,5 @@
 // src/components/chatbotguest/ChatInput.jsx
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import PhIcon from "../ui/PhIcon.jsx";
 
 export default function ChatInput({
@@ -26,6 +26,7 @@ export default function ChatInput({
   const [isFocused, setIsFocused] = useState(false);
 
   const isExpanded = isFocused || !!input.trim() || isLoading;
+  const displayedValue = isListening ? transcript : input;
 
   const availableIntents = selectedAudience
     ? intents.filter((intent) => {
@@ -49,6 +50,24 @@ export default function ChatInput({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isToolMenuOpen, isFocused, input]);
+
+  const resizeTextarea = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+
+    const maxHeight =
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 639px)").matches
+        ? 120
+        : 160;
+
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`;
+  }, []);
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [displayedValue, isExpanded, resizeTextarea]);
 
   const handleSubmit = (e) => {
     e?.preventDefault();
@@ -80,14 +99,14 @@ export default function ChatInput({
         <div
           className={`rounded-2xl relative overflow-visible transition-all duration-300 ease-out bg-sidebar ${
             isExpanded
-              ? "p-2.5 md:p-3 border border-accent/30 shadow-[0_-4px_24px_-4px_rgba(19,91,236,0.12),0_4px_16px_-4px_rgba(0,0,0,0.1)]"
+              ? "p-2 sm:p-2.5 md:p-3 border border-accent/30 shadow-[0_-4px_24px_-4px_rgba(19,91,236,0.12),0_4px_16px_-4px_rgba(0,0,0,0.1)]"
               : "p-1.5 md:p-2 border border-border-main/50 hover:border-border-main/80 shadow-[0_-2px_12px_-2px_rgba(0,0,0,0.08)]"
           }`}
           onClick={() => !isFocused && setIsFocused(true)}
         >
           {/* Live transcript banner */}
           {isListening && (
-            <div className="mx-2 md:mx-3 mb-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-400/30">
+            <div className="mx-1 sm:mx-2 md:mx-3 mb-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-400/30">
               <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse shrink-0" />
               <span className="flex-1 text-[12px] text-red-300 italic min-w-0 truncate">
                 {transcript || "Đang nghe..."}
@@ -116,14 +135,71 @@ export default function ChatInput({
           )}
 
           <div
-            className={`flex items-center gap-2 transition-all duration-300 ease-out ${
-              isExpanded ? "px-2 md:px-3 pt-2.5 pb-1.5" : "px-2 md:px-2 py-0.5"
+            className={`flex flex-col gap-2 transition-all duration-300 ease-out ${
+              isExpanded ? "px-1 sm:px-2 md:px-3 pt-2 pb-1.5" : "px-2 md:px-2 py-0.5"
             }`}
           >
-            {/* Action buttons — only visible when expanded */}
+            <div className="flex items-end gap-2">
+              {/* Textarea */}
+              <textarea
+                ref={textareaRef}
+                className={`flex-1 min-w-0 max-h-[120px] sm:max-h-40 bg-transparent border-none outline-none text-text-main placeholder-text-muted/95 focus:ring-0 p-0 transition-all duration-300 resize-none overflow-y-auto ${
+                  isExpanded ? "text-[15px] md:text-base leading-6" : "text-[14px] md:text-[15px]"
+                }`}
+                placeholder={
+                  isExpanded
+                    ? "Nêu vấn đề theo cách của bạn..."
+                    : "Nhập câu hỏi..."
+                }
+                rows={1}
+                value={displayedValue}
+                onChange={(e) => {
+                  if (!isListening) onInputChange(e.target.value);
+                  resizeTextarea();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (isListening) {
+                      onTranscriptConfirm?.();
+                    } else {
+                      handleSubmit(e);
+                    }
+                  }
+                }}
+                onFocus={() => setIsFocused(true)}
+                disabled={isLoading}
+              />
+
+              {/* Send / Stop button */}
+              {isLoading ? (
+                <button
+                  type="button"
+                  title="Dừng phản hồi"
+                  onClick={onStop}
+                  className={`shrink-0 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-[0_10px_22px_-14px_rgba(239,68,68,0.8)] ${
+                    isExpanded ? "w-9 h-9" : "w-8 h-8"
+                  }`}
+                >
+                  <PhIcon name="stop" size={isExpanded ? 15 : 13} weight="fill" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={!input.trim() || !wsReady}
+                  className={`shrink-0 rounded-full bg-accent text-white flex items-center justify-center hover:brightness-110 transition-all disabled:opacity-35 disabled:cursor-not-allowed shadow-[0_10px_22px_-14px_rgba(19,91,236,0.8)] ${
+                    isExpanded ? "w-9 h-9" : "w-8 h-8"
+                  }`}
+                >
+                  <PhIcon name="arrow_upward" size={isExpanded ? 17 : 15} weight="bold" />
+                </button>
+              )}
+            </div>
+
+            {/* Action buttons — move below the textarea on small screens */}
             <div
-              className={`flex items-center gap-2 transition-all duration-300 ease-out overflow-hidden shrink-0 ${
-                isExpanded ? "max-w-[300px] opacity-100" : "max-w-0 opacity-0"
+              className={`flex items-center gap-2 transition-all duration-300 ease-out overflow-hidden ${
+                isExpanded ? "max-h-12 opacity-100" : "max-h-0 opacity-0"
               }`}
             >
               <button
@@ -152,7 +228,7 @@ export default function ChatInput({
                 />
               </button>
 
-              <div className="relative shrink-0">
+              <div className="relative min-w-0">
                 <button
                   type="button"
                   title="Chọn lĩnh vực tra cứu"
@@ -160,85 +236,26 @@ export default function ChatInput({
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => setIsToolMenuOpen((prev) => !prev)}
                   disabled={isLoading}
-                  className={`h-9 px-2.5 shrink-0 inline-flex items-center gap-1.5 rounded-full border transition-colors disabled:opacity-40 ${
+                  className={`h-9 max-w-full px-2.5 shrink-0 inline-flex items-center gap-1.5 rounded-full border transition-colors disabled:opacity-40 ${
                     selectedIntent
                       ? "border-accent/40 bg-accent/10 text-accent"
                       : "border-border-main/60 text-text-muted hover:text-text-main hover:bg-primary/50"
                   }`}
                 >
                   <PhIcon name="database" size={14} />
-                  <span className="text-[11px] max-w-[92px] truncate">
+                  <span className="text-[11px] max-w-[180px] sm:max-w-[220px] truncate">
                     {selectedIntent ? selectedIntent.intent_name : "Lĩnh vực"}
                   </span>
                   <PhIcon name="expand_more" size={11} />
                 </button>
               </div>
             </div>
-
-            {/* Textarea */}
-            <textarea
-              ref={textareaRef}
-              className={`flex-1 min-w-0 bg-transparent border-none outline-none text-text-main placeholder-text-muted/95 focus:ring-0 p-0 transition-all duration-300 resize-none overflow-y-auto ${
-                isExpanded ? "text-[15px] md:text-base" : "text-[14px] md:text-[15px]"
-              }`}
-              placeholder={
-                isExpanded
-                  ? "Nêu vấn đề theo cách của bạn..."
-                  : "Nhập câu hỏi..."
-              }
-              rows={1}
-              value={isListening ? transcript : input}
-              onChange={(e) => {
-                if (!isListening) onInputChange(e.target.value);
-                const el = textareaRef.current;
-                if (el) {
-                  el.style.height = "auto";
-                  el.style.height = Math.min(el.scrollHeight, 160) + "px";
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  if (isListening) {
-                    onTranscriptConfirm?.();
-                  } else {
-                    handleSubmit(e);
-                  }
-                }
-              }}
-              onFocus={() => setIsFocused(true)}
-              disabled={isLoading}
-            />
-
-            {/* Send / Stop button */}
-            {isLoading ? (
-              <button
-                type="button"
-                title="Dừng phản hồi"
-                onClick={onStop}
-                className={`shrink-0 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-[0_10px_22px_-14px_rgba(239,68,68,0.8)] ${
-                  isExpanded ? "w-9 h-9" : "w-8 h-8"
-                }`}
-              >
-                <PhIcon name="stop" size={isExpanded ? 15 : 13} weight="fill" />
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={!input.trim() || !wsReady}
-                className={`shrink-0 rounded-full bg-accent text-white flex items-center justify-center hover:brightness-110 transition-all disabled:opacity-35 disabled:cursor-not-allowed shadow-[0_10px_22px_-14px_rgba(19,91,236,0.8)] ${
-                  isExpanded ? "w-9 h-9" : "w-8 h-8"
-                }`}
-              >
-                <PhIcon name="arrow_upward" size={isExpanded ? 17 : 15} weight="bold" />
-              </button>
-            )}
           </div>
 
           {/* Intent dropdown */}
           {isToolMenuOpen && (
-            <div className="absolute bottom-full left-2 md:left-3 z-30 pb-2">
-              <div className="w-56 overflow-y-auto max-h-[320px] rounded-xl border border-border-main/70 bg-sidebar shadow-2xl p-1.5 scrollbar-thin scrollbar-thumb-border-main scrollbar-track-transparent">
+            <div className="absolute bottom-full left-2 right-2 sm:left-3 sm:right-auto z-30 pb-2">
+              <div className="w-full sm:w-64 overflow-y-auto max-h-[min(320px,45vh)] rounded-xl border border-border-main/70 bg-sidebar shadow-2xl p-1.5 scrollbar-thin scrollbar-thumb-border-main scrollbar-track-transparent">
                 {!selectedAudience && (
                   <div className="px-2.5 py-2 text-[12px] text-text-muted">
                     Chọn đối tượng trước khi lọc lĩnh vực.
