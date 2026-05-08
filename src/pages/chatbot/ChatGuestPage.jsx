@@ -380,11 +380,8 @@ export default function ChatGuestPage() {
           const data = JSON.parse(e.data);
           switch (data.event) {
             case "chunk":
-              setPartial((prev) => {
-                const next = prev + (data.content ?? "");
-                partialRef.current = next;
-                return next;
-              });
+              partialRef.current = partialRef.current + (data.content ?? ""); 
+              setPartial(partialRef.current); // chỉ để trigger re-render
               break;
             case "go":
               if (typeof data.confidence === "number") {
