@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import PhIcon from "../ui/PhIcon.jsx";
+import { API_CONFIG } from "../../config/api.js";
 
 export default function ChatMessageBubble({ message }) {
   const [isCopied, setIsCopied] = useState(false);
@@ -9,8 +10,7 @@ export default function ChatMessageBubble({ message }) {
   const hasLawyerSuggestion = message.text?.includes("[SUGGEST_LAWYER]");
   const cleanContent = message.text?.replace("[SUGGEST_LAWYER]", "").trim();
 
-  const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+  const API_BASE_URL = API_CONFIG.FASTAPI_BASE_URL;
 
   const sources = Array.isArray(message.sources) ? message.sources : [];
 

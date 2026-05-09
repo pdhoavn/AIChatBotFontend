@@ -15,8 +15,7 @@ const CHATBOT_PREFILL_KEY = "chatbot_prefill_message";
 const GUEST_ID_KEY = "guest_user_id_v1";
 const GUEST_SESSION_KEY = "guest_session_id_v1";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = API_CONFIG.FASTAPI_BASE_URL;
 const SAFARI_WS_CONNECT_DELAY_MS = 500;
 const SAFARI_WS_RETRY_DELAY_MS = 1200;
 
