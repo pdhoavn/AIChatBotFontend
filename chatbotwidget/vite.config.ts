@@ -28,7 +28,7 @@ export default defineConfig({
     proxy: {
       // Khi code gọi tới /api/...
       '/api': {
-        target: 'http://14.161.1.28:8000', // Địa chỉ Backend local của bạn
+        target: 'http://localhost:8000', // Địa chỉ Backend local của bạn
         changeOrigin: true,
         // Rewrite này cực quan trọng: Nó bỏ chữ /api trước khi gửi sang Backend
         // Giống hệt cái proxy_pass http://...:8000/; (có dấu gạch chéo cuối) ở Nginx
