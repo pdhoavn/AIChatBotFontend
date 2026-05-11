@@ -523,6 +523,24 @@ export default function ChatGuestPage() {
       return false;
     }
 
+    // Dùng Permissions API để check quyền mà KHÔNG mở mic stream
+    // (tránh race condition với SpeechRecognition trên HTTPS)
+    try {
+      if (navigator.permissions?.query) {
+        const result = await navigator.permissions.query({ name: "microphone" });
+        if (result.state === "denied") {
+          alert("Bạn đã chặn quyền microphone. Vui lòng mở cài đặt trình duyệt để cấp lại quyền.");
+          return false;
+        }
+        // "granted" hoặc "prompt" → cho phép tiếp tục
+        // SpeechRecognition sẽ tự trigger prompt nếu cần
+        return true;
+      }
+    } catch {
+      // Permissions API không hỗ trợ → fallback
+    }
+
+    // Fallback: check getUserMedia nhưng release ngay
     if (!navigator.mediaDevices?.getUserMedia) {
       alert("Trình duyệt của bạn không hỗ trợ truy cập microphone.");
       return false;
@@ -531,6 +549,8 @@ export default function ChatGuestPage() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
+      // Chờ browser release mic trước khi SpeechRecognition acquire lại
+      await new Promise((resolve) => setTimeout(resolve, 200));
       return true;
     } catch (error) {
       if (error?.name === "NotAllowedError" || error?.name === "PermissionDeniedError") {
