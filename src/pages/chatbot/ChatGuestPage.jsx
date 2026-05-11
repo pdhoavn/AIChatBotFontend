@@ -16,38 +16,10 @@ const GUEST_ID_KEY = "guest_user_id_v1";
 const GUEST_SESSION_KEY = "guest_session_id_v1";
 
 const API_BASE_URL = API_CONFIG.FASTAPI_BASE_URL;
-const SAFARI_WS_CONNECT_DELAY_MS = 500;
-const SAFARI_WS_RETRY_DELAY_MS = 1200;
 
 function generateNumericId() {
   const max = 2_000_000_000;
   return Math.floor(Math.random() * max);
-}
-
-function isSafariBrowser() {
-  if (typeof navigator === "undefined") return false;
-  const ua = navigator.userAgent;
-  return /safari/i.test(ua) && !/chrome|chromium|crios|fxios|edg/i.test(ua);
-}
-
-function buildWebSocketUrl(baseUrl, path) {
-  const fallbackOrigin =
-    typeof window !== "undefined" ? window.location.origin : "http://localhost";
-  const url = new URL(baseUrl || fallbackOrigin, fallbackOrigin);
-  const isSecurePage =
-    typeof window !== "undefined" && window.location.protocol === "https:";
-  const isLoopback = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(
-    url.hostname
-  );
-
-  url.protocol = url.protocol === "https:" || (isSecurePage && !isLoopback)
-    ? "wss:"
-    : "ws:";
-  url.pathname = `${url.pathname.replace(/\/$/, "")}${path}`;
-  url.search = "";
-  url.hash = "";
-
-  return url.toString();
 }
 
 function normalizeWsSources(sources) {
@@ -152,19 +124,15 @@ function normalizeSuggestionQuestions(data) {
 export default function ChatGuestPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [wsReady, setWsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [partial, setPartial] = useState("");
   const [prefillMessage, setPrefillMessage] = useState(null);
-  const [hasWelcomed, setHasWelcomed] = useState(false);
   const [greeting, setGreeting] = useState(null);
   const [hasError, setHasError] = useState(false);
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
   const [audiences, setAudiences] = useState([]);
-  const [audiencesLoaded, setAudiencesLoaded] = useState(false);
-  const [wsAttempt, setWsAttempt] = useState(0);
   const [intents, setIntents] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [selectedAudience, setSelectedAudience] = useState(null);
@@ -196,7 +164,7 @@ export default function ChatGuestPage() {
 
   const partialRef = useRef("");
   const isStoppedRef = useRef(false);
-  const wsRef = useRef(null);
+  const abortControllerRef = useRef(null);
   const prefillSentRef = useRef(false);
   const autoScrollRef = useRef(null);
 
@@ -237,11 +205,6 @@ export default function ChatGuestPage() {
       .catch(() => {
         if (!isActive) return;
         toast.error("Không thể tải danh sách đối tượng.");
-      })
-      .finally(() => {
-        if (isActive) {
-          setAudiencesLoaded(true);
-        }
       });
 
     return () => {
@@ -330,78 +293,81 @@ export default function ChatGuestPage() {
     setShowScrollButton(!isNearBottom);
   };
 
-  useEffect(() => {
-    const isSafari = isSafariBrowser();
-    let isUnmounted = false;
-    let connectTimer = null;
-    let retryTimer = null;
-    let ws = null;
-    let hasOpened = false;
-    let retryScheduled = false;
+  // SSE streaming helper: gửi message qua POST, đọc response SSE
+  const sendMessageSSE = async (text, audienceId, intentId) => {
+    setIsLoading(true);
+    setHasError(false);
+    setPartial("");
+    partialRef.current = "";
+    isStoppedRef.current = false;
 
-    if (isSafari && !audiencesLoaded) {
-      return;
+    // Abort request trước đó nếu có
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
-    const scheduleRetry = () => {
-      if (!isSafari || wsAttempt > 0 || hasOpened || retryScheduled || isUnmounted) {
-        return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          session_id: sessionId,
+          user_id: guestId,
+          audience_id: audienceId || null,
+          intent_id: intentId || null,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
-      retryScheduled = true;
-      retryTimer = window.setTimeout(() => {
-        if (!isUnmounted) {
-          setWsAttempt((attempt) => attempt + 1);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (isStoppedRef.current) {
+          reader.cancel();
+          break;
         }
-      }, SAFARI_WS_RETRY_DELAY_MS);
-    };
 
-    const connect = () => {
-      if (isUnmounted) return;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
 
-      const wsUrl = buildWebSocketUrl(API_BASE_URL, "/chat/ws/chat");
-      ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
 
-      ws.onopen = () => {
-        if (wsRef.current !== ws) return;
-        hasOpened = true;
-        setWsReady(true);
-        setHasWelcomed(false);
-        prefillSentRef.current = false;
-        isStoppedRef.current = false;
-        ws.send(JSON.stringify({}));
-      };
+            switch (data.event) {
+              case "session":
+                // Cập nhật session_id nếu server tạo mới
+                if (data.session_id) {
+                  localStorage.setItem(GUEST_SESSION_KEY, String(data.session_id));
+                }
+                break;
+              case "chunk":
+                if (isStoppedRef.current) break;
+                partialRef.current += data.content ?? "";
+                setPartial(partialRef.current);
+                break;
+              case "done": {
+                if (isStoppedRef.current) break;
+                const finalText = (partialRef.current || "").trim();
+                const confidence =
+                  typeof data.confidence === "number" ? data.confidence : null;
+                const normalizedSources = normalizeWsSources(data.sources);
 
-      ws.onmessage = (e) => {
-        if (wsRef.current !== ws) return;
-        if (isStoppedRef.current) return;
-        try {
-          const data = JSON.parse(e.data);
-          switch (data.event) {
-            case "chunk":
-              partialRef.current = partialRef.current + (data.content ?? ""); 
-              setPartial(partialRef.current); // chỉ để trigger re-render
-              break;
-            case "go":
-              if (typeof data.confidence === "number") {
-                // keep for parity with backend flow; final value is attached on done
-              }
-              setHasWelcomed(true);
-              break;
-            case "done": {
-              if (isStoppedRef.current) return;
-              const finalText = (partialRef.current || "").trim();
-              const confidence =
-                typeof data.confidence === "number" ? data.confidence : null;
-              const normalizedSources = normalizeWsSources(data.sources);
-
-              if (finalText) {
-                setMessages((prev) => {
-                  if (prev.length === 0) {
-                    setGreeting(finalText);
-                    return prev;
-                  }
-                  return [
+                if (finalText) {
+                  setMessages((prev) => [
                     ...prev,
                     {
                       sender: "bot",
@@ -409,92 +375,73 @@ export default function ChatGuestPage() {
                       confidence,
                       sources: normalizedSources,
                     },
-                  ];
-                });
+                  ]);
+                }
+
+                partialRef.current = "";
+                setPartial("");
+                setIsLoading(false);
+                break;
               }
-
-              partialRef.current = "";
-              setPartial("");
-              setIsLoading(false);
-              break;
+              case "error":
+                setIsLoading(false);
+                setHasError(true);
+                break;
+              default:
+                break;
             }
-            case "error":
-              setIsLoading(false);
-              setHasError(true);
-              break;
-            default:
-              break;
+          } catch {
+            // ignore non-JSON lines
           }
-        } catch {
-          // ignore non-JSON
         }
-      };
-
-      ws.onclose = () => {
-        if (wsRef.current !== ws) return;
-        setWsReady(false);
-        setIsLoading(prev => {
-          if (prev) setHasError(true);
-          return false;
-        });
-        scheduleRetry();
-      };
-      ws.onerror = () => {
-        if (wsRef.current !== ws) return;
-        setWsReady(false);
-        setIsLoading(prev => {
-          if (prev) setHasError(true);
-          return false;
-        });
-        scheduleRetry();
-      };
-    };
-
-    connectTimer = window.setTimeout(
-      connect,
-      isSafari ? SAFARI_WS_CONNECT_DELAY_MS : 0
-    );
-
-    return () => {
-      isUnmounted = true;
-      if (connectTimer) window.clearTimeout(connectTimer);
-      if (retryTimer) window.clearTimeout(retryTimer);
-      if (wsRef.current === ws) {
-        wsRef.current = null;
       }
-      if (ws) {
-        ws.close();
+
+      // Stream kết thúc mà chưa nhận done event → finalize
+      if (!isStoppedRef.current && partialRef.current) {
+        const finalText = partialRef.current.trim();
+        if (finalText) {
+          setMessages((prev) => [
+            ...prev,
+            { sender: "bot", text: finalText, confidence: null, sources: [] },
+          ]);
+        }
+        partialRef.current = "";
+        setPartial("");
+        setIsLoading(false);
       }
-    };
-  }, [audiencesLoaded, guestId, sessionId, wsAttempt]);
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      console.error("SSE stream error:", err);
+      setIsLoading(false);
+      setHasError(true);
+    } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
+    }
+  };
 
   useEffect(() => {
-    if (!wsReady || !prefillMessage || !hasWelcomed) return;
+    if (!prefillMessage) return;
     if (
       prefillAudienceCode &&
       resolveAudienceCode(selectedAudience) !== prefillAudienceCode
     ) {
       return;
     }
-    if (wsRef.current?.readyState !== WebSocket.OPEN) return;
     if (prefillSentRef.current) return;
 
     setMessages((prev) => [...prev, { sender: "user", text: prefillMessage }]);
-    setIsLoading(true);
-    setPartial("");
-    partialRef.current = "";
-    isStoppedRef.current = false;
-
-    wsRef.current.send(
-      JSON.stringify({
-        message: prefillMessage,
-        audience_id: selectedAudience?.id || null,
-      })
-    );
     prefillSentRef.current = true;
+
+    sendMessageSSE(
+      prefillMessage,
+      selectedAudience?.id || null,
+      null,
+    );
     setPrefillMessage(null);
     setPrefillAudienceCode(null);
-  }, [wsReady, prefillMessage, hasWelcomed, prefillAudienceCode, selectedAudience]);
+  }, [prefillMessage, prefillAudienceCode, selectedAudience]);
 
   useEffect(() => {
     try {
@@ -533,19 +480,12 @@ export default function ChatGuestPage() {
     const userMessage = text;
     setMessages((prev) => [...prev, { sender: "user", text: userMessage }]);
     setInput("");
-    setIsLoading(true);
-    setHasError(false);
-    setPartial("");
-    partialRef.current = "";
-    isStoppedRef.current = false;
 
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({
-        message: userMessage,
-        audience_id: selectedAudience?.id || null,
-        intent_id: intentId ?? selectedIntent?.intent_id ?? null,
-      }));
-    }
+    sendMessageSSE(
+      userMessage,
+      selectedAudience?.id || null,
+      intentId ?? selectedIntent?.intent_id ?? null,
+    );
   };
 
   const handleSubmit = (intentId) => {
@@ -562,7 +502,6 @@ export default function ChatGuestPage() {
       toast.warning("Vui lòng chọn đối tượng tra cứu trước khi nhắn tin.", { toastId: "no-audience-suggestion" });
       return;
     }
-    if (!wsReady) return;
     send(text);
   };
 
@@ -628,6 +567,11 @@ export default function ChatGuestPage() {
   const handleStop = () => {
     isStoppedRef.current = true;
     setIsLoading(false);
+    // Abort đang stream
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
   };
 
   const handleMicStop = () => {
@@ -762,7 +706,7 @@ export default function ChatGuestPage() {
           <ChatInput
             input={input}
             isLoading={isLoading}
-            wsReady={wsReady}
+            wsReady={true}
             onInputChange={setInput}
             onSubmit={handleSubmit}
             onOpenCall={handleMicClick}

@@ -33,8 +33,6 @@ export default defineConfig({
         // Rewrite này cực quan trọng: Nó bỏ chữ /api trước khi gửi sang Backend
         // Giống hệt cái proxy_pass http://...:8000/; (có dấu gạch chéo cuối) ở Nginx
         rewrite: (path) => path.replace(/^\/api/, ''),
-        // Bật hỗ trợ WebSocket cho Local
-        ws: true,
       }
     }
   },

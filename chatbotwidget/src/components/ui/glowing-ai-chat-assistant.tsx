@@ -5,7 +5,8 @@ import ReactMarkdown from 'react-markdown';
 
 interface FloatingAiAssistantProps {
   apiUrl: string;
-  wsUrl: string;
+  /** @deprecated No longer used — SSE streaming replaces WebSocket */
+  wsUrl?: string;
 }
 
 interface ChatMessage {
@@ -22,17 +23,7 @@ function generateNumericId() {
   return Math.floor(Math.random() * 2_000_000_000);
 }
 
-function buildWebSocketUrl(baseUrl: string, path: string) {
-  const fallbackOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
-  const url = new URL(baseUrl || fallbackOrigin, fallbackOrigin);
-  const isSecurePage = typeof window !== 'undefined' && window.location.protocol === 'https:';
-  const isLoopback = ['localhost', '127.0.0.1'].includes(url.hostname);
-  url.protocol = url.protocol === 'https:' || (isSecurePage && !isLoopback) ? 'wss:' : 'ws:';
-  url.pathname = `${url.pathname.replace(/\/$/, '')}${path}`;
-  url.search = '';
-  url.hash = '';
-  return url.toString();
-}
+// buildWebSocketUrl removed — SSE uses standard HTTP POST
 
 const GUEST_ID_KEY = 'widget_guest_user_id';
 const GUEST_SESSION_KEY = 'widget_guest_session_id';
@@ -93,17 +84,15 @@ const markdownComponents = {
   blockquote: ({ node, ...props }: any) => <blockquote className="border-l-4 border-blue-300 pl-3.5 italic text-gray-600 my-3 bg-blue-50/30 py-1.5 rounded-r-lg" {...props} />
 };
 
-const FloatingAiAssistant = ({ apiUrl, wsUrl }: Partial<FloatingAiAssistantProps> = {}) => {
+const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {}) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [charCount, setCharCount] = useState(0);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [partial, setPartial] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [wsReady, setWsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
   const effectiveApiUrl = apiUrl || import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? `${window.location.origin.replace(/\/$/, '')}/api` : '');
-  const effectiveWsUrl = wsUrl || import.meta.env.VITE_WS_URL || (typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host.replace(/\/$/, '')}` : '');
 
   const defaultAudienceOptions = [
     { id: 'CANBO', label: 'Viên chức / Người lao động', icon: Briefcase },
@@ -122,7 +111,7 @@ const FloatingAiAssistant = ({ apiUrl, wsUrl }: Partial<FloatingAiAssistantProps
 
   const chatRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const partialRef = useRef('');
   const isStoppedRef = useRef(false);
 
@@ -243,163 +232,130 @@ const FloatingAiAssistant = ({ apiUrl, wsUrl }: Partial<FloatingAiAssistantProps
     }
   }, [selectedAudience, selectedIntent]);
 
-  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const connectionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const streamIdleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const STREAM_IDLE_MS = 30_000; // 30s — if no new chunk arrives, finalize the stream
-
-  const finalizeStream = (_ws: WebSocket | null, partialRefVal: string) => {
-    if (streamIdleTimeoutRef.current) clearTimeout(streamIdleTimeoutRef.current);
-    const finalText = (partialRefVal || '').trim();
-    if (finalText) {
-      setMessages(prev => {
-        if (prev.length === 0) return prev;
-        return [...prev, {
-          id: Date.now().toString(),
-          text: finalText,
-          sender: 'ai',
-          confidence: null,
-          sources: [],
-        }];
-      });
-    }
-    partialRef.current = '';
+  // SSE streaming: gửi message qua POST, đọc response SSE
+  const sendMessageSSE = async (text: string) => {
+    setIsLoading(true);
+    setHasError(false);
     setPartial('');
-    setIsLoading(false);
-  };
+    partialRef.current = '';
+    isStoppedRef.current = false;
 
-  const resetStreamIdleTimer = (ws: WebSocket | null) => {
-    if (streamIdleTimeoutRef.current) clearTimeout(streamIdleTimeoutRef.current);
-    streamIdleTimeoutRef.current = setTimeout(() => {
-      if (wsRef.current !== ws) return;
-      finalizeStream(ws, partialRef.current);
-    }, STREAM_IDLE_MS);
-  };
+    // Abort request trước đó nếu có
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
- useEffect(() => {
-    let ws: WebSocket | null = null;
-    let isUnmounted = false;
-    let pingInterval: ReturnType<typeof setInterval>; // Khai báo biến đếm nhịp tim
+    try {
+      const response = await fetch(`${effectiveApiUrl}/chat/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          session_id: _sessionId,
+          user_id: _guestId,
+          audience_id: selectedAudience?.dbId ?? null,
+          intent_id: selectedIntent?.intent_id ?? null,
+        }),
+        signal: controller.signal,
+      });
 
-    const connect = () => {
-      if (isUnmounted) return;
-      const socketUrl = effectiveWsUrl.startsWith('ws')
-        ? effectiveWsUrl
-        : buildWebSocketUrl(effectiveWsUrl, '/chat/ws/chat');
-      
-      ws = new WebSocket(socketUrl);
-      wsRef.current = ws; // BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ REF LƯU TRỮ SOCKET
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
-      // Connection timeout — if onopen doesn't fire within 10s, treat it as failed
-      connectionTimeoutRef.current = setTimeout(() => {
-        if (ws && ws.readyState !== WebSocket.OPEN) {
-          ws.close();
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (isStoppedRef.current) {
+          reader.cancel();
+          break;
         }
-      }, 10_000);
 
-      ws.onopen = () => {
-        if (isUnmounted || wsRef.current !== ws) return;
-        if (connectionTimeoutRef.current) clearTimeout(connectionTimeoutRef.current);
-        setWsReady(true);
-        setHasError(false);
-        isStoppedRef.current = false;
-        
-        // Gửi payload khởi tạo ban đầu (nếu Backend của bạn yêu cầu)
-        ws!.send(JSON.stringify({}));
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
 
-        // --- BƠM NHỊP TIM (HEARTBEAT) ---
-        // Cứ 20 giây gửi 1 tín hiệu để Ngrok/Proxy không tưởng là mình đang AFK
-        pingInterval = setInterval(() => {
-          if (ws?.readyState === WebSocket.OPEN) {
-            // Chú ý: Báo với bạn làm Backend là hãy lờ đi những tin nhắn có action: 'ping' này
-            ws.send(JSON.stringify({ action: 'ping' })); 
-          }
-        }, 20_000);
-      };
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
 
-      ws.onmessage = (e) => {
-        if (wsRef.current !== ws || isStoppedRef.current) return;
-        try {
-          const data = JSON.parse(e.data);
-          
-          // NẾU LÀ PONG TỪ SERVER TRẢ VỀ THÌ BỎ QUA KHÔNG IN RA GIAO DIỆN
-          if (data.action === 'pong' || data.event === 'pong') return;
-
-          switch (data.event) {
-            case 'chunk':
-              resetStreamIdleTimer(ws);
-              setPartial(prev => {
-                const next = prev + (data.content ?? '');
-                partialRef.current = next;
-                return next;
-              });
-              break;
-            case 'done': {
-              if (streamIdleTimeoutRef.current) clearTimeout(streamIdleTimeoutRef.current);
-              const finalText = (partialRef.current || '').trim();
-              const normalizedSources = normalizeWsSources(data.sources || []);
-              if (finalText) {
-                setMessages(prev => {
-                  if (prev.length === 0) return prev;
-                  return [...prev, {
-                    id: Date.now().toString(),
-                    text: finalText,
-                    sender: 'ai',
-                    confidence: typeof data.confidence === 'number' ? data.confidence : null,
-                    sources: normalizedSources,
-                  }];
-                });
+            switch (data.event) {
+              case 'session':
+                if (data.session_id) {
+                  localStorage.setItem(GUEST_SESSION_KEY, String(data.session_id));
+                }
+                break;
+              case 'chunk':
+                if (isStoppedRef.current) break;
+                partialRef.current += data.content ?? '';
+                setPartial(partialRef.current);
+                break;
+              case 'done': {
+                if (isStoppedRef.current) break;
+                const finalText = (partialRef.current || '').trim();
+                const normalizedSources = normalizeWsSources(data.sources || []);
+                if (finalText) {
+                  setMessages(prev => [
+                    ...prev,
+                    {
+                      id: Date.now().toString(),
+                      text: finalText,
+                      sender: 'ai',
+                      confidence: typeof data.confidence === 'number' ? data.confidence : null,
+                      sources: normalizedSources,
+                    },
+                  ]);
+                }
+                partialRef.current = '';
+                setPartial('');
+                setIsLoading(false);
+                break;
               }
-              partialRef.current = '';
-              setPartial('');
-              setIsLoading(false);
-              break;
+              case 'error':
+                setIsLoading(false);
+                setHasError(true);
+                break;
+              default:
+                break;
             }
-            case 'error':
-              if (streamIdleTimeoutRef.current) clearTimeout(streamIdleTimeoutRef.current);
-              setIsLoading(false);
-              setHasError(true);
-              break;
-            default: break;
-          }
-        } catch { }
-      };
-
-      ws.onclose = () => {
-        if (connectionTimeoutRef.current) clearTimeout(connectionTimeoutRef.current);
-        if (streamIdleTimeoutRef.current) clearTimeout(streamIdleTimeoutRef.current);
-        clearInterval(pingInterval); // DỌN DẸP NHỊP TIM KHI ĐỨT KẾT NỐI
-
-        if (wsRef.current !== ws) return;
-        setWsReady(false);
-        const wasLoading = isLoading;
-        setIsLoading(false);
-        if (wasLoading) setHasError(true);
-        
-        // Auto-reconnect after 3s if component is still mounted
-        if (!isUnmounted) {
-          reconnectTimeoutRef.current = setTimeout(connect, 3_000);
+          } catch { /* ignore non-JSON */ }
         }
-      };
+      }
 
-      ws.onerror = () => {
-        if (wsRef.current !== ws) return;
-        setWsReady(false);
-      };
-    };
-
-    connect();
-    return () => {
-      isUnmounted = true;
-      if (connectionTimeoutRef.current) clearTimeout(connectionTimeoutRef.current);
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (streamIdleTimeoutRef.current) clearTimeout(streamIdleTimeoutRef.current);
-      clearInterval(pingInterval); // DỌN DẸP NHỊP TIM KHI UNMOUNT
-      if (wsRef.current === ws) wsRef.current = null;
-      ws?.close();
-    };
-  }, []); // Cần truyền [apiUrl, wsUrl] vào đây nếu bạn lấy từ Props như mình hướng dẫn ở bước trước
+      // Stream kết thúc mà chưa nhận done event → finalize
+      if (!isStoppedRef.current && partialRef.current) {
+        const finalText = partialRef.current.trim();
+        if (finalText) {
+          setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            text: finalText,
+            sender: 'ai',
+            confidence: null,
+            sources: [],
+          }]);
+        }
+        partialRef.current = '';
+        setPartial('');
+        setIsLoading(false);
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
+      console.error('SSE stream error:', err);
+      setIsLoading(false);
+      setHasError(true);
+    } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
+    }
+  };
 
   const handleSend = (textOverride?: string) => {
     const text = (textOverride ?? message).trim();
@@ -408,31 +364,10 @@ const FloatingAiAssistant = ({ apiUrl, wsUrl }: Partial<FloatingAiAssistantProps
 
     const userMsg: ChatMessage = { id: Date.now().toString(), text, sender: 'user' };
     setMessages(prev => [...prev, userMsg]);
-    setIsLoading(true);
-    setHasError(false);
-    setPartial('');
-    partialRef.current = '';
-    isStoppedRef.current = false;
+    setMessage('');
+    setCharCount(0);
 
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      try {
-        wsRef.current.send(JSON.stringify({
-          message: text,
-          audience_id: selectedAudience?.dbId ?? null,
-          intent_id: selectedIntent?.intent_id ?? null,
-        }));
-      } catch {
-        setIsLoading(false);
-        setHasError(true);
-        return;
-      }
-      // Clear input only after send succeeds
-      setMessage('');
-      setCharCount(0);
-    } else {
-      setIsLoading(false);
-      setHasError(true);
-    }
+    sendMessageSSE(text);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -531,7 +466,7 @@ useEffect(() => {
               </div>
               {/* WS status */}
               <div className="flex items-center gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full ${wsReady ? 'bg-green-400' : 'bg-gray-300'}`} title={wsReady ? 'Đã kết nối' : 'Đang kết nối...'} />
+                <div className={`w-1.5 h-1.5 rounded-full ${!hasError ? 'bg-green-400' : 'bg-red-400'}`} title={!hasError ? 'Sẵn sàng' : 'Lỗi kết nối'} />
                 <button
                   onClick={() => setIsChatOpen(false)}
                   className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors ml-1"
