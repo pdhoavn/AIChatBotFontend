@@ -16,6 +16,20 @@ import { API_CONFIG } from '../config/api.js';
 
 import { LoginResponse } from '../utils/fastapi-client';
 
+// Document task status (polling)
+export interface DocumentTaskStatus {
+  task_id: number;
+  document_id: number;
+  task_type: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress: number;       // 0–100
+  total_items: number;
+  completed_items: number;
+  error_message?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
 // Analytics types
 export interface KnowledgeGap {
   id: number;
@@ -271,8 +285,7 @@ export const knowledgeAPI = {
     formData: FormData,
     intendId: number,
     target_audiences: string[] = [],
-    onEvent?: (event: Record<string, unknown>) => void
-  ): Promise<void> => {
+  ): Promise<{ message: string; document_id: number; task_id: number; status: string }> => {
     const token = localStorage.getItem("access_token");
     const headers: HeadersInit = {};
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -291,31 +304,7 @@ export const knowledgeAPI = {
       throw error;
     }
 
-    // Parse SSE stream từ backend
-    const reader = response.body!.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() ?? '';
-
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        try {
-          const data = JSON.parse(line.slice(6));
-          onEvent?.(data);
-          if (data.event === 'error') throw new Error(data.message as string);
-        } catch (e) {
-          if (e instanceof SyntaxError) continue;
-          throw e;
-        }
-      }
-    }
+    return response.json();
   },
 
   uploadTrainingQuestion: (data: { question: string; answer: string; intent_id: number; target_audiences: string[] }) =>
@@ -344,7 +333,15 @@ export const knowledgeAPI = {
   // Review workflow for documents
   getPendingDocuments: () => fastAPIClient.get<KnowledgeDocument[]>('/knowledge/documents/pending-review'),
   submitDocumentForReview: (id: number) => fastAPIClient.post(`/knowledge/documents/${id}/submit-review`, {}),
-  approveDocument: (id: number) => fastAPIClient.post(`/knowledge/documents/${id}/approve`, {}),
+  approveDocument: (id: number) =>
+    fastAPIClient.post<{ message: string; document_id: number; task_id: number; status: string }>(
+      `/knowledge/documents/${id}/approve`, {}
+    ),
+  getDocumentTaskStatus: (id: number, taskType?: 'ocr' | 'approve') =>
+    fastAPIClient.get<DocumentTaskStatus>(
+      `/knowledge/documents/${id}/task-status${taskType ? `?task_type=${taskType}` : ''}`
+    ),
+  // Legacy SSE stream kept for reference — backend no longer uses SSE
   approveDocumentStream: async (
     id: number,
     onEvent?: (event: Record<string, unknown>) => void

@@ -10,7 +10,6 @@ interface OCRWidgetState {
   totalPages: number;
   currentPage: number;
   progress: number;
-  totalChars: number;
   errorMsg: string;
 }
 
@@ -39,13 +38,22 @@ const INITIAL: OCRWidgetState = {
   totalPages: 0,
   currentPage: 0,
   progress: 0,
-  totalChars: 0,
   errorMsg: '',
 };
 
+const POLL_INTERVAL_MS = 2000;
+
 export function OCRProvider({ children }: { children: ReactNode }) {
   const [widget, setWidget] = useState<OCRWidgetState>(INITIAL);
-  const versionRef = useRef(0); // tăng mỗi lần startOCR — bỏ qua events từ lần cũ
+  const versionRef = useRef(0);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const clearPoll = () => {
+    if (pollIntervalRef.current !== null) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+  };
 
   // Tự dismiss sau khi done (4s) hoặc error (6s) — chỉ khi đang expanded
   useEffect(() => {
@@ -60,6 +68,9 @@ export function OCRProvider({ children }: { children: ReactNode }) {
     }
   }, [widget.phase, widget.visible, widget.minimized]);
 
+  // Cleanup poll on unmount
+  useEffect(() => () => clearPoll(), []);
+
   const startOCR = (
     formData: FormData,
     intentId: number,
@@ -72,40 +83,56 @@ export function OCRProvider({ children }: { children: ReactNode }) {
       '';
 
     const myVersion = ++versionRef.current;
+    clearPoll();
     setWidget({ ...INITIAL, visible: true, fileName });
 
     knowledgeAPI
-      .uploadDocumentOCR(formData, intentId, target_audiences, (data) => {
-        if (versionRef.current !== myVersion) return; // bỏ qua events từ OCR cũ
-        if (data.event === 'start') {
-          setWidget((p) => ({ ...p, totalPages: data.total_pages as number }));
-        } else if (data.event === 'progress') {
-          setWidget((p) => ({
-            ...p,
-            currentPage: data.page as number,
-            progress: data.progress as number,
-          }));
-        } else if (data.event === 'done') {
-          setWidget((p) => ({
-            ...p,
-            phase: 'done',
-            progress: 100,
-            totalChars: data.total_chars as number,
-            minimized: false,
-          }));
-          onDone?.();
-        } else if (data.event === 'error') {
-          setWidget((p) => ({
-            ...p,
-            phase: 'error',
-            minimized: false,
-            errorMsg: data.message as string,
-          }));
-        }
+      .uploadDocumentOCR(formData, intentId, target_audiences)
+      .then(({ document_id }) => {
+        if (versionRef.current !== myVersion) return;
+
+        // Start polling task-status
+        const pollId = setInterval(async () => {
+          if (versionRef.current !== myVersion) {
+            clearInterval(pollId);
+            return;
+          }
+          try {
+            const task = await knowledgeAPI.getDocumentTaskStatus(document_id, 'ocr');
+            if (!task || versionRef.current !== myVersion) return;
+
+            setWidget(p => ({
+              ...p,
+              totalPages: task.total_items,
+              currentPage: task.completed_items,
+              progress: task.progress,
+            }));
+
+            if (task.status === 'completed') {
+              clearInterval(pollId);
+              pollIntervalRef.current = null;
+              setWidget(p => ({ ...p, phase: 'done', progress: 100, minimized: false }));
+              onDone?.();
+            } else if (task.status === 'failed') {
+              clearInterval(pollId);
+              pollIntervalRef.current = null;
+              setWidget(p => ({
+                ...p,
+                phase: 'error',
+                minimized: false,
+                errorMsg: task.error_message || 'OCR thất bại',
+              }));
+            }
+          } catch {
+            // Network hiccup — skip this tick, keep polling
+          }
+        }, POLL_INTERVAL_MS);
+
+        pollIntervalRef.current = pollId;
       })
       .catch((error: Error) => {
         if (versionRef.current !== myVersion) return;
-        setWidget((p) => ({ ...p, phase: 'error', minimized: false, errorMsg: error.message }));
+        setWidget(p => ({ ...p, phase: 'error', minimized: false, errorMsg: error.message }));
       });
   };
 
@@ -198,7 +225,7 @@ export function OCRProvider({ children }: { children: ReactNode }) {
                       ? `Trang ${widget.currentPage} / ${widget.totalPages}`
                       : 'Đang khởi động...'
                     : widget.phase === 'done'
-                    ? `${widget.totalChars.toLocaleString('vi-VN')} ký tự`
+                    ? 'Hoàn tất'
                     : widget.errorMsg || 'Tải lên thất bại'}
                 </span>
                 <span className={`text-xs font-bold ${

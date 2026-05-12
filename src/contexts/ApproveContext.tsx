@@ -36,9 +36,19 @@ const INITIAL: ApproveWidgetState = {
   errorMsg: '',
 };
 
+const POLL_INTERVAL_MS = 2000;
+
 export function ApproveProvider({ children }: { children: ReactNode }) {
   const [widget, setWidget] = useState<ApproveWidgetState>(INITIAL);
   const versionRef = useRef(0);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const clearPoll = () => {
+    if (pollIntervalRef.current !== null) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+  };
 
   useEffect(() => {
     if (!widget.visible || widget.minimized) return;
@@ -52,37 +62,62 @@ export function ApproveProvider({ children }: { children: ReactNode }) {
     }
   }, [widget.phase, widget.visible, widget.minimized]);
 
+  // Cleanup poll on unmount
+  useEffect(() => () => clearPoll(), []);
+
   const startApprove = (id: number, docTitle: string, onDone?: () => void, onError?: () => void) => {
     const myVersion = ++versionRef.current;
+    clearPoll();
     setWidget({ ...INITIAL, visible: true, docTitle });
 
     knowledgeAPI
-      .approveDocumentStream(id, (data) => {
+      .approveDocument(id)
+      .then(() => {
         if (versionRef.current !== myVersion) return;
-        if (data.event === 'start') {
-          setWidget((p) => ({ ...p, totalChunks: data.total_chunks as number }));
-        } else if (data.event === 'progress') {
-          setWidget((p) => ({
-            ...p,
-            currentChunk: data.chunk as number,
-            progress: data.progress as number,
-          }));
-        } else if (data.event === 'done') {
-          setWidget((p) => ({ ...p, phase: 'done', progress: 100, minimized: false }));
-          onDone?.();
-        } else if (data.event === 'error') {
-          setWidget((p) => ({
-            ...p,
-            phase: 'error',
-            minimized: false,
-            errorMsg: data.message as string,
-          }));
-          onError?.();
-        }
+
+        // Start polling task-status
+        const pollId = setInterval(async () => {
+          if (versionRef.current !== myVersion) {
+            clearInterval(pollId);
+            return;
+          }
+          try {
+            const task = await knowledgeAPI.getDocumentTaskStatus(id, 'approve');
+            if (!task || versionRef.current !== myVersion) return;
+
+            setWidget(p => ({
+              ...p,
+              totalChunks: task.total_items,
+              currentChunk: task.completed_items,
+              progress: task.progress,
+            }));
+
+            if (task.status === 'completed') {
+              clearInterval(pollId);
+              pollIntervalRef.current = null;
+              setWidget(p => ({ ...p, phase: 'done', progress: 100, minimized: false }));
+              onDone?.();
+            } else if (task.status === 'failed') {
+              clearInterval(pollId);
+              pollIntervalRef.current = null;
+              setWidget(p => ({
+                ...p,
+                phase: 'error',
+                minimized: false,
+                errorMsg: task.error_message || 'Phê duyệt thất bại',
+              }));
+              onError?.();
+            }
+          } catch {
+            // Network hiccup — skip this tick, keep polling
+          }
+        }, POLL_INTERVAL_MS);
+
+        pollIntervalRef.current = pollId;
       })
       .catch((error: Error) => {
         if (versionRef.current !== myVersion) return;
-        setWidget((p) => ({ ...p, phase: 'error', minimized: false, errorMsg: error.message }));
+        setWidget(p => ({ ...p, phase: 'error', minimized: false, errorMsg: error.message }));
         onError?.();
       });
   };
