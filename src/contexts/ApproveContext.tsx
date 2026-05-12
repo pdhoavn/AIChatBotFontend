@@ -14,7 +14,7 @@ interface ApproveWidgetState {
 }
 
 interface ApproveContextType {
-  startApprove: (id: number, docTitle: string, onDone?: () => void) => void;
+  startApprove: (id: number, docTitle: string, onDone?: () => void, onError?: () => void) => void;
 }
 
 const ApproveContext = createContext<ApproveContextType | null>(null);
@@ -52,7 +52,7 @@ export function ApproveProvider({ children }: { children: ReactNode }) {
     }
   }, [widget.phase, widget.visible, widget.minimized]);
 
-  const startApprove = (id: number, docTitle: string, onDone?: () => void) => {
+  const startApprove = (id: number, docTitle: string, onDone?: () => void, onError?: () => void) => {
     const myVersion = ++versionRef.current;
     setWidget({ ...INITIAL, visible: true, docTitle });
 
@@ -77,11 +77,13 @@ export function ApproveProvider({ children }: { children: ReactNode }) {
             minimized: false,
             errorMsg: data.message as string,
           }));
+          onError?.();
         }
       })
       .catch((error: Error) => {
         if (versionRef.current !== myVersion) return;
         setWidget((p) => ({ ...p, phase: 'error', minimized: false, errorMsg: error.message }));
+        onError?.();
       });
   };
 
