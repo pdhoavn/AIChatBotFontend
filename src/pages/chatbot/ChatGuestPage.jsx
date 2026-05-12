@@ -147,10 +147,24 @@ export default function ChatGuestPage() {
     startListening,
     stopListening,
     clearTranscript,
+    error: speechError,
   } = useSpeechRecognition();
 
   const isStartingRef = useRef(false);
   const inputBeforeMicRef = useRef("");
+
+  // Hiển thị lỗi speech recognition cho user
+  useEffect(() => {
+    if (!speechError) return;
+    const errorMessages = {
+      "not-allowed": "Bạn đã chặn quyền microphone. Vui lòng cấp lại trong cài đặt trình duyệt.",
+      "network": "Trình duyệt này không hỗ trợ dịch vụ giọng nói. Vui lòng sử dụng Chrome hoặc Safari.",
+      "no-mic": "Không tìm thấy microphone trên thiết bị.",
+      "not-supported": "Trình duyệt hiện tại không hỗ trợ nhập giọng nói. Vui lòng sử dụng Chrome hoặc Safari.",
+      "start-failed": "Không thể khởi động nhận diện giọng nói. Vui lòng sử dụng Chrome hoặc Safari.",
+    };
+    toast.info(errorMessages[speechError] || "Lỗi nhận diện giọng nói.", { toastId: "speech-error", autoClose: 5000 });
+  }, [speechError]);
 
   useEffect(() => {
     if (isStartingRef.current) {
@@ -517,66 +531,14 @@ export default function ChatGuestPage() {
     setSelectedIntent(intent);
   };
 
-  const requestMicrophoneAccess = async () => {
-    if (!window.isSecureContext) {
-      alert("Microphone chỉ hoạt động trên HTTPS hoặc localhost.");
-      return false;
-    }
-
-    // Dùng Permissions API để check quyền mà KHÔNG mở mic stream
-    // (tránh race condition với SpeechRecognition trên HTTPS)
-    try {
-      if (navigator.permissions?.query) {
-        const result = await navigator.permissions.query({ name: "microphone" });
-        if (result.state === "denied") {
-          alert("Bạn đã chặn quyền microphone. Vui lòng mở cài đặt trình duyệt để cấp lại quyền.");
-          return false;
-        }
-        // "granted" hoặc "prompt" → cho phép tiếp tục
-        // SpeechRecognition sẽ tự trigger prompt nếu cần
-        return true;
-      }
-    } catch {
-      // Permissions API không hỗ trợ → fallback
-    }
-
-    // Fallback: check getUserMedia nhưng release ngay
-    if (!navigator.mediaDevices?.getUserMedia) {
-      alert("Trình duyệt của bạn không hỗ trợ truy cập microphone.");
-      return false;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((track) => track.stop());
-      // Chờ browser release mic trước khi SpeechRecognition acquire lại
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return true;
-    } catch (error) {
-      if (error?.name === "NotAllowedError" || error?.name === "PermissionDeniedError") {
-        alert("Bạn đã chặn quyền microphone. Vui lòng mở cài đặt trình duyệt để cấp lại quyền.");
-        return false;
-      }
-      if (error?.name === "NotFoundError" || error?.name === "DevicesNotFoundError") {
-        alert("Không tìm thấy microphone trên thiết bị.");
-        return false;
-      }
-      alert("Không thể truy cập microphone. Vui lòng kiểm tra quyền trình duyệt.");
-      return false;
-    }
-  };
-
-  const handleMicClick = async () => {
+  const handleMicClick = () => {
     if (!isSpeechSupported) {
-      alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.");
+      toast.info(
+        "Trình duyệt hiện tại không hỗ trợ nhập giọng nói. Vui lòng sử dụng Chrome hoặc Safari để dùng tính năng này.",
+        { toastId: "no-speech", autoClose: 5000 }
+      );
       return;
     }
-    if (isMicrophoneAvailable === false) {
-      alert("Vui lòng cho phép truy cập microphone trong trình duyệt.");
-      return;
-    }
-    const hasMicrophoneAccess = await requestMicrophoneAccess();
-    if (!hasMicrophoneAccess) return;
 
     isStartingRef.current = true;
     inputBeforeMicRef.current = input;
@@ -735,6 +697,7 @@ export default function ChatGuestPage() {
             onIntentChange={handleIntentChange}
             intents={intents}
             isListening={isListening}
+            isSpeechSupported={isSpeechSupported}
             transcript={transcript}
             onMicClick={handleMicClick}
             onMicStop={handleMicStop}

@@ -14,6 +14,7 @@ export default function ChatInput({
   onIntentChange,
   intents = [],
   isListening = false,
+  isSpeechSupported = true,
   transcript = "",
   onMicClick,
   onMicStop,
