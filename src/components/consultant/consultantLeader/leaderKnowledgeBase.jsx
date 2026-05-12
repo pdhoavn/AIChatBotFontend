@@ -202,10 +202,16 @@ export function LeaderKnowledgeBase() {
       } else {
         const doc = documents.find(d => d.document_id === id);
         const docTitle = doc?.title || `Tài liệu #${id}`;
-        startApprove(id, docTitle, () => {
-          setDocuments(prev => prev.filter(d => d.document_id !== id));
-        });
-        setApprovingId(null);
+        startApprove(
+          id,
+          docTitle,
+          () => {
+            setDocuments(prev => prev.filter(d => d.document_id !== id));
+            setApprovingId(null);
+          },
+          () => setApprovingId(null)
+        );
+        return; // giữ approvingId đến khi widget done/error
       }
     } catch (error) {
       toast.error('Không thể duyệt. Vui lòng thử lại.');
