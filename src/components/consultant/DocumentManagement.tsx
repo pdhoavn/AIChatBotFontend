@@ -61,7 +61,7 @@ export function DocumentManagement() {
     try {
       setLoading(true);
 
-      const data = statusFilter !== 'all' 
+      const data = statusFilter !== 'all'
         ? await knowledgeAPI.getDocuments(statusFilter)
         : await knowledgeAPI.getDocuments();
       setDocuments(data);
@@ -118,7 +118,7 @@ export function DocumentManagement() {
       setShowUploadDialog(false);
 
       await fetchDocuments();
-      
+
       toast.success('Tải lên tài liệu thành công!');
     } catch (error) {
       toast.error(`Không thể tải lên tài liệu: ${error.message}`);
@@ -138,7 +138,7 @@ export function DocumentManagement() {
 
       setSelectedDoc(null);
       setShowDeleteDialog(false);
-      
+
       toast.success('Xóa tài liệu thành công!');
     } catch (error) {
       toast.error('Không thể xóa tài liệu. Vui lòng thử lại.');
@@ -159,7 +159,7 @@ export function DocumentManagement() {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('Tải tài liệu thành công!');
     } catch (error: any) {
       const errorMessage = error?.message || 'Không thể tải xuống tài liệu. Vui lòng thử lại.';
@@ -194,15 +194,15 @@ export function DocumentManagement() {
 
   return (
     <div className="min-h-screen h-full flex bg-[#F8FAFC]">
-      {}
+      { }
       <div className="w-96 bg-white border-r border-gray-200 flex flex-col">
-        {}
+        { }
         <div className="p-4 border-b border-gray-200 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">{t('documents.title')}</h2>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="gap-2"
               onClick={() => {
                 setUploadedFile(null);
@@ -213,7 +213,7 @@ export function DocumentManagement() {
               {t('common.upload')}
             </Button>
           </div>
-          
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -224,7 +224,7 @@ export function DocumentManagement() {
             />
           </div>
 
-          {}
+          { }
           <div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full">
@@ -244,7 +244,7 @@ export function DocumentManagement() {
           </div>
         </div>
 
-        {}
+        { }
         <ScrollArea className="flex-1">
           {loading ? (
             <div className="flex items-center justify-center p-8">
@@ -256,15 +256,15 @@ export function DocumentManagement() {
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">{t('documents.no_documents_found')}</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                {searchQuery 
+                {searchQuery
                   ? `${t('documents.no_documents_found')} "${searchQuery}"`
                   : t('documents.upload_first_document')
                 }
               </p>
               {!searchQuery && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="gap-2"
                   onClick={() => {
                     setUploadedFile(null);
@@ -293,11 +293,10 @@ export function DocumentManagement() {
                   <button
                     key={doc.document_id}
                     onClick={() => fetchDocumentDetails(doc.document_id)}
-                    className={`w-full flex items-start gap-3 p-3 rounded-lg transition-colors text-left ${
-                      selectedDoc?.document_id === doc.document_id
+                    className={`w-full flex items-start gap-3 p-3 rounded-lg transition-colors text-left ${selectedDoc?.document_id === doc.document_id
                         ? 'bg-[#3B82F6] text-white'
                         : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <FileText className="h-5 w-5 flex-shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
@@ -309,9 +308,8 @@ export function DocumentManagement() {
                           </span>
                         )}
                       </div>
-                      <div className={`text-sm truncate ${
-                        selectedDoc?.document_id === doc.document_id ? 'text-blue-100' : 'text-muted-foreground'
-                      }`}>
+                      <div className={`text-sm truncate ${selectedDoc?.document_id === doc.document_id ? 'text-blue-100' : 'text-muted-foreground'
+                        }`}>
                         Tạo {formatDate(doc.created_at)}
                       </div>
                     </div>
@@ -323,7 +321,7 @@ export function DocumentManagement() {
         </ScrollArea>
       </div>
 
-      {}
+      { }
       <div className="flex-1 flex flex-col">
         {selectedDoc ? (
           <ScrollArea className="flex-1">
@@ -331,15 +329,15 @@ export function DocumentManagement() {
               <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-semibold">{selectedDoc.title}</h1>
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="gap-2"
                     onClick={() => handleDownload(selectedDoc)}
                   >
                     <Download className="h-4 w-4" />{t('common.download')}</Button>
-                  <Button 
-                    variant="destructive" 
+                  <Button
+                    variant="destructive"
                     size="sm"
                     className="gap-2"
                     onClick={() => setShowDeleteDialog(true)}
@@ -355,7 +353,7 @@ export function DocumentManagement() {
                 </div>
               </div>
 
-              {}
+              { }
               {selectedDoc.status && (
                 <div className="mb-4">
                   <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(selectedDoc.status)}`}>
@@ -408,7 +406,7 @@ export function DocumentManagement() {
               <FileText className="h-12 w-12 text-muted-foreground mx-auto" />
               <h3 className="font-medium">{t('documents.no_document_selected')}</h3>
               <p className="text-sm text-muted-foreground">
-                {documents.length === 0 
+                {documents.length === 0
                   ? t('documents.upload_first_document')
                   : t('documents.select_document_prompt')
                 }
@@ -418,7 +416,7 @@ export function DocumentManagement() {
         )}
       </div>
 
-      {}
+      { }
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
@@ -429,8 +427,8 @@ export function DocumentManagement() {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Hủy</Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={handleDelete}
               disabled={deleting}
             >
@@ -447,7 +445,7 @@ export function DocumentManagement() {
         </DialogContent>
       </Dialog>
 
-      {}
+      { }
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -456,9 +454,9 @@ export function DocumentManagement() {
               {t('documents.upload_dialog_description')}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
-            {}
+            { }
             <div className="space-y-2">
               <label className="text-sm font-medium text-red-600">{t('documents.intent_required')}</label>
               <Select value={selectedIntent} onValueChange={setSelectedIntent}>
@@ -478,7 +476,7 @@ export function DocumentManagement() {
               )}
             </div>
 
-            {}
+            { }
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('documents.document_title')}</label>
               <Input
@@ -492,7 +490,7 @@ export function DocumentManagement() {
               </p>
             </div>
 
-            {}
+            { }
             <div className="space-y-2">
               <label className="text-sm font-medium text-red-600">{t('documents.file_required')}</label>
               <div className="flex items-center gap-4">
@@ -509,7 +507,7 @@ export function DocumentManagement() {
                         e.target.value = '';
                         return;
                       }
-                      
+
                       setUploadedFile(file);
 
                       if (!documentTitle) {
@@ -541,7 +539,7 @@ export function DocumentManagement() {
               setDocumentTitle('');
               setShowUploadDialog(false);
             }}>{t('common.cancel')}</Button>
-            <Button 
+            <Button
               onClick={handleUpload}
               disabled={!uploadedFile || !selectedIntent || uploading}
             >

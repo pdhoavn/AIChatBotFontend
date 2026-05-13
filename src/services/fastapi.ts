@@ -119,7 +119,7 @@ export const articlesAPI = {
         try {
           const err = await response.json();
           if (err.detail) message = err.detail;
-        } catch (_) {}
+        } catch (_) { }
         throw new Error(message);
       }
       return response.json() as Promise<Article>;
@@ -162,17 +162,17 @@ export const articlesAPI = {
         try {
           const err = await response.json();
           if (err.detail) message = err.detail;
-        } catch (_) {}
+        } catch (_) { }
         throw new Error(message);
       }
       return response.json() as Promise<Article>;
     });
   },
   delete: (id: number) => fastAPIClient.delete(`/articles/${id}`),
-  
+
   // Review APIs for Content Manager Leaders
   getReviewQueue: () => fastAPIClient.get<ReviewArticle[]>('/articles/review'),
-  updateStatus: (articleId: number, data: ArticleStatusUpdate) => 
+  updateStatus: (articleId: number, data: ArticleStatusUpdate) =>
     fastAPIClient.put<ReviewArticle>(`/articles/${articleId}/status`, data),
 };
 
@@ -319,7 +319,7 @@ export const knowledgeAPI = {
   getDocumentDetail: (id: number) => fastAPIClient.get<KnowledgeDocument>(`/knowledge/documents/${id}/detail`),
   getDocumentChunks: (id: number, source: 'db' | 'qdrant' = 'qdrant') =>
     fastAPIClient.get<{ chunk_id: number | null; point_id: string | null; chunk_index: number; chunk_text: string; char_count: number }[]>(`/knowledge/documents/${id}/chunks?source=${source}`),
-  
+
   // Get training questions with optional status filter
   getTrainingQuestions: (status?: string) => {
     const params = status ? `?status=${status}` : '';
@@ -329,6 +329,9 @@ export const knowledgeAPI = {
   // Soft delete (sets status to 'deleted')
   deleteDocument: (id: number) => fastAPIClient.delete(`/knowledge/documents/${id}`),
   deleteTrainingQuestion: (id: number) => fastAPIClient.delete(`/knowledge/training_questions/${id}`),
+
+  getDeletedDocuments: () => fastAPIClient.get<KnowledgeDocument[]>('/knowledge/documents/deleted'),
+  getDeletedTrainingQuestions: () => fastAPIClient.get<TrainingQuestion[]>('/knowledge/training_questions/deleted'),
 
   // Review workflow for documents
   getPendingDocuments: () => fastAPIClient.get<KnowledgeDocument[]>('/knowledge/documents/pending-review'),
@@ -386,13 +389,13 @@ export const knowledgeAPI = {
   rejectDocument: (id: number, reason: string) => {
     const formData = new FormData();
     formData.append('reason', reason);
-    
+
     const token = localStorage.getItem("access_token");
     const headers: HeadersInit = {};
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return fetch(`${API_CONFIG.FASTAPI_BASE_URL}/knowledge/documents/${id}/reject`, {
       method: 'POST',
       headers,
@@ -414,13 +417,13 @@ export const knowledgeAPI = {
   rejectTrainingQuestion: (id: number, reason: string) => {
     const formData = new FormData();
     formData.append('reason', reason);
-    
+
     const token = localStorage.getItem("access_token");
     const headers: HeadersInit = {};
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return fetch(`${API_CONFIG.FASTAPI_BASE_URL}/knowledge/training_questions/${id}/reject`, {
       method: 'POST',
       headers,
@@ -434,15 +437,15 @@ export const knowledgeAPI = {
       return response.json();
     });
   },
-  
+
   downloadDocument: async (id: number) => {
     const token = localStorage.getItem("access_token");
     const url = `${API_CONFIG.FASTAPI_BASE_URL}/knowledge/documents/${id}/download`;
-    
+
     const response = await fetch(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
-    
+
     if (!response.ok) {
       // Try to get error message from response
       let errorMessage = `HTTP error! status: ${response.status}`;
@@ -456,7 +459,7 @@ export const knowledgeAPI = {
       }
       throw new Error(errorMessage);
     }
-    
+
     return response.blob();
   },
 };
@@ -755,7 +758,7 @@ export interface AcademicScore {
 // Academic Scores API functions
 export const academicScoresAPI = {
   // Get academic scores for a specific user
-  getUserAcademicScores: (userId: number) => 
+  getUserAcademicScores: (userId: number) =>
     fastAPIClient.get<AcademicScore>(`/academic-score/users/${userId}/academic-scores`),
 };
 
@@ -771,11 +774,11 @@ export const templateAPI = {
   createTemplate: (data: TemplateCreate) => fastAPIClient.post<Template>('/template', data),
 
   // Update existing template
-  updateTemplate: (templateId: number, data: TemplateUpdate) => 
+  updateTemplate: (templateId: number, data: TemplateUpdate) =>
     fastAPIClient.put<Template>(`/template/${templateId}`, data),
 
   // Delete templates (soft delete)
-  deleteTemplates: (templateIds: number[]) => 
+  deleteTemplates: (templateIds: number[]) =>
     fastAPIClient.delete('/template', { template_ids: templateIds })
 };
 

@@ -81,17 +81,17 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
 
   const getStatusBadge = (status?: string) => {
     if (!status) return null;
-    
+
     const statusConfig = {
       draft: { color: 'bg-yellow-100 text-yellow-800', label: 'Nháp' },
       approved: { color: 'bg-green-100 text-green-800', label: 'Đã duyệt' },
       rejected: { color: 'bg-red-100 text-red-800', label: 'Từ chối' },
       deleted: { color: 'bg-gray-100 text-gray-800', label: 'Đã xóa' }
     };
-    
+
     const config = statusConfig[status as keyof typeof statusConfig];
     if (!config) return null;
-    
+
     return (
       <span className={`px-2 py-0.5 text-xs font-medium rounded ${config.color}`}>
         {config.label}
@@ -125,7 +125,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
           intent_name: intent?.intent_name || 'Không có lĩnh vực'
         };
       });
-      
+
       setTrainingQuestions(questionsWithIntentNames);
 
       if (questionsWithIntentNames.length > 0) {
@@ -144,7 +144,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
   useEffect(() => {
     const fetchTemplates = async () => {
       if (!showAddDialog) return;
-      
+
       try {
         setTemplatesLoading(true);
         const data = await templateAPI.getTemplates();
@@ -193,7 +193,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
 
   const filteredTrainingQuestions = trainingQuestions.filter(tq => {
     const matchesSearch = tq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         tq.answer.toLowerCase().includes(searchQuery.toLowerCase());
+      tq.answer.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesIntent = selectedIntent === 'Tất cả lĩnh vực' || tq.intent_name === selectedIntent;
     return matchesSearch && matchesIntent;
   });
@@ -215,16 +215,16 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
 
     try {
 
-      setTrainingQuestions(prev => 
-        prev.map(tq => 
+      setTrainingQuestions(prev =>
+        prev.map(tq =>
           tq.question_id === selectedQuestion.question_id
             ? {
-                ...tq,
-                question: editedQuestion.trim(),
-                answer: editedAnswer.trim(),
-                intent_id: editedIntentId,
-                intent_name: intents.find(intent => intent.intent_id === editedIntentId)?.intent_name
-              }
+              ...tq,
+              question: editedQuestion.trim(),
+              answer: editedAnswer.trim(),
+              intent_id: editedIntentId,
+              intent_name: intents.find(intent => intent.intent_id === editedIntentId)?.intent_name
+            }
             : tq
         )
       );
@@ -251,7 +251,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
     try {
       await knowledgeAPI.deleteTrainingQuestion(selectedQuestion.question_id);
 
-      setTrainingQuestions(prev => 
+      setTrainingQuestions(prev =>
         prev.filter(tq => tq.question_id !== selectedQuestion.question_id)
       );
 
@@ -271,13 +271,13 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
 
   const handleUseTemplate = () => {
     if (!selectedTemplateId || !selectedQAPairIndex) return;
-    
+
     const template = templates.find(t => t.template_id?.toString() === selectedTemplateId);
     if (!template) return;
-    
+
     const qaPairIndex = parseInt(selectedQAPairIndex);
     const qaPair = template.qa_pairs[qaPairIndex];
-    
+
     if (qaPair) {
       setEditedQuestion(qaPair.question);
       setEditedAnswer(qaPair.answer);
@@ -297,7 +297,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
 
     try {
       setCreating(true);
-      
+
       const requestBody: CreateTrainingQuestionRequest = {
         question: editedQuestion.trim(),
         answer: editedAnswer.trim(),
@@ -334,9 +334,9 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
 
   return (
     <div className="min-h-screen h-full flex bg-[#F8FAFC]">
-      {}
+      { }
       <div className="w-96 bg-white border-r border-gray-200 flex flex-col min-w-0 overflow-hidden">
-        {}
+        { }
         <div className="p-4 border-b border-gray-200 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">{t('training.title')}</h2>
@@ -350,7 +350,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
               {t('common.add')}
             </Button>
           </div>
-          
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -372,7 +372,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
             </SelectContent>
           </Select>
 
-          {}
+          { }
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger>
               <SelectValue placeholder="Trạng thái" />
@@ -390,7 +390,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
           </div>
         </div>
 
-        {}
+        { }
         <ScrollArea className="flex-1 overflow-hidden">
           <div className="p-2 space-y-1 min-w-0">
             {loading ? (
@@ -402,11 +402,10 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
                 <button
                   key={tq.question_id}
                   onClick={() => setSelectedQuestion(tq)}
-                  className={`w-full flex items-start gap-3 p-3 rounded-lg transition-colors text-left overflow-hidden ${
-                    selectedQuestion?.question_id === tq.question_id
+                  className={`w-full flex items-start gap-3 p-3 rounded-lg transition-colors text-left overflow-hidden ${selectedQuestion?.question_id === tq.question_id
                       ? 'bg-[#3B82F6] text-white'
                       : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                    }`}
                 >
                   <MessageCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 overflow-hidden">
@@ -418,9 +417,8 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
                         </div>
                       )}
                     </div>
-                    <div className={`text-sm break-words ${
-                      selectedQuestion?.question_id === tq.question_id ? 'text-blue-100' : 'text-muted-foreground'
-                    }`}>
+                    <div className={`text-sm break-words ${selectedQuestion?.question_id === tq.question_id ? 'text-blue-100' : 'text-muted-foreground'
+                      }`}>
                       Lĩnh vực: {tq.intent_name || 'Đang tải...'}
                     </div>
                   </div>
@@ -431,7 +429,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
         </ScrollArea>
       </div>
 
-      {}
+      { }
       <div className="flex-1 flex flex-col">
         {selectedQuestion ? (
           <ScrollArea className="flex-1">
@@ -444,8 +442,8 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" className="gap-2" onClick={handleEdit}>
                       <Edit className="h-4 w-4" />Chỉnh Sửa</Button>
-                    <Button 
-                      variant="destructive" 
+                    <Button
+                      variant="destructive"
                       size="sm"
                       className="gap-2"
                       onClick={() => setShowDeleteDialog(true)}
@@ -542,7 +540,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
         )}
       </div>
 
-      {}
+      { }
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
@@ -558,7 +556,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
         </DialogContent>
       </Dialog>
 
-      {}
+      { }
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-6xl w-[1200px] max-h-[90vh] flex flex-col">
           <DialogHeader className="flex-shrink-0">
@@ -570,145 +568,145 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
 
           <ScrollArea className="flex-1 overflow-y-auto -mx-6 px-6">
             <div className="grid grid-cols-1 gap-6 py-4">
-            {}
-            <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-blue-600" />
-                <h3 className="font-semibold text-sm">{t('training.use_template')}</h3>
-                <span className="text-xs text-muted-foreground ml-auto">
-                  {templates.length} {t('common.optional')}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t('training.select_template')}</label>
-                  <Select 
-                    value={selectedTemplateId} 
-                    onValueChange={handleTemplateChange}
-                    disabled={templatesLoading || templates.length === 0}
-                  >
-                    <SelectTrigger className="h-11 bg-white">
-                      <SelectValue placeholder={templatesLoading ? 'Đang tải' : 'Chọn mẫu câu hỏi'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {templates.map((template) => (
-                        <SelectItem key={template.template_id} value={template.template_id!.toString()}>
-                          {template.template_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              { }
+              <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  <h3 className="font-semibold text-sm">{t('training.use_template')}</h3>
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {templates.length} {t('common.optional')}
+                  </span>
                 </div>
 
-                {}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Chọn Cặp Hỏi-Đáp</label>
-                  <Select 
-                    value={selectedQAPairIndex} 
-                    onValueChange={setSelectedQAPairIndex}
-                    disabled={!selectedTemplateId}
-                  >
-                    <SelectTrigger className="h-11 bg-white">
-                      <SelectValue placeholder="Chọn cặp hỏi-đáp" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectedTemplateId && templates
-                        .find(t => t.template_id?.toString() === selectedTemplateId)
-                        ?.qa_pairs
-                        .sort((a, b) => a.order_position - b.order_position)
-                        .map((qa, index) => (
-                          <SelectItem key={index} value={index.toString()}>
-                            {qa.question.substring(0, 50)}{qa.question.length > 50 ? '...' : ''}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  { }
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">{t('training.select_template')}</label>
+                    <Select
+                      value={selectedTemplateId}
+                      onValueChange={handleTemplateChange}
+                      disabled={templatesLoading || templates.length === 0}
+                    >
+                      <SelectTrigger className="h-11 bg-white">
+                        <SelectValue placeholder={templatesLoading ? 'Đang tải' : 'Chọn mẫu câu hỏi'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {templates.map((template) => (
+                          <SelectItem key={template.template_id} value={template.template_id!.toString()}>
+                            {template.template_name}
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  { }
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Chọn Cặp Hỏi-Đáp</label>
+                    <Select
+                      value={selectedQAPairIndex}
+                      onValueChange={setSelectedQAPairIndex}
+                      disabled={!selectedTemplateId}
+                    >
+                      <SelectTrigger className="h-11 bg-white">
+                        <SelectValue placeholder="Chọn cặp hỏi-đáp" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedTemplateId && templates
+                          .find(t => t.template_id?.toString() === selectedTemplateId)
+                          ?.qa_pairs
+                          .sort((a, b) => a.order_position - b.order_position)
+                          .map((qa, index) => (
+                            <SelectItem key={index} value={index.toString()}>
+                              {qa.question.substring(0, 50)}{qa.question.length > 50 ? '...' : ''}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  { }
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium opacity-0">Hành động</label>
+                    <Button
+                      onClick={handleUseTemplate}
+                      disabled={!selectedTemplateId || !selectedQAPairIndex}
+                      className="w-full h-11 bg-[#facb01] hover:bg-[#d14f0a]"
+                    >
+                      Tải Mẫu
+                    </Button>
+                  </div>
+                </div>
+
+                { }
+                {selectedTemplateId && selectedQAPairIndex && (
+                  <div className="p-3 bg-white rounded-md border border-blue-200 text-sm">
+                    <div className="font-medium text-gray-700 mb-1">Xem Trước:</div>
+                    <div className="text-xs text-gray-600 space-y-1">
+                      <div><span className="font-semibold">Câu hỏi:</span> {templates.find(t => t.template_id?.toString() === selectedTemplateId)?.qa_pairs[parseInt(selectedQAPairIndex)]?.question}</div>
+                      <div className="line-clamp-2"><span className="font-semibold">Trả lời:</span> {templates.find(t => t.template_id?.toString() === selectedTemplateId)?.qa_pairs[parseInt(selectedQAPairIndex)]?.answer}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              { }
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    {t('common.question')}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    value={editedQuestion}
+                    onChange={(e) => setEditedQuestion(e.target.value)}
+                    placeholder={t('training.search_placeholder')}
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    {t('common.answer')}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    value={editedAnswer}
+                    onChange={(e) => setEditedAnswer(e.target.value)}
+                    placeholder={t('common.answer')}
+                    className="min-h-[180px] resize-none"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    {t('common.intent')}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Select value={editedIntentId?.toString() || ''} onValueChange={(value) => setEditedIntentId(Number(value))}>
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder={t('training.select_intent_for_question')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {intentLoading ? (
+                        <SelectItem value="loading" disabled>{t('training.loading_intents')}</SelectItem>
+                      ) : (
+                        intents.map((intent) => (
+                          <SelectItem key={intent.intent_id} value={intent.intent_id.toString()}>
+                            {intent.intent_name}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
-
-                {}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium opacity-0">Hành động</label>
-                  <Button
-                    onClick={handleUseTemplate}
-                    disabled={!selectedTemplateId || !selectedQAPairIndex}
-                    className="w-full h-11 bg-[#facb01] hover:bg-[#d14f0a]"
-                  >
-                    Tải Mẫu
-                  </Button>
-                </div>
               </div>
-
-              {}
-              {selectedTemplateId && selectedQAPairIndex && (
-                <div className="p-3 bg-white rounded-md border border-blue-200 text-sm">
-                  <div className="font-medium text-gray-700 mb-1">Xem Trước:</div>
-                  <div className="text-xs text-gray-600 space-y-1">
-                    <div><span className="font-semibold">Câu hỏi:</span> {templates.find(t => t.template_id?.toString() === selectedTemplateId)?.qa_pairs[parseInt(selectedQAPairIndex)]?.question}</div>
-                    <div className="line-clamp-2"><span className="font-semibold">Trả lời:</span> {templates.find(t => t.template_id?.toString() === selectedTemplateId)?.qa_pairs[parseInt(selectedQAPairIndex)]?.answer}</div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-1">
-                  {t('common.question')}
-                  <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  value={editedQuestion}
-                  onChange={(e) => setEditedQuestion(e.target.value)}
-                  placeholder={t('training.search_placeholder')}
-                  className="h-11"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-1">
-                  {t('common.answer')}
-                  <span className="text-red-500">*</span>
-                </label>
-                <Textarea
-                  value={editedAnswer}
-                  onChange={(e) => setEditedAnswer(e.target.value)}
-                  placeholder={t('common.answer')}
-                  className="min-h-[180px] resize-none"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-1">
-                  {t('common.intent')}
-                  <span className="text-red-500">*</span>
-                </label>
-                <Select value={editedIntentId?.toString() || ''} onValueChange={(value) => setEditedIntentId(Number(value))}>
-                  <SelectTrigger className="h-11">
-                    <SelectValue placeholder={t('training.select_intent_for_question')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {intentLoading ? (
-                      <SelectItem value="loading" disabled>{t('training.loading_intents')}</SelectItem>
-                    ) : (
-                      intents.map((intent) => (
-                        <SelectItem key={intent.intent_id} value={intent.intent_id.toString()}>
-                          {intent.intent_name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
             </div>
           </ScrollArea>
 
           <DialogFooter className="flex-shrink-0">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setEditedQuestion('');
                 setEditedAnswer('');

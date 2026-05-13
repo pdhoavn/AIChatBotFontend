@@ -11,6 +11,7 @@ import { ConsultantAnalyticsPage } from "../pages/consulant/ConsultantAnalyticsP
 import { ConsultantTrainingDataPage } from "../pages/consulant/ConsultantTrainingDataPage.tsx";
 import { ConsultantIntentPage } from "../pages/consulant/ConsultantIntentPage.tsx";
 import { ConsultantLeaderPage } from "../pages/consulant/ConsultantLeaderPage.tsx";
+import { ConsultantLogsPage } from "../pages/consulant/ConsultantLogsPage.tsx";
 import { ContentManagerPage } from "../pages/contentManager/ContentManagerPage.jsx";
 import LoginPage from "../pages/loginForAd/LoginPage.tsx";
 import ProtectedRoute from "../components/auth/ProtectedRoute.tsx";
@@ -84,6 +85,7 @@ export default function Router() {
         <Route path="trainingdata" element={<ConsultantTrainingDataPage />} />
         <Route path="intents" element={<ConsultantIntentPage />} />
         <Route path="leader" element={<ConsultantLeaderPage />} />
+        <Route path="logs" element={<ConsultantLogsPage />} />
         <Route path="profile" element={<ManagerProfilePage />} />
       </Route>
       
@@ -127,6 +129,7 @@ export default function Router() {
         <Route path="dashboard" element={<AdminDashboardPage />} />
         <Route path="templates" element={<QATemplateManagerPage />} />
         <Route path="users" element={<UserManagementPage />} />
+        <Route path="logs" element={<ConsultantLogsPage />} />
         {/* Admission Management Routes */}
         <Route path="content" element={<AdminContentManagerDashboardPage />} />
         <Route path="consultation" element={<AdminConsultationPage />} />

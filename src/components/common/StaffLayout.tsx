@@ -19,7 +19,8 @@ import {
   BookOpen,
   Clock,
   LogOut,
-  Tag
+  Tag,
+  Activity
 } from 'lucide-react';
 import { useAuth } from '../../contexts/Auth';
 import { canAccessPage } from '../../constants/permissions';
@@ -59,6 +60,7 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
       { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard, path: '/admin/dashboard' },
       { id: 'templates', label: 'Mẫu Câu Hỏi Trả Lời', icon: MessageSquareText, path: '/admin/templates' },
       { id: 'users', label: 'Quản Lý Người Dùng', icon: Users, path: '/admin/users' },
+      { id: 'logs', label: 'Nhật Ký Hệ Thống', icon: Activity, path: '/admin/logs' },
       { id: 'profile', label: user?.name || 'Hồ Sơ', icon: User, path: '/admin/profile' },
     ],
     // 'Content Manager': [
@@ -85,6 +87,7 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
       ...(user?.isLeader ? [
         { id: 'leader', label: 'Duyệt Cơ Sở Tri Thức', icon: Shield, path: '/consultant/leader' }
       ] : []),
+      { id: 'logs', label: 'Nhật Ký Hệ Thống', icon: Activity, path: '/consultant/logs' },
       { id: 'profile', label: user?.name || 'Hồ Sơ', icon: User, path: '/consultant/profile' }
     ]
   };
