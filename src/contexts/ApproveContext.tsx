@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
-import { Minus, X, Loader2, CheckCircle2, XCircle, ShieldCheck } from 'lucide-react';
+import { Minus, X, Loader2, CheckCircle2, XCircle, ShieldCheck, LogIn } from 'lucide-react';
 import { knowledgeAPI } from '../services/fastapi';
+import { AuthenticationError } from '../utils/fastapi-client';
 
 interface ApproveWidgetState {
   visible: boolean;
   minimized: boolean;
   phase: 'processing' | 'done' | 'error';
+  isAuthError: boolean;
   docTitle: string;
   totalChunks: number;
   currentChunk: number;
@@ -29,6 +31,7 @@ const INITIAL: ApproveWidgetState = {
   visible: false,
   minimized: false,
   phase: 'processing',
+  isAuthError: false,
   docTitle: '',
   totalChunks: 0,
   currentChunk: 0,
@@ -108,8 +111,21 @@ export function ApproveProvider({ children }: { children: ReactNode }) {
               }));
               onError?.();
             }
-          } catch {
-            // Network hiccup — skip this tick, keep polling
+          } catch (err) {
+            // Nếu token hết hạn → dừng polling, hiện lỗi auth
+            if (err instanceof AuthenticationError) {
+              clearInterval(pollId);
+              pollIntervalRef.current = null;
+              setWidget(p => ({
+                ...p,
+                phase: 'error',
+                minimized: false,
+                isAuthError: true,
+                errorMsg: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+              }));
+              onError?.();
+            }
+            // Lỗi mạng tạm thời → bỏ qua tick này, tiếp tục poll
           }
         }, POLL_INTERVAL_MS);
 
@@ -117,7 +133,16 @@ export function ApproveProvider({ children }: { children: ReactNode }) {
       })
       .catch((error: Error) => {
         if (versionRef.current !== myVersion) return;
-        setWidget(p => ({ ...p, phase: 'error', minimized: false, errorMsg: error.message }));
+        const isAuth = error instanceof AuthenticationError;
+        setWidget(p => ({
+          ...p,
+          phase: 'error',
+          minimized: false,
+          isAuthError: isAuth,
+          errorMsg: isAuth
+            ? 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+            : error.message,
+        }));
         onError?.();
       });
   };
@@ -241,12 +266,25 @@ export function ApproveProvider({ children }: { children: ReactNode }) {
               <p className="text-xs text-green-600">✓ Tài liệu đã được phê duyệt và lập chỉ mục.</p>
             )}
             {widget.phase === 'error' && (
-              <button
-                onClick={() => setWidget(INITIAL)}
-                className="text-xs text-red-500 underline hover:text-red-700 transition-colors"
-              >
-                Đóng thông báo
-              </button>
+              <div className="flex items-center justify-between gap-2">
+                {widget.isAuthError ? (
+                  <a
+                    href="/login"
+                    className="flex items-center gap-1 text-xs text-red-600 font-medium underline hover:text-red-800 transition-colors"
+                  >
+                    <LogIn className="h-3 w-3" />
+                    Đăng nhập lại
+                  </a>
+                ) : (
+                  <span />
+                )}
+                <button
+                  onClick={() => setWidget(INITIAL)}
+                  className="text-xs text-red-500 underline hover:text-red-700 transition-colors"
+                >
+                  Đóng
+                </button>
+              </div>
             )}
           </div>
         </div>
