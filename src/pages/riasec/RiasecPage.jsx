@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronUp } from 'lucide-react';
-import Footer from "@/components/footer/Footer";
 import Header from "@/components/header/Header";
 import RiasecGuestForm from '../../components/riasec/RiasecGuestForm.jsx';
 
@@ -18,8 +17,6 @@ const RiasecPage =() =>{
     <Header minimal />
     <div class='pb-8'></div>
     <RiasecGuestForm/>
-    <Footer />
-
     {showScrollTop && (
         <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
