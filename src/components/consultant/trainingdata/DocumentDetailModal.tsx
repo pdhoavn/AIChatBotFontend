@@ -296,19 +296,33 @@ export function DocumentDetailModal({
                 </div>
               </div>
 
-              {/* Dòng 4: Ngày tạo | Ngày duyệt */}
+              {/* Dòng 4: Người tải lên | Người duyệt */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Ngày tạo</label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg text-sm">
-                    {formatDateTime(document.created_at) ?? '—'}
-                  </p>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Người tải lên</label>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-gray-900 font-medium text-sm">
+                      {document.created_by_name || 'Hệ thống'}
+                    </p>
+                    {document.created_at && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        {formatDateTime(document.created_at)}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Ngày duyệt</label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg text-sm">
-                    {formatDateTime((document as any).reviewed_at) ?? <span className="text-gray-400">Chưa duyệt</span>}
-                  </p>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Người duyệt</label>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-gray-900 font-medium text-sm">
+                      {document.reviewed_by_name || 'Chưa duyệt'}
+                    </p>
+                    {document.reviewed_at && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        {formatDateTime(document.reviewed_at)}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 

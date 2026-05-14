@@ -108,11 +108,19 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
                 </div>
               )}
 
-              {doc.created_at && (
-                <p className="text-xs text-gray-400 mt-1">
-                  {new Date(doc.created_at as string).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
-                </p>
-              )}
+              <div className="flex items-center justify-between mt-1">
+                {doc.created_at && (
+                  <p className="text-xs text-gray-400">
+                    {new Date(doc.created_at as string).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+                  </p>
+                )}
+                <div className="text-[11px] text-gray-500 flex gap-x-2">
+                  <span>Người tạo: <span className="font-medium text-gray-700">{doc.created_by_name || 'Hệ thống'}</span></span>
+                  {doc.reviewed_by_name && (
+                    <span>• Duyệt: <span className="font-medium text-gray-700">{doc.reviewed_by_name}</span></span>
+                  )}
+                </div>
+              </div>
 
             </div>
           </div>

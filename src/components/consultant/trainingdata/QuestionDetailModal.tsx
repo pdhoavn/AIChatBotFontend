@@ -149,22 +149,28 @@ export function QuestionDetailModal({
 
           {}
           <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-            {question.created_at && (
-              <div>
-                <span className="text-sm text-gray-500">Ngày tạo:</span>
-                <p className="text-sm font-medium text-gray-900">
-                  {new Date(question.created_at).toLocaleDateString('vi-VN')}
+            <div>
+              <span className="text-sm text-gray-500">Người tạo:</span>
+              <p className="text-sm font-medium text-gray-900">
+                {question.created_by_name || 'Hệ thống'}
+              </p>
+              {question.created_at && (
+                <p className="text-xs text-gray-400 mt-1">
+                  {new Date(question.created_at).toLocaleString('vi-VN')}
                 </p>
-              </div>
-            )}
-            {question.approved_at && (
-              <div>
-                <span className="text-sm text-gray-500">Ngày duyệt:</span>
-                <p className="text-sm font-medium text-gray-900">
-                  {new Date(question.approved_at).toLocaleDateString('vi-VN')}
+              )}
+            </div>
+            <div>
+              <span className="text-sm text-gray-500">Người duyệt:</span>
+              <p className="text-sm font-medium text-gray-900">
+                {question.approved_by_name || 'Chưa duyệt'}
+              </p>
+              {question.approved_at && (
+                <p className="text-xs text-gray-400 mt-1">
+                  {new Date(question.approved_at).toLocaleString('vi-VN')}
                 </p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 

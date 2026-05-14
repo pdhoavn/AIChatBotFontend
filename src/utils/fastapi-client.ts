@@ -295,9 +295,13 @@ export interface KnowledgeDocument {
   created_at: string;
   updated_at?: string;
   created_by?: number;
+  created_by_name?: string;
   status?: string; // draft, approved, rejected, deleted
   reviewed_by?: number;
+  reviewed_by_name?: string;
   reviewed_at?: string;
+  deleted_by?: number;
+  deleted_by_name?: string;
   reject_reason?: string;
   is_ocr?: boolean;
 }
@@ -307,10 +311,15 @@ export interface TrainingQuestion {
   question: string;
   answer: string;
   intent_id?: number;
+  intent_name?: string;
   created_at?: string;
   approved_at?: string;
   created_by?: number;
+  created_by_name?: string;
   approved_by?: number;
+  approved_by_name?: string;
+  deleted_by?: number;
+  deleted_by_name?: string;
   status?: string; // draft, approved, rejected, deleted
   reject_reason?: string;
   target_audiences?: string[];

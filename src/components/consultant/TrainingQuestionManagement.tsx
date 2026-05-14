@@ -23,7 +23,9 @@ interface TrainingQuestionPair {
   created_at?: string;
   approved_at?: string;
   created_by?: number;
+  created_by_name?: string;
   approved_by?: number;
+  approved_by_name?: string;
 }
 
 interface CreateTrainingQuestionRequest {
@@ -61,6 +63,18 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
   const [selectedIntent, setSelectedIntent] = useState('Tất cả lĩnh vực');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedQuestion, setSelectedQuestion] = useState<TrainingQuestionPair | null>(null);
+
+  useEffect(() => {
+    if (selectedQuestion) {
+      console.log('Selected Question Debug:', {
+        id: selectedQuestion.question_id,
+        created_by_name: selectedQuestion.created_by_name,
+        approved_by_name: selectedQuestion.approved_by_name,
+        full_data: selectedQuestion
+      });
+    }
+  }, [selectedQuestion]);
+
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -127,6 +141,7 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
       });
 
       setTrainingQuestions(questionsWithIntentNames);
+      console.log('Training Questions Data:', questionsWithIntentNames);
 
       if (questionsWithIntentNames.length > 0) {
         setSelectedQuestion(questionsWithIntentNames[0]);
@@ -417,9 +432,12 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
                         </div>
                       )}
                     </div>
-                    <div className={`text-sm break-words ${selectedQuestion?.question_id === tq.question_id ? 'text-blue-100' : 'text-muted-foreground'
-                      }`}>
+                    <div className={`text-sm break-words ${selectedQuestion?.question_id === tq.question_id ? 'text-blue-100' : 'text-muted-foreground'}`}>
                       Lĩnh vực: {tq.intent_name || 'Đang tải...'}
+                    </div>
+                    <div className={`text-xs mt-1 flex flex-wrap gap-x-3 ${selectedQuestion?.question_id === tq.question_id ? 'text-blue-100/80' : 'text-gray-400'}`}>
+                      <span>Tạo: {tq.created_by_name || 'N/A'}</span>
+                      {tq.approved_by_name && <span>Duyệt: {tq.approved_by_name}</span>}
                     </div>
                   </div>
                 </button>
@@ -509,6 +527,31 @@ export function TrainingQuestionManagement({ prefilledQuestion, onQuestionUsed, 
                     <div className="space-y-1">
                       <div className="text-sm text-muted-foreground">{t('common.question')} ID</div>
                       <div>{selectedQuestion.question_id}</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mt-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <div className="space-y-1">
+                      <div className="text-sm text-muted-foreground">Người tạo</div>
+                      <div>
+                        <span className="font-medium text-gray-900">{selectedQuestion.created_by_name || 'N/A'}</span>
+                        {selectedQuestion.created_at && (
+                          <div className="text-xs text-gray-500 mt-0.5">
+                            {new Date(selectedQuestion.created_at).toLocaleString('vi-VN')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-sm text-muted-foreground">Người duyệt</div>
+                      <div>
+                        <span className="font-medium text-gray-900">{selectedQuestion.approved_by_name || 'N/A'}</span>
+                        {selectedQuestion.approved_at && (
+                          <div className="text-xs text-gray-500 mt-0.5">
+                            {new Date(selectedQuestion.approved_at).toLocaleString('vi-VN')}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 

@@ -99,11 +99,19 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
             </div>
           )}
 
-          {question.created_at && (
-            <p className="text-xs text-gray-400 mt-2">
-              {new Date(question.created_at as string).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
-            </p>
-          )}
+          <div className="flex items-center justify-between mt-2">
+            {question.created_at && (
+              <p className="text-xs text-gray-400">
+                {new Date(question.created_at as string).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+              </p>
+            )}
+            <div className="text-[11px] text-gray-500 flex gap-x-2">
+              <span>Người tạo: <span className="font-medium text-gray-700">{question.created_by_name || 'Hệ thống'}</span></span>
+              {question.approved_by_name && (
+                <span>• Duyệt: <span className="font-medium text-gray-700">{question.approved_by_name}</span></span>
+              )}
+            </div>
+          </div>
         </div>
       ))}
 

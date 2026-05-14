@@ -308,9 +308,14 @@ export function DocumentManagement() {
                           </span>
                         )}
                       </div>
-                      <div className={`text-sm truncate ${selectedDoc?.document_id === doc.document_id ? 'text-blue-100' : 'text-muted-foreground'
-                        }`}>
-                        Tạo {formatDate(doc.created_at)}
+                      <div className={`text-xs mt-1 flex flex-wrap gap-x-2 ${selectedDoc?.document_id === doc.document_id ? 'text-blue-100' : 'text-muted-foreground'}`}>
+                        <span>Tạo: {doc.created_by_name || 'Hệ thống'}</span>
+                        {doc.reviewed_by_name && (
+                          <>
+                            <span>•</span>
+                            <span>Duyệt: {doc.reviewed_by_name}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </button>
@@ -364,10 +369,6 @@ export function DocumentManagement() {
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">{t('common.created')}</div>
-                  <div>{formatDate(selectedDoc.created_at)}</div>
-                </div>
-                <div className="space-y-1">
                   <div className="text-sm text-muted-foreground">{t('documents.file_type')}</div>
                   <div className="capitalize">{getFileType(selectedDoc.file_path)}</div>
                 </div>
@@ -385,18 +386,31 @@ export function DocumentManagement() {
                     <div className="capitalize">{selectedDoc.status}</div>
                   </div>
                 )}
-                {selectedDoc.reviewed_by && (
-                  <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">{t('documents.reviewed_by')}</div>
-                    <div>ID Người Dùng: {selectedDoc.reviewed_by}</div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <div className="space-y-1">
+                  <div className="text-sm text-muted-foreground">Người tải lên</div>
+                  <div>
+                    <span className="font-medium text-gray-900">{selectedDoc.created_by_name || 'Hệ thống'}</span>
+                    {selectedDoc.created_at && (
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {formatDate(selectedDoc.created_at)}
+                      </div>
+                    )}
                   </div>
-                )}
-                {selectedDoc.reviewed_at && (
-                  <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">{t('documents.reviewed_at')}</div>
-                    <div>{formatDate(selectedDoc.reviewed_at)}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-sm text-muted-foreground">Người duyệt</div>
+                  <div>
+                    <span className="font-medium text-gray-900">{selectedDoc.reviewed_by_name || 'Chưa duyệt'}</span>
+                    {selectedDoc.reviewed_at && (
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {formatDate(selectedDoc.reviewed_at)}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </ScrollArea>
