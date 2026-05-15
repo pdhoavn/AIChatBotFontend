@@ -489,7 +489,7 @@ useEffect(() => {
                 >
                   <div className="w-[95%] rounded-2xl p-4 text-sm leading-relaxed shadow-sm bg-white/80 text-gray-800 rounded-bl-sm border border-gray-200/50 backdrop-blur-md">
                     <p className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-bold mb-1.5">
-                      Trợ lý ảo Trường Đại học Giao thông vận tải - Phân hiệu tại Thành Phố Hồ Chí Minh.
+                      Trợ lý ảo Phân Hiệu Trường Đại học Giao thông Vận tải tại TP. Hồ Chí Minh
                     </p>
                     <p className="text-[13px] text-gray-700 font-medium mb-3 leading-relaxed">
                       {selectedAudience.description || 'Hệ thống sẽ cá nhân hóa toàn bộ trải nghiệm dựa trên vai trò của bạn — từ nghiệp vụ, quy chế đào tạo đến các quy định liên quan.'}

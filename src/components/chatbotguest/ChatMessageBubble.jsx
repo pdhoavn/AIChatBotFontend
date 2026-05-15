@@ -65,7 +65,7 @@ export default function ChatMessageBubble({ message }) {
               <PhIcon name="balance" size={12} className="text-accent" />
             </div>
             <span className="text-[10px] font-bold text-text-muted">
-              Trợ lý ảo Trường Đại học Giao thông vận tải - Phân hiệu tại Thành Phố Hồ Chí Minh.
+              Trợ lý ảo Phân Hiệu Trường Đại học Giao thông Vận tải tại TP. Hồ Chí Minh
             </span>
           </div>
         )}
