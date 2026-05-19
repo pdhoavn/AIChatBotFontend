@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Trash2, Download, FileText, FileType, FileSpreadsheet, Copy, Check, Search, AlertTriangle, RefreshCw, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Trash2, Download, FileText, FileType, FileSpreadsheet, Copy, Check, Search, AlertTriangle, RefreshCw, ChevronUp, ChevronDown, ClipboardCopy } from 'lucide-react';
 import { TrainingDocument, Intent } from './types';
 import { Button } from '../../ui/system_users/button';
 import { knowledgeAPI } from '../../../services/fastapi';
@@ -12,7 +12,7 @@ const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
   TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
 };
 
-type Tab = 'info' | 'content';
+type Tab = 'info' | 'content' | 'full';
 
 interface DocumentDetailModalProps {
   document: TrainingDocument;
@@ -45,6 +45,7 @@ export function DocumentDetailModal({
   const [chunksLoading, setChunksLoading] = useState(false);
   const [chunksError, setChunksError] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copiedAll, setCopiedAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -80,9 +81,16 @@ export function DocumentDetailModal({
   }, [document.document_id]);
 
   useEffect(() => {
-    if (activeTab !== 'content') return;
+    if (activeTab !== 'content' && activeTab !== 'full') return;
     fetchChunks();
   }, [activeTab, fetchChunks]);
+
+  const handleCopyAll = () => {
+    const fullText = chunks.map(c => c.chunk_text).join('\n\n');
+    navigator.clipboard.writeText(fullText);
+    setCopiedAll(true);
+    setTimeout(() => setCopiedAll(false), 2500);
+  };
 
   const handleCopyChunk = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
@@ -205,6 +213,7 @@ export function DocumentDetailModal({
   const tabs = [
     { key: 'info' as Tab,    label: 'Thông tin' },
     { key: 'content' as Tab, label: 'Nội dung' },
+    { key: 'full' as Tab,    label: 'Nội dung đầy đủ' },
   ];
 
   return (
@@ -243,7 +252,73 @@ export function DocumentDetailModal({
 
         {/* Body */}
         <div className="flex-1 overflow-hidden flex flex-col">
-          {activeTab === 'info' ? (
+          {activeTab === 'full' ? (
+            <div className="flex-1 flex flex-col p-6 gap-4 min-h-0">
+              {/* Toolbar */}
+              <div className="shrink-0 flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm">
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-gray-500">Tổng số đoạn:</span>
+                    <span className="font-semibold text-gray-900">{(document as any).qdrant_points_count ?? '—'}</span>
+                  </div>
+                  {(document as any).content_char_count > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-gray-500">Tổng ký tự:</span>
+                      <span className="font-semibold text-gray-900">{((document as any).content_char_count as number).toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+                {!chunksLoading && chunks.length > 0 && (
+                  <button
+                    onClick={handleCopyAll}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors
+                      text-gray-700 border-gray-300 hover:bg-gray-100 disabled:opacity-50"
+                  >
+                    {copiedAll
+                      ? <><Check className="h-4 w-4 text-green-500" />Đã sao chép</>
+                      : <><ClipboardCopy className="h-4 w-4" />Sao chép</>}
+                  </button>
+                )}
+              </div>
+
+              {/* Full text area */}
+              <div className="overflow-y-auto doc-chunk-list" style={{ flex: '1 1 0', minHeight: 0, maxHeight: 'calc(90vh - 300px)' }}>
+                {chunksLoading ? (
+                  <div className="flex items-center justify-center py-16 text-gray-400 text-sm gap-2">
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Đang tải nội dung...
+                  </div>
+                ) : chunksError ? (
+                  <div className="flex flex-col items-center justify-center py-16 gap-3">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50">
+                      <AlertTriangle className="h-6 w-6 text-red-400" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-red-600 mb-1">Không thể tải nội dung</p>
+                      <p className="text-xs text-gray-500 max-w-sm">{chunksError}</p>
+                    </div>
+                    <button
+                      onClick={fetchChunks}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Thử lại
+                    </button>
+                  </div>
+                ) : chunks.length === 0 ? (
+                  <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
+                    Không có nội dung
+                  </div>
+                ) : (
+                  <div className="bg-white border border-gray-200 rounded-lg p-5">
+                    <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                      {chunks.map(c => c.chunk_text).join('\n\n')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : activeTab === 'info' ? (
             <div className="flex-1 overflow-y-auto p-6">
             <div className="space-y-5">
               {/* Dòng 1: Tiêu đề */}
