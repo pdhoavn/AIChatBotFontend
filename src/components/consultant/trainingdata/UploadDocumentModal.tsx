@@ -42,6 +42,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: 
   const [intentId, setIntentId] = useState<number | undefined>(undefined);
   const [audiences, setAudiences] = useState<Audience[]>([]);
   const [audienceOpen, setAudienceOpen] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showOCRPrompt, setShowOCRPrompt] = useState(false);
   const [useOCR, setUseOCR] = useState(false);
@@ -123,6 +124,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: 
     const formData = new FormData();
     formData.append('file', file);
     formData.append('title', title);
+    formData.append('is_private', isPrivate.toString());
     const resolvedIntentId = intentId ?? 0;
     const audienceValues = audiences.map(a => AUDIENCE_VALUE_MAP[a]);
 
@@ -292,6 +294,17 @@ export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: 
                 ))}
               </SelectContent>
             </Select>
+            <label className="flex items-center gap-2.5 mt-4 cursor-pointer select-none w-fit">
+              <div
+                onClick={() => setIsPrivate(prev => !prev)}
+                className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 transition-colors ${isPrivate ? 'bg-[#facb01] border-[#facb01]' : 'border-gray-300 bg-white'}`}
+              >
+                {isPrivate && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+              </div>
+              <span onClick={() => setIsPrivate(prev => !prev)} className="text-sm font-medium text-gray-700">
+                Riêng tư (Yêu cầu đăng nhập)
+              </span>
+            </label>
           </div>
         </div>
 

@@ -307,7 +307,7 @@ export const knowledgeAPI = {
     return response.json();
   },
 
-  uploadTrainingQuestion: (data: { question: string; answer: string; intent_id: number; target_audiences: string[] }) =>
+  uploadTrainingQuestion: (data: { question: string; answer: string; intent_id: number; target_audiences: string[]; is_private?: boolean }) =>
     fastAPIClient.post<TrainingQuestion>('/knowledge/upload/training_question', data),
 
   // Get documents with optional status filter

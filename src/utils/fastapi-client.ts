@@ -304,6 +304,7 @@ export interface KnowledgeDocument {
   deleted_by_name?: string;
   reject_reason?: string;
   is_ocr?: boolean;
+  is_private?: boolean;
 }
 
 export interface TrainingQuestion {
@@ -323,6 +324,7 @@ export interface TrainingQuestion {
   status?: string; // draft, approved, rejected, deleted
   reject_reason?: string;
   target_audiences?: string[];
+  is_private?: boolean;
 }
 
 // Intent types

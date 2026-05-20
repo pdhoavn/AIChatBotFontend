@@ -227,6 +227,11 @@ export function DocumentDetailModal({
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-gray-900">Chi Tiết Tài Liệu</h2>
             {getStatusBadge(document.status)}
+            {document.is_private && (
+              <span className="px-3 py-1 text-sm font-medium rounded bg-purple-100 text-purple-800 border border-purple-200">
+                Riêng tư
+              </span>
+            )}
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="h-5 w-5" />

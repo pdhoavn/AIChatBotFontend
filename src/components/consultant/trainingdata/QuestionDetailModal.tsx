@@ -67,6 +67,11 @@ export function QuestionDetailModal({
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-gray-900">Chi Tiết Câu Hỏi</h2>
             {getStatusBadge(question.status)}
+            {question.is_private && (
+              <span className="px-3 py-1 text-sm font-medium rounded bg-purple-100 text-purple-800 border border-purple-200">
+                Riêng tư
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}

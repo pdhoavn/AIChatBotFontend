@@ -34,7 +34,7 @@ type Audience = typeof AUDIENCE_OPTIONS[number];
 interface AddQuestionModalProps {
   intents: Intent[];
   onClose: () => void;
-  onSubmit: (data: { question: string; answer: string; intent_id: number; target_audiences: string[] }) => Promise<void>;
+  onSubmit: (data: { question: string; answer: string; intent_id: number; target_audiences: string[]; is_private?: boolean }) => Promise<void>;
 }
 
 export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModalProps) {
@@ -43,6 +43,7 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
   const [intentId, setIntentId] = useState<number | undefined>(undefined);
   const [audiences, setAudiences] = useState<Audience[]>([]);
   const [audienceOpen, setAudienceOpen] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
   const audienceRef = useRef<HTMLDivElement>(null);
 
@@ -130,7 +131,7 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
     try {
       setLoading(true);
       const resolvedIntentId = intentId ?? 0;
-      await onSubmit({ question, answer, intent_id: resolvedIntentId, target_audiences: audiences.map(a => AUDIENCE_VALUE_MAP[a]) });
+      await onSubmit({ question, answer, intent_id: resolvedIntentId, target_audiences: audiences.map(a => AUDIENCE_VALUE_MAP[a]), is_private: isPrivate });
       onClose();
     } catch (error) {
     } finally {
@@ -295,6 +296,17 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
                 ))}
               </SelectContent>
             </Select>
+            <label className="flex items-center gap-2.5 mt-4 cursor-pointer select-none w-fit">
+              <div
+                onClick={() => setIsPrivate(prev => !prev)}
+                className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 transition-colors ${isPrivate ? 'bg-[#facb01] border-[#facb01]' : 'border-gray-300 bg-white'}`}
+              >
+                {isPrivate && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+              </div>
+              <span onClick={() => setIsPrivate(prev => !prev)} className="text-sm font-medium text-gray-700">
+                Riêng tư (Yêu cầu đăng nhập)
+              </span>
+            </label>
           </div>
 
           {}
