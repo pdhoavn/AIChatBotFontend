@@ -48,8 +48,14 @@ const handleLogin = async (event) => {
         return;
       }
 
-      // Student / Parent -> về profile
-      navigate("/profile");
+      // Student / Parent -> về profile hoặc quay lại trang chat nếu có
+      const returnTo = localStorage.getItem("chatbot_login_return");
+      if (returnTo) {
+        localStorage.removeItem("chatbot_login_return");
+        navigate(returnTo);
+      } else {
+        navigate("/profile");
+      }
     } else {
       // sai TK / MK
       swal({

@@ -323,9 +323,16 @@ export default function ChatGuestPage() {
     abortControllerRef.current = controller;
 
     try {
+      // Đính kèm JWT token nếu người dùng đã đăng nhập
+      const token = localStorage.getItem("access_token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${API_BASE_URL}/chat/stream`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           message: text,
           session_id: sessionId,
@@ -373,6 +380,27 @@ export default function ChatGuestPage() {
                 partialRef.current += data.content ?? "";
                 setPartial(partialRef.current);
                 break;
+              case "login_required": {
+                // Backend yêu cầu đăng nhập để xem nội dung bảo mật
+                const loginMsg = data.message || "Nội dung này yêu cầu đăng nhập để xem.";
+
+                // Lưu câu hỏi bị chặn để gửi lại sau khi đăng nhập
+                localStorage.setItem(CHATBOT_PREFILL_KEY, JSON.stringify({ text }));
+                localStorage.setItem("chatbot_login_return", window.location.pathname + window.location.search);
+
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    sender: "bot",
+                    text: loginMsg,
+                    type: "login_required",
+                  },
+                ]);
+                partialRef.current = "";
+                setPartial("");
+                setIsLoading(false);
+                break;
+              }
               case "done": {
                 if (isStoppedRef.current) break;
                 const finalText = (partialRef.current || "").trim();

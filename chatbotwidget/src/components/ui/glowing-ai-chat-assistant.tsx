@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Send, Info, X, Briefcase, GraduationCap, HeartHandshake, ClipboardList, ChevronDown, Bot, ExternalLink, Sparkles, FileText, Copy, Check } from 'lucide-react';
+import { Mic, Send, Info, X, Briefcase, GraduationCap, HeartHandshake, ClipboardList, ChevronDown, Bot, ExternalLink, Sparkles, FileText, Copy, Check, Lock, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
@@ -13,6 +13,7 @@ interface ChatMessage {
   id: string;
   text: string;
   sender: 'user' | 'ai';
+  type?: 'login_required';
   confidence?: number | null;
   sources?: Array<{ document_id: number; file_name?: string | null }>;
 }
@@ -248,9 +249,15 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
     abortControllerRef.current = controller;
 
     try {
+      const token = localStorage.getItem('access_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${effectiveApiUrl}/chat/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           message: text,
           session_id: _sessionId,
@@ -297,6 +304,22 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
                 partialRef.current += data.content ?? '';
                 setPartial(partialRef.current);
                 break;
+              case 'login_required': {
+                const loginMsg = data.message || 'Nội dung này yêu cầu đăng nhập để xem.';
+                setMessages(prev => [
+                  ...prev,
+                  {
+                    id: Date.now().toString(),
+                    text: loginMsg,
+                    sender: 'ai',
+                    type: 'login_required',
+                  },
+                ]);
+                partialRef.current = '';
+                setPartial('');
+                setIsLoading(false);
+                break;
+              }
               case 'done': {
                 if (isStoppedRef.current) break;
                 const finalText = (partialRef.current || '').trim();
@@ -526,7 +549,44 @@ useEffect(() => {
               <AnimatePresence>
                 {messages.map((msg) => {
                   const isUser = msg.sender === 'user';
+                  const isLoginRequired = msg.type === 'login_required';
                   const sources = Array.isArray(msg.sources) ? msg.sources : [];
+
+                  // Render đặc biệt cho yêu cầu đăng nhập
+                  if (isLoginRequired) {
+                    const mainChatbotUrl = import.meta.env.VITE_MAIN_CHATBOT_URL || 'http://localhost:5173';
+                    return (
+                      <motion.div
+                        key={msg.id}
+                        initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.3, type: 'spring', bounce: 0.3 }}
+                        className="flex w-full justify-start"
+                      >
+                        <div className="max-w-[92%] rounded-2xl px-4 py-3.5 text-sm leading-relaxed shadow-sm bg-white/80 text-gray-800 rounded-bl-sm border border-amber-200/70 backdrop-blur-md">
+                          <div className="flex items-start gap-2.5">
+                            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                              <Lock className="w-4 h-4 text-amber-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-semibold text-gray-800 mb-0.5">Yêu cầu đăng nhập</p>
+                              <p className="text-[12.5px] text-gray-600 leading-relaxed">{msg.text}</p>
+                            </div>
+                          </div>
+                          <a
+                            href={`${mainChatbotUrl}/loginprivate`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-blue-600 text-white hover:bg-blue-500 active:scale-[0.98] transition-all shadow-sm text-[12.5px] font-semibold"
+                          >
+                            <LogIn className="w-3.5 h-3.5" />
+                            Đăng nhập
+                          </a>
+                        </div>
+                      </motion.div>
+                    );
+                  }
+
                   return (
                     <motion.div
                       key={msg.id}

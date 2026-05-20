@@ -1,12 +1,15 @@
 // src/components/chatbotguest/ChatMessageBubble.jsx
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { useNavigate } from "react-router-dom";
 import PhIcon from "../ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
 
 export default function ChatMessageBubble({ message }) {
   const [isCopied, setIsCopied] = useState(false);
+  const navigate = useNavigate();
   const isUser = message.sender === "user";
+  const isLoginRequired = message.type === "login_required";
   const hasLawyerSuggestion = message.text?.includes("[SUGGEST_LAWYER]");
   const cleanContent = message.text?.replace("[SUGGEST_LAWYER]", "").trim();
 
@@ -49,6 +52,47 @@ export default function ChatMessageBubble({ message }) {
   }
 
   const citations = Array.from(citationsByDocId.values());
+
+  // Render đặc biệt cho yêu cầu đăng nhập
+  if (isLoginRequired) {
+    return (
+      <div className="flex justify-start">
+        <div className="max-w-[85%] rounded-2xl px-5 py-4 bg-surface border border-amber-300/50 shadow-sm rounded-bl-md transition-all duration-300">
+          {/* Header bot */}
+          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border-main/30">
+            <div className="w-5 h-5 rounded-md bg-accent/20 flex items-center justify-center">
+              <PhIcon name="balance" size={12} className="text-accent" />
+            </div>
+            <span className="text-[10px] font-bold text-text-muted">
+              Trợ lý ảo Phân Hiệu Trường Đại học Giao thông Vận tải tại TP. Hồ Chí Minh
+            </span>
+          </div>
+          {/* Lock icon + message */}
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+              <PhIcon name="lock" size={20} className="text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-text-main mb-1">
+                Yêu cầu đăng nhập
+              </p>
+              <p className="text-sm text-text-muted leading-relaxed">
+                {message.text}
+              </p>
+            </div>
+          </div>
+          {/* Login button */}
+          <button
+            onClick={() => navigate("/loginprivate")}
+            className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-accent text-white hover:bg-accent/90 active:scale-[0.98] transition-all shadow-sm text-sm font-semibold"
+          >
+            <PhIcon name="login" size={16} />
+            Đăng nhập
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
