@@ -105,6 +105,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         const userId = payload.user_id;
         const userEmail = payload.sub;
+
+        // chat_user tokens (từ /auth/login/chat) không có user_id — giữ nguyên token
+        if (payload.role === 'chat_user') {
+          setIsLoading(false);
+          return;
+        }
         
         if (!userId || !userEmail) {
           localStorage.removeItem("access_token");
