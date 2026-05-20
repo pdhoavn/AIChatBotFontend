@@ -10,6 +10,7 @@ import PhIcon from "../../components/ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition.js";
 import { audienceAPI, resolveAudienceCode } from "../../api/audienceApi.ts";
+import ChatLoginModal from "../../components/chatbotguest/ChatLoginModal.jsx";
 
 const CHATBOT_PREFILL_KEY = "chatbot_prefill_message";
 const GUEST_ID_KEY = "guest_user_id_v1";
@@ -131,6 +132,8 @@ export default function ChatGuestPage() {
   const [hasError, setHasError] = useState(false);
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState(null);
 
   const [audiences, setAudiences] = useState([]);
   const [intents, setIntents] = useState([]);
@@ -384,9 +387,9 @@ export default function ChatGuestPage() {
                 // Backend yêu cầu đăng nhập để xem nội dung bảo mật
                 const loginMsg = data.message || "Nội dung này yêu cầu đăng nhập để xem.";
 
-                // Lưu câu hỏi bị chặn để gửi lại sau khi đăng nhập
-                localStorage.setItem(CHATBOT_PREFILL_KEY, JSON.stringify({ text }));
-                localStorage.setItem("chatbot_login_return", window.location.pathname + window.location.search);
+                // Show modal and save pending text
+                setPendingMessage(text);
+                setShowLoginModal(true);
 
                 setMessages((prev) => [
                   ...prev,
@@ -604,6 +607,16 @@ export default function ChatGuestPage() {
     setInput("");
   };
 
+  const handleLoginSuccess = () => {
+    setShowLoginModal(false);
+    if (pendingMessage) {
+      setTimeout(() => {
+        send(pendingMessage, selectedIntent?.intent_id);
+        setPendingMessage(null);
+      }, 300);
+    }
+  };
+
   return (
     <div className="chat-shell flex h-[100dvh] min-h-[100svh] flex-col bg-sidebar relative w-full transition-colors duration-300 overflow-hidden">
       <ChatGuestHeader
@@ -739,6 +752,13 @@ export default function ChatGuestPage() {
           </div>
         </div>
       </div>
+
+      {/* Login Modal for Private Content */}
+      <ChatLoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
+        onSuccess={handleLoginSuccess} 
+      />
     </div>
   );
 }
