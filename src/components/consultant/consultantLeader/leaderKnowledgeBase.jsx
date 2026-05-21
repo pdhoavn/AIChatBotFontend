@@ -45,6 +45,18 @@ function AudienceBadges({ audiences }) {
   );
 }
 
+function PrivacyBadge({ isPrivate }) {
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${
+      isPrivate
+        ? 'bg-amber-50 text-amber-700 border-amber-200'
+        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    }`}>
+      {isPrivate ? 'Riêng tư' : 'Công khai'}
+    </span>
+  );
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A';
   return new Date(dateString).toLocaleDateString('vi-VN', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -66,6 +78,7 @@ function TrainingQuestionCard({ question, approvingId, rejectingId, onApprove, o
         <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800 flex-shrink-0">Nháp</span>
       </div>
       <div className="flex flex-col gap-1.5 mb-3">
+        <PrivacyBadge isPrivate={question.is_private} />
         <AudienceBadges audiences={question.target_audiences} />
         {question.intent_name && (
           <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full self-start">
@@ -112,6 +125,7 @@ function DocumentCard({ document, approvingId, rejectingId, downloadingId, onApp
         <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800 flex-shrink-0">Nháp</span>
       </div>
       <div className="flex flex-col gap-1.5 mb-3">
+        <PrivacyBadge isPrivate={document.is_private} />
         <AudienceBadges audiences={document.target_audiences} />
         {document.intent_name && (
           <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full self-start">

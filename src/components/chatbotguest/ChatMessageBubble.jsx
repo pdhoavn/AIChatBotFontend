@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import PhIcon from "../ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
 
-export default function ChatMessageBubble({ message, onLoginClick }) {
+export default function ChatMessageBubble({ message, onLoginClick, isPrivateLoggedIn = false }) {
   const [isCopied, setIsCopied] = useState(false);
   const navigate = useNavigate();
   const isUser = message.sender === "user";
@@ -84,10 +84,14 @@ export default function ChatMessageBubble({ message, onLoginClick }) {
           {/* Login button */}
           <button
             onClick={() => onLoginClick ? onLoginClick() : navigate("/loginprivate")}
-            className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-accent text-white hover:bg-accent/90 active:scale-[0.98] transition-all shadow-sm text-sm font-semibold"
+            className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl transition-all shadow-sm text-sm font-semibold ${
+              isPrivateLoggedIn
+                ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                : "bg-accent text-white hover:bg-accent/90 active:scale-[0.98]"
+            }`}
           >
-            <PhIcon name="login" size={16} />
-            Đăng nhập
+            <PhIcon name={isPrivateLoggedIn ? "check" : "login"} size={16} />
+            {isPrivateLoggedIn ? "Đã đăng nhập dữ liệu nội bộ" : "Đăng nhập"}
           </button>
         </div>
       </div>

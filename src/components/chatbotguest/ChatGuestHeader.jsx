@@ -160,7 +160,7 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
             </button>
           ) : (
             <button
-              onClick={() => navigate("/loginprivate")}
+              onClick={() => navigate("/loginforad")}
               className="rounded-full bg-black px-4 py-1.5 text-sm text-white hover:opacity-90"
             >
               Đăng nhập

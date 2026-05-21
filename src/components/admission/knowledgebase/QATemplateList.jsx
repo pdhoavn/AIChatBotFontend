@@ -38,6 +38,18 @@ export function QATemplateList({
     );
   };
 
+  const getPrivacyBadge = (isPrivate) => (
+    <span
+      className={`px-2 py-1 text-xs font-medium rounded border ${
+        isPrivate
+          ? 'bg-amber-50 text-amber-700 border-amber-200'
+          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      }`}
+    >
+      {isPrivate ? 'Riêng tư' : 'Công khai'}
+    </span>
+  );
+
   return (
     <Tabs defaultValue="qa" className="space-y-4">
       <TabsList>
@@ -82,6 +94,7 @@ export function QATemplateList({
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap items-center gap-2">
+                  {getPrivacyBadge(template.is_private)}
                   {getStatusBadge(template.status)}
                   <Badge variant="secondary">{template.category}</Badge>
                   {template.tags && template.tags.length > 0 && template.tags.map((tag) => (

@@ -11,6 +11,7 @@ import { API_CONFIG } from "../../config/api.js";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition.js";
 import { audienceAPI, resolveAudienceCode } from "../../api/audienceApi.ts";
 import ChatLoginModal from "../../components/chatbotguest/ChatLoginModal.jsx";
+import { clearChatSession, getChatAccessToken, getChatRequestToken } from "../../utils/chatAuth";
 
 const CHATBOT_PREFILL_KEY = "chatbot_prefill_message";
 const GUEST_ID_KEY = "guest_user_id_v1";
@@ -134,6 +135,7 @@ export default function ChatGuestPage() {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingMessage, setPendingMessage] = useState(null);
+  const [isChatPrivateLoggedIn, setIsChatPrivateLoggedIn] = useState(Boolean(getChatAccessToken()));
 
   const [audiences, setAudiences] = useState([]);
   const [intents, setIntents] = useState([]);
@@ -155,6 +157,21 @@ export default function ChatGuestPage() {
 
   const isStartingRef = useRef(false);
   const inputBeforeMicRef = useRef("");
+
+  useEffect(() => {
+    const syncChatPrivateAuth = () => {
+      setIsChatPrivateLoggedIn(Boolean(getChatAccessToken()));
+    };
+
+    syncChatPrivateAuth();
+    window.addEventListener("storage", syncChatPrivateAuth);
+    window.addEventListener("chat-auth-change", syncChatPrivateAuth);
+
+    return () => {
+      window.removeEventListener("storage", syncChatPrivateAuth);
+      window.removeEventListener("chat-auth-change", syncChatPrivateAuth);
+    };
+  }, []);
 
   // Hiển thị lỗi speech recognition cho user
   useEffect(() => {
@@ -327,7 +344,7 @@ export default function ChatGuestPage() {
 
     try {
       // Đính kèm JWT token nếu người dùng đã đăng nhập
-      const token = localStorage.getItem("access_token");
+      const token = getChatRequestToken();
       const headers = { "Content-Type": "application/json" };
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
@@ -385,11 +402,11 @@ export default function ChatGuestPage() {
                 break;
               case "login_required": {
                 // Backend yêu cầu đăng nhập để xem nội dung bảo mật
-                const loginMsg = data.message || "Nội dung này yêu cầu đăng nhập để xem.";
+                const loginMsg = data.message || "Câu hỏi của bạn liên quan đến dữ liệu nội bộ, vui lòng đăng nhập để hệ thống trả lời.";
 
                 // Show modal and save pending text
                 setPendingMessage(text);
-                setShowLoginModal(true);
+                setShowLoginModal(!getChatAccessToken());
 
                 setMessages((prev) => [
                   ...prev,
@@ -607,8 +624,26 @@ export default function ChatGuestPage() {
     setInput("");
   };
 
+  const handlePrivateLoginClick = () => {
+    if (getChatAccessToken()) {
+      setShowLoginModal(false);
+      toast.info("Bạn đã đăng nhập dữ liệu nội bộ.", { toastId: "chat-private-already-logged-in" });
+      return;
+    }
+
+    setShowLoginModal(true);
+  };
+
+  const handlePrivateLogout = () => {
+    clearChatSession();
+    setShowLoginModal(false);
+    setPendingMessage(null);
+    toast.info("Đã đăng xuất khỏi dữ liệu nội bộ.", { toastId: "chat-private-logout" });
+  };
+
   const handleLoginSuccess = () => {
     setShowLoginModal(false);
+    setIsChatPrivateLoggedIn(Boolean(getChatAccessToken()));
     if (pendingMessage) {
       setTimeout(() => {
         send(pendingMessage, selectedIntent?.intent_id);
@@ -632,6 +667,22 @@ export default function ChatGuestPage() {
       >
         <div className="max-w-5xl mx-auto w-full px-3 md:px-6 flex flex-col pb-52 sm:pb-44 min-h-full">
           <div className="w-full flex-1">
+            {isChatPrivateLoggedIn && (
+              <div className="sticky top-2 z-10 mb-4 flex justify-center">
+                <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-emerald-200 bg-white/95 px-3 py-1.5 text-xs text-emerald-700 shadow-sm backdrop-blur">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="font-medium">Đã đăng nhập dữ liệu nội bộ</span>
+                  <button
+                    type="button"
+                    onClick={handlePrivateLogout}
+                    className="ml-1 rounded-full border border-emerald-200 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              </div>
+            )}
+
             {messages.length === 0 && (
               <ChatEmptyState
                 greeting={greeting}
@@ -647,10 +698,21 @@ export default function ChatGuestPage() {
               <div key={i} className="mb-4 chat-message">
                 <ChatMessageBubble 
                   message={m} 
-                  onLoginClick={() => setShowLoginModal(true)} 
+                  onLoginClick={handlePrivateLoginClick} 
+                  isPrivateLoggedIn={isChatPrivateLoggedIn}
                 />
               </div>
             ))}
+
+            {showLoginModal && (
+              <div className="mb-4 chat-message">
+                <ChatLoginModal
+                  isOpen={showLoginModal}
+                  onClose={() => setShowLoginModal(false)}
+                  onSuccess={handleLoginSuccess}
+                />
+              </div>
+            )}
 
             {(isLoading || partial) && (
               <div className="mb-4 chat-message flex justify-start">
@@ -755,13 +817,6 @@ export default function ChatGuestPage() {
           </div>
         </div>
       </div>
-
-      {/* Login Modal for Private Content */}
-      <ChatLoginModal 
-        isOpen={showLoginModal} 
-        onClose={() => setShowLoginModal(false)} 
-        onSuccess={handleLoginSuccess} 
-      />
     </div>
   );
 }

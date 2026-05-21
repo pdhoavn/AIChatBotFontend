@@ -48,6 +48,7 @@ export function KnowledgeBaseViewer() {
               answer: question.answer || 'No answer',
               category: question.intent_id ? (intentMap[question.intent_id] || 'Khác') : 'Khác',
               status: question.status || 'draft',
+              is_private: Boolean(question.is_private),
               tags: [],
               lastModified: question.created_at || new Date().toISOString().split('T')[0]
             }))
@@ -65,6 +66,7 @@ export function KnowledgeBaseViewer() {
               description: doc.content ? doc.content.substring(0, 150) + '...' : '',
               category: doc.category || 'Khác',
               status: doc.status || 'draft',
+              is_private: Boolean(doc.is_private),
               fileType: getFileType(doc.file_path || ''),
               uploadedDate: doc.created_at || new Date().toISOString().split('T')[0],
               tags: [],

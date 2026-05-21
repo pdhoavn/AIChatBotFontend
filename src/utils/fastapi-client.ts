@@ -81,7 +81,11 @@ class FastAPIClient {
           // Small delay to ensure localStorage is cleared
           setTimeout(() => {
             if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-              window.location.href = '/login';
+              const staffPaths = ['/admin', '/content', '/consultant', '/admission'];
+              const loginPath = staffPaths.some(path => window.location.pathname.startsWith(path))
+                ? '/loginforad'
+                : '/loginprivate';
+              window.location.href = loginPath;
             }
           }, 100);
           
