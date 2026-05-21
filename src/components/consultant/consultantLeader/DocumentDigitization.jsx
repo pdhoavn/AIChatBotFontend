@@ -74,7 +74,8 @@ function TreeNode({ node, depth = 0, selectedId, onSelect, onDeleteFolder, delet
 
   return (
     <div>
-      <div className={`group/node flex items-center rounded transition-colors
+      <div
+        className={`group/node flex items-center rounded transition-colors
           ${isSelected ? 'bg-yellow-100 text-yellow-800 font-medium' : 'hover:bg-gray-100 text-gray-700'}`}
         style={{ paddingLeft: `${8 + depth * 16}px`, paddingRight: '4px' }}
       >
@@ -82,16 +83,14 @@ function TreeNode({ node, depth = 0, selectedId, onSelect, onDeleteFolder, delet
           onClick={() => { setOpen(o => !o); onSelect(node.folder_id); }}
           className="flex-1 flex items-center gap-1.5 py-1 text-sm text-left min-w-0"
         >
-          {hasChildren ? (
-            open
-              ? <ChevronDown className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
-              : <ChevronRight className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
-          ) : (
-            <span className="w-3.5 flex-shrink-0" />
-          )}
+          <ChevronRight
+            className={`h-3.5 w-3.5 flex-shrink-0 text-gray-400 transition-transform duration-200
+              ${hasChildren ? '' : 'opacity-0'}
+              ${open && hasChildren ? 'rotate-90' : ''}`}
+          />
           {open && hasChildren
-            ? <FolderOpen className="h-4 w-4 flex-shrink-0 text-yellow-500" />
-            : <Folder      className="h-4 w-4 flex-shrink-0 text-yellow-400" />
+            ? <FolderOpen className="h-4 w-4 flex-shrink-0 text-yellow-500 transition-all duration-150" />
+            : <Folder     className="h-4 w-4 flex-shrink-0 text-yellow-400 transition-all duration-150" />
           }
           <span className="truncate">{node.folder_name}</span>
         </button>
@@ -105,9 +104,16 @@ function TreeNode({ node, depth = 0, selectedId, onSelect, onDeleteFolder, delet
         </button>
       </div>
 
-      {open && hasChildren && (
-        <div>
-          {node.children.map(child => (
+      {/* animate mở/đóng bằng CSS grid trick */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateRows: open && hasChildren ? '1fr' : '0fr',
+          transition: 'grid-template-rows 0.2s ease',
+        }}
+      >
+        <div style={{ overflow: 'hidden' }}>
+          {node.children?.map(child => (
             <TreeNode
               key={child.folder_id}
               node={child}
@@ -119,7 +125,76 @@ function TreeNode({ node, depth = 0, selectedId, onSelect, onDeleteFolder, delet
             />
           ))}
         </div>
-      )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Custom Folder Dropdown ───────────────────────────────────────────────────
+
+function FolderDropdown({ value, onChange, folderTree, placeholder = '— Không chọn thư mục —' }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const flatFolders = flattenTree(folderTree);
+  const selected = flatFolders.find(f => f.id === value);
+
+  // Đóng khi click ra ngoài
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-2 pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white hover:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-colors"
+      >
+        <Folder className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+        <span className={`flex-1 text-left truncate ${!selected ? 'text-gray-400' : 'text-gray-700'}`}>
+          {selected ? selected.name : placeholder}
+        </span>
+        <ChevronDown className={`h-4 w-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {/* Dropdown list */}
+      <div
+        className={`absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden
+          transition-all duration-200 origin-top
+          ${open ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-95 pointer-events-none'}`}
+        style={{ maxHeight: '200px', overflowY: 'auto' }}
+      >
+        {/* Option gốc */}
+        <button
+          type="button"
+          onClick={() => { onChange(null); setOpen(false); }}
+          className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-yellow-50 transition-colors
+            ${value == null ? 'bg-yellow-50 text-yellow-800 font-medium' : 'text-gray-700'}`}
+        >
+          <FolderOpen className="h-4 w-4 text-yellow-500 flex-shrink-0" />
+          <span>{placeholder}</span>
+        </button>
+
+        {flatFolders.map(f => (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => { onChange(f.id); setOpen(false); }}
+            className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-yellow-50 transition-colors
+              ${value === f.id ? 'bg-yellow-50 text-yellow-800 font-medium' : 'text-gray-700'}`}
+            style={{ paddingLeft: `${12 + f.depth * 16}px` }}
+          >
+            <Folder className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+            <span className="truncate">{f.name}</span>
+          </button>
+        ))}
+
+        {flatFolders.length === 0 && (
+          <p className="px-3 py-2 text-xs text-gray-400">Chưa có thư mục nào</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -206,26 +281,11 @@ function UploadModal({ onClose, onUploaded, folderId, folderTree = [] }) {
           <label className="block text-xs font-medium text-gray-600 mb-1.5">
             Thư mục lưu trữ
           </label>
-          <div className="relative">
-            <Folder className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-yellow-400 pointer-events-none" />
-            <select
-              value={selectedFolderId}
-              onChange={e => setSelectedFolderId(e.target.value ? Number(e.target.value) : '')}
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent appearance-none"
-            >
-              <option value="">— Không chọn thư mục —</option>
-              {flatFolders.length === 0 ? (
-                <option disabled>Chưa có thư mục nào</option>
-              ) : (
-                flatFolders.map(f => (
-                  <option key={f.id} value={f.id}>
-                    {'  '.repeat(f.depth * 2)}{f.depth > 0 ? '└ ' : ''}{f.name}
-                  </option>
-                ))
-              )}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-          </div>
+          <FolderDropdown
+            value={selectedFolderId || null}
+            onChange={val => setSelectedFolderId(val ?? '')}
+            folderTree={folderTree}
+          />
         </div>
 
         {/* Drop zone */}
@@ -321,16 +381,22 @@ function UploadModal({ onClose, onUploaded, folderId, folderTree = [] }) {
 
 // ─── Create Folder Modal ──────────────────────────────────────────────────────
 
-function CreateFolderModal({ parentId, onClose, onCreated }) {
-  const [name, setName]       = useState('');
-  const [loading, setLoading] = useState(false);
+function CreateFolderModal({ parentId, folderTree = [], onClose, onCreated }) {
+  const [name, setName]           = useState('');
+  const [selectedParent, setSelectedParent] = useState(parentId ?? '');
+  const [loading, setLoading]     = useState(false);
+
+  const flatFolders = flattenTree(folderTree);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
     try {
       setLoading(true);
-      const folder = await digitizationAPI.createFolder(name.trim(), parentId ?? null);
+      const folder = await digitizationAPI.createFolder(
+        name.trim(),
+        selectedParent !== '' ? Number(selectedParent) : null
+      );
       toast.success(`Đã tạo thư mục "${folder.folder_name}"`);
       onCreated(folder);
       onClose();
@@ -343,7 +409,7 @@ function CreateFolderModal({ parentId, onClose, onCreated }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-2xl w-[400px] overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-[420px] overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="text-base font-semibold text-gray-800">Tạo thư mục mới</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
@@ -362,9 +428,17 @@ function CreateFolderModal({ parentId, onClose, onCreated }) {
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
             />
           </div>
-          {parentId && (
-            <p className="text-xs text-gray-400">Tạo bên trong thư mục đang chọn (ID: {parentId})</p>
-          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Thư mục cha</label>
+            <FolderDropdown
+              value={selectedParent !== '' ? Number(selectedParent) : null}
+              onChange={val => setSelectedParent(val !== null ? String(val) : '')}
+              folderTree={folderTree}
+              placeholder="Số hóa (gốc)"
+            />
+          </div>
+
           <div className="flex justify-end gap-2 pt-1">
             <button type="button" onClick={onClose}
               className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
@@ -382,6 +456,68 @@ function CreateFolderModal({ parentId, onClose, onCreated }) {
   );
 }
 
+// ─── PDF Viewer Modal ─────────────────────────────────────────────────────────
+
+function PdfViewerModal({ doc, onClose }) {
+  const [url, setUrl]       = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]   = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    digitizationAPI.getViewUrl(doc.document_id)
+      .then(u => { if (!cancelled) { setUrl(u); setLoading(false); } })
+      .catch(e => { if (!cancelled) { setError(e?.message || 'Không thể tải file'); setLoading(false); } });
+    return () => { cancelled = true; };
+  }, [doc.document_id]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div
+        className="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        style={{ width: '90vw', height: '90vh' }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <FileText className="h-4 w-4 text-red-400 flex-shrink-0" />
+            <span className="text-sm font-medium text-gray-800 truncate">{doc.file_name}</span>
+            <span className="text-xs text-gray-400 flex-shrink-0">— bản số hóa</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 ml-4"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-hidden bg-gray-100">
+          {loading && (
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-400">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="text-sm">Đang tải tài liệu...</span>
+            </div>
+          )}
+          {error && (
+            <div className="flex flex-col items-center justify-center h-full gap-2 text-red-500">
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
+          {url && (
+            <iframe
+              src={`${url}#zoom=page-fit`}
+              className="w-full h-full border-0"
+              title={doc.file_name}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function DocumentDigitization() {
@@ -392,11 +528,13 @@ export function DocumentDigitization() {
   const [panelWidth, setPanelWidth]         = useState(240);
   const [showUpload, setShowUpload]         = useState(false);
   const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [rootOpen, setRootOpen]             = useState(true);
   const [selectedFiles, setSelectedFiles]   = useState([]);
   const [deletingDocId, setDeletingDocId]       = useState(null);
   const [deletingFolderId, setDeletingFolderId] = useState(null);
   const [runningOCR, setRunningOCR]             = useState(false);
   const [downloadingDocId, setDownloadingDocId] = useState(null);
+  const [viewingDoc, setViewingDoc]             = useState(null);
   const [folderTree, setFolderTree]             = useState([]);
   const [treeError, setTreeError]               = useState(null);
   const [files, setFiles]                       = useState([]);
@@ -596,10 +734,15 @@ export function DocumentDigitization() {
           onUploaded={() => fetchDocuments(selectedFolder, page, fileSearch)}
         />
       )}
+      {/* ── PDF Viewer Modal ── */}
+      {viewingDoc && (
+        <PdfViewerModal doc={viewingDoc} onClose={() => setViewingDoc(null)} />
+      )}
       {/* ── Create Folder Modal ── */}
       {showCreateFolder && (
         <CreateFolderModal
           parentId={selectedFolder}
+          folderTree={folderTree}
           onClose={() => setShowCreateFolder(false)}
           onCreated={() => fetchFolderTree()}
         />
@@ -633,31 +776,73 @@ export function DocumentDigitization() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-2">
-            {treeError ? (
-              <div className="flex flex-col items-center gap-2 py-6 px-2 text-center">
-                <p className="text-xs text-red-500">{treeError}</p>
+            {/* ── Root cố định: Số hóa ── */}
+            <div>
+              <div className={`flex items-center rounded transition-colors
+                ${selectedFolder === null
+                  ? 'bg-yellow-100 text-yellow-800 font-semibold'
+                  : 'hover:bg-gray-100 text-gray-700 font-medium'}`}
+              >
                 <button
-                  onClick={fetchFolderTree}
-                  className="text-xs text-yellow-700 underline hover:text-yellow-900"
-                >Thử lại</button>
+                  onClick={() => setRootOpen(o => !o)}
+                  className="p-1 pl-2 flex-shrink-0 cursor-pointer"
+                >
+                  <ChevronRight
+                    className={`h-3.5 w-3.5 flex-shrink-0 text-gray-400 transition-transform duration-200
+                      ${rootOpen ? 'rotate-90' : ''}`}
+                  />
+                </button>
+                <button
+                  onClick={() => setSelectedFolder(null)}
+                  className="flex-1 flex items-center gap-1.5 pr-2 py-1.5 text-sm text-left"
+                >
+                  {rootOpen
+                    ? <FolderOpen className="h-4 w-4 flex-shrink-0 text-yellow-500" />
+                    : <Folder     className="h-4 w-4 flex-shrink-0 text-yellow-400" />
+                  }
+                  <span>Số hóa</span>
+                </button>
               </div>
-            ) : treeLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+
+              {/* Cây thư mục con — animate mở/đóng */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateRows: rootOpen ? '1fr' : '0fr',
+                  transition: 'grid-template-rows 0.2s ease',
+                }}
+              >
+              <div style={{ overflow: 'hidden' }}>
+              <div className="ml-2">
+                {treeError ? (
+                  <div className="flex flex-col items-center gap-2 py-4 px-2 text-center">
+                    <p className="text-xs text-red-500">{treeError}</p>
+                    <button onClick={fetchFolderTree} className="text-xs text-yellow-700 underline hover:text-yellow-900">
+                      Thử lại
+                    </button>
+                  </div>
+                ) : treeLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                  </div>
+                ) : folderTree.length === 0 ? (
+                  <p className="text-xs text-gray-400 px-3 py-2">Chưa có thư mục nào</p>
+                ) : (
+                  folderTree.map(node => (
+                    <TreeNode
+                      key={node.folder_id}
+                      node={node}
+                      selectedId={selectedFolder}
+                      onSelect={setSelectedFolder}
+                      onDeleteFolder={handleDeleteFolder}
+                      deletingFolderId={deletingFolderId}
+                    />
+                  ))
+                )}
               </div>
-            ) : folderTree.length === 0 ? (
-              <p className="text-xs text-gray-400 text-center py-6">Chưa có thư mục nào</p>
-            ) : null}
-            {folderTree.map(node => (
-              <TreeNode
-                key={node.folder_id}
-                node={node}
-                selectedId={selectedFolder}
-                onSelect={setSelectedFolder}
-                onDeleteFolder={handleDeleteFolder}
-                deletingFolderId={deletingFolderId}
-              />
-            ))}
+              </div>
+              </div>
+            </div>
           </div>
 
           <div className="p-3 border-t border-gray-100 text-xs text-gray-500 flex-shrink-0">
@@ -842,8 +1027,12 @@ export function DocumentDigitization() {
                                 }
                               </button>
                             </Tooltip>
-                            <Tooltip text="Xem chi tiết">
-                              <button className="p-1.5 rounded hover:bg-yellow-50 text-gray-400 hover:text-yellow-600 transition-colors">
+                            <Tooltip text={file.status === 'completed' ? 'Xem PDF' : 'Chưa hoàn tất OCR'}>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); if (file.status === 'completed') setViewingDoc(file); }}
+                                disabled={file.status !== 'completed'}
+                                className="p-1.5 rounded hover:bg-yellow-50 text-gray-400 hover:text-yellow-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                              >
                                 <Eye className="h-4 w-4" />
                               </button>
                             </Tooltip>

@@ -583,6 +583,14 @@ export const digitizationAPI = {
   getProgress: (id: number) =>
     digitizeAuthFetch(`${DIGITIZE_PREFIX}/documents/${id}/progress`) as Promise<OcrDocumentProgress>,
 
+  getViewUrl: async (id: number): Promise<string> => {
+    const data = await digitizeAuthFetch(
+      `${DIGITIZE_PREFIX}/documents/${id}/prepare-download`,
+      { method: 'POST' }
+    ) as { token: string };
+    return `${API_CONFIG.FASTAPI_BASE_URL}${DIGITIZE_PREFIX}/documents/${id}/download?token=${data.token}&inline=true`;
+  },
+
   downloadDocument: async (id: number): Promise<void> => {
     // Lấy temp token qua API có auth
     const data = await digitizeAuthFetch(
