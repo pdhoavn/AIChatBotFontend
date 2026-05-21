@@ -567,19 +567,11 @@ export function DocumentDigitization() {
     fetchDocuments(selectedFolder, page, fileSearch);
   };
 
-  const handleDownload = async (id, fileName, e) => {
+  const handleDownload = async (id, e) => {
     e.stopPropagation();
     try {
       setDownloadingDocId(id);
-      const blob = await digitizationAPI.downloadDocument(id);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${fileName}_searchable.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      await digitizationAPI.downloadDocument(id);
     } catch (err) {
       toast.error(err?.message || 'Không thể tải xuống tài liệu');
     } finally {
@@ -840,7 +832,7 @@ export function DocumentDigitization() {
                           <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                             <Tooltip text={file.status === 'completed' ? 'Tải xuống PDF' : 'Chưa hoàn tất OCR'}>
                               <button
-                                onClick={(e) => file.status === 'completed' && handleDownload(file.document_id, file.file_name, e)}
+                                onClick={(e) => file.status === 'completed' && handleDownload(file.document_id, e)}
                                 disabled={file.status !== 'completed' || downloadingDocId === file.document_id}
                                 className="p-1.5 rounded hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                               >

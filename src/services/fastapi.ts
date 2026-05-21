@@ -583,39 +583,20 @@ export const digitizationAPI = {
   getProgress: (id: number) =>
     digitizeAuthFetch(`${DIGITIZE_PREFIX}/documents/${id}/progress`) as Promise<OcrDocumentProgress>,
 
-  downloadDocument: (id: number): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const token = localStorage.getItem('access_token');
-      const url = `${API_CONFIG.FASTAPI_BASE_URL}${DIGITIZE_PREFIX}/documents/${id}/download`;
+  downloadDocument: async (id: number): Promise<void> => {
+    // Lấy temp token qua API có auth
+    const data = await digitizeAuthFetch(
+      `${DIGITIZE_PREFIX}/documents/${id}/prepare-download`,
+      { method: 'POST' }
+    ) as { token: string };
 
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', url);
-      if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-      xhr.responseType = 'blob';
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          resolve(xhr.response as Blob);
-        } else {
-          // Đọc error message từ blob JSON nếu có
-          const reader = new FileReader();
-          reader.onload = () => {
-            try {
-              const err = JSON.parse(reader.result as string);
-              reject(new Error(err?.detail || `HTTP ${xhr.status}`));
-            } catch {
-              reject(new Error(`HTTP ${xhr.status}`));
-            }
-          };
-          reader.readAsText(xhr.response);
-        }
-      };
-
-      xhr.onerror = () => reject(new Error('Không thể kết nối đến server'));
-      xhr.ontimeout = () => reject(new Error('Request timeout'));
-
-      xhr.send();
-    });
+    // Mở URL trực tiếp → browser tự stream xuống disk, không load vào memory
+    const downloadUrl = `${API_CONFIG.FASTAPI_BASE_URL}${DIGITIZE_PREFIX}/documents/${id}/download?token=${data.token}`;
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   },
 };
 
