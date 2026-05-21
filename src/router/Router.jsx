@@ -54,6 +54,7 @@ export default function Router() {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<ChatGuestPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/loginprivate" element={<LoginPrivate />} />
       <Route path="/loginforad" element={<LoginPage />} />
       <Route path="/chatbot" element={<ChatGuestPage />} />

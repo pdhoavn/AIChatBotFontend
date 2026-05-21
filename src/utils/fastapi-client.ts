@@ -162,6 +162,13 @@ class FastAPIClient {
     });
   }
 
+  async patch<T>(endpoint: string, data: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
   async delete<T>(endpoint: string, data?: any): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'DELETE',
@@ -305,6 +312,9 @@ export interface KnowledgeDocument {
   reject_reason?: string;
   is_ocr?: boolean;
   is_private?: boolean;
+  target_audiences?: string[];
+  intent_id?: number;
+  intent_name?: string;
 }
 
 export interface TrainingQuestion {

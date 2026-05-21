@@ -319,12 +319,20 @@ export const knowledgeAPI = {
   getDocumentDetail: (id: number) => fastAPIClient.get<KnowledgeDocument>(`/knowledge/documents/${id}/detail`),
   getDocumentChunks: (id: number, source: 'db' | 'qdrant' = 'qdrant') =>
     fastAPIClient.get<{ chunk_id: number | null; point_id: string | null; chunk_index: number; chunk_text: string; char_count: number }[]>(`/knowledge/documents/${id}/chunks?source=${source}`),
+  updateDocumentMetadata: (
+    id: number,
+    data: { title?: string; category?: string | null; intent_id?: number | null; target_audiences?: string[]; is_private?: boolean }
+  ) => fastAPIClient.patch<KnowledgeDocument>(`/knowledge/documents/${id}/metadata`, data),
 
   // Get training questions with optional status filter
   getTrainingQuestions: (status?: string) => {
     const params = status ? `?status=${status}` : '';
     return fastAPIClient.get<TrainingQuestion[]>(`/knowledge/training_questions${params}`);
   },
+  updateTrainingQuestionMetadata: (
+    id: number,
+    data: { intent_id?: number | null; target_audiences?: string[]; is_private?: boolean }
+  ) => fastAPIClient.patch<TrainingQuestion>(`/knowledge/training_questions/${id}/metadata`, data),
 
   // Soft delete (sets status to 'deleted')
   deleteDocument: (id: number) => fastAPIClient.delete(`/knowledge/documents/${id}`),

@@ -123,6 +123,22 @@ export function TrainingDataManagement() {
     }
   };
 
+  const handleUpdateQuestionMetadata = async (
+    questionId: number,
+    data: { intent_id?: number | null; target_audiences?: string[]; is_private?: boolean }
+  ) => {
+    try {
+      const updated = await knowledgeAPI.updateTrainingQuestionMetadata(questionId, data);
+      toast.success('Cập nhật metadata câu hỏi thành công');
+      setQuestions(prev => prev.map(q => q.question_id === questionId ? { ...q, ...updated } : q));
+      setSelectedQuestion(prev => prev?.question_id === questionId ? { ...prev, ...updated } : prev);
+      await fetchQuestions();
+    } catch (error) {
+      toast.error('Không thể cập nhật metadata câu hỏi');
+      throw error;
+    }
+  };
+
   const handleSelectDocument = async (document: TrainingDocument) => {
     try {
       const fullDoc = await knowledgeAPI.getDocumentDetail(document.document_id);
@@ -138,16 +154,24 @@ export function TrainingDataManagement() {
     }
   };
 
-  const handleUpdateDocument = async (
+  const handleUpdateDocumentMetadata = async (
     documentId: number,
-    data: { title: string; intent_id?: number; category?: string }
+    data: { title?: string; intent_id?: number | null; category?: string | null; target_audiences?: string[]; is_private?: boolean }
   ) => {
     try {
-
-      toast.info('Chức năng cập nhật đang được phát triển');
-      throw new Error('Update not implemented');
+      const updated = await knowledgeAPI.updateDocumentMetadata(documentId, data);
+      toast.success('Cập nhật metadata tài liệu thành công');
+      const normalized = {
+        ...updated,
+        file_size: 0,
+        file_type: updated.file_path.split('.').pop() || 'unknown',
+        reject_reason: updated.reject_reason || undefined
+      };
+      setDocuments(prev => prev.map(doc => doc.document_id === documentId ? { ...doc, ...normalized } : doc));
+      setSelectedDocument(prev => prev?.document_id === documentId ? { ...prev, ...normalized } : prev);
+      await fetchDocuments();
     } catch (error) {
-      toast.error('Không thể cập nhật tài liệu');
+      toast.error('Không thể cập nhật metadata tài liệu');
       throw error;
     }
   };
@@ -425,6 +449,7 @@ export function TrainingDataManagement() {
             setSelectedQuestion(null);
           }}
           onDelete={handleDeleteQuestion}
+          onUpdateMetadata={handleUpdateQuestionMetadata}
         />
       )}
 
@@ -438,6 +463,7 @@ export function TrainingDataManagement() {
             setSelectedDocument(null);
           }}
           onDelete={handleDeleteDocument}
+          onUpdateMetadata={handleUpdateDocumentMetadata}
           onApprove={isLeader ? handleApproveDocument : undefined}
           onReject={isLeader ? handleRejectDocument : undefined}
           isApproving={approvingDocumentId === selectedDocument.document_id}
