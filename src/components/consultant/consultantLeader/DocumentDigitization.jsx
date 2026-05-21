@@ -801,6 +801,7 @@ export function DocumentDigitization() {
                             type="checkbox"
                             checked={selectedFiles.includes(file.document_id)}
                             onChange={() => toggleFile(file.document_id)}
+                            onClick={(e) => e.stopPropagation()}
                             className="rounded border-gray-300 accent-yellow-400"
                           />
                         </td>
