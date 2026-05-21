@@ -20,7 +20,8 @@ import {
   Clock,
   LogOut,
   Tag,
-  Activity
+  Activity,
+  ScanText
 } from 'lucide-react';
 import { useAuth } from '../../contexts/Auth';
 import { canAccessPage } from '../../constants/permissions';
@@ -87,6 +88,7 @@ export function StaffLayout({ roleKey }: StaffLayoutProps) {
       ...(user?.isLeader ? [
         { id: 'leader', label: 'Duyệt Cơ Sở Tri Thức', icon: Shield, path: '/consultant/leader' }
       ] : []),
+      { id: 'digitization', label: 'Số Hóa Tài Liệu', icon: ScanText, path: '/consultant/digitization' },
       { id: 'logs', label: 'Nhật Ký Hệ Thống', icon: Activity, path: '/consultant/logs' },
       { id: 'profile', label: user?.name || 'Hồ Sơ', icon: User, path: '/consultant/profile' }
     ]

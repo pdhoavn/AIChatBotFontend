@@ -464,6 +464,161 @@ export const knowledgeAPI = {
   },
 };
 
+// ─── Digitization (OCR Folder/Document) API ───────────────────────────────────
+// Prefix khớp với main.py: app.include_router(..., prefix="/consultant/digitization")
+const DIGITIZE_PREFIX = '/consultant/digitization';
+
+const digitizeAuthFetch = async (url: string, init: RequestInit = {}) => {
+  const token = localStorage.getItem('access_token');
+  const headers: HeadersInit = { ...(init.headers as HeadersInit) };
+  if (token) (headers as Record<string, string>).Authorization = `Bearer ${token}`;
+  const response = await fetch(`${API_CONFIG.FASTAPI_BASE_URL}${url}`, { ...init, headers });
+  if (!response.ok) {
+    const err = await response.json().catch(() => null);
+    throw new Error(err?.detail || `HTTP ${response.status}`);
+  }
+  if (response.status === 204) return undefined;
+  return response.json();
+};
+
+export interface OcrFolder {
+  folder_id: number;
+  folder_name: string;
+  parent_id: number | null;
+  created_by?: number;
+  created_at?: string;
+  children: OcrFolder[];
+}
+
+export interface OcrDocumentItem {
+  document_id: number;
+  file_name: string;
+  file_type: string;
+  full_name?: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  created_by?: number;
+  creator_name?: string;
+  created_at?: string;
+  created_time?: string;
+  folder_id?: number;
+  total_pages: number;
+  completed_pages: number;
+  error_message?: string;
+}
+
+export interface OcrDocumentProgress {
+  document_id: number;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  total_pages: number;
+  completed_pages: number;
+  progress_percent: number;
+  error_message?: string | null;
+}
+
+export interface OcrDocumentListResult {
+  items: OcrDocumentItem[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export const digitizationAPI = {
+  // ── Folder ──
+  createFolder: (folder_name: string, parent_id?: number | null) =>
+    digitizeAuthFetch(`${DIGITIZE_PREFIX}/folders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folder_name, parent_id: parent_id ?? null }),
+    }) as Promise<OcrFolder>,
+
+  getFolderTree: () =>
+    digitizeAuthFetch(`${DIGITIZE_PREFIX}/folders/tree`) as Promise<OcrFolder[]>,
+
+  updateFolder: (id: number, folder_name: string) =>
+    digitizeAuthFetch(`${DIGITIZE_PREFIX}/folders/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folder_name }),
+    }) as Promise<OcrFolder>,
+
+  deleteFolder: (id: number) =>
+    digitizeAuthFetch(`${DIGITIZE_PREFIX}/folders/${id}`, { method: 'DELETE' }),
+
+  // ── Document ──
+  getDocuments: (params: {
+    folder_id?: number | null;
+    status?: string;
+    keyword?: string;
+    page?: number;
+    page_size?: number;
+  } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.folder_id != null) qs.set('folder_id', String(params.folder_id));
+    if (params.status)           qs.set('status', params.status);
+    if (params.keyword)          qs.set('keyword', params.keyword);
+    if (params.page)             qs.set('page', String(params.page));
+    if (params.page_size)        qs.set('page_size', String(params.page_size));
+    const q = qs.toString();
+    return digitizeAuthFetch(`${DIGITIZE_PREFIX}/documents${q ? `?${q}` : ''}`) as Promise<OcrDocumentListResult>;
+  },
+
+  uploadDocument: (file: File, folder_id?: number | null, full_name?: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (folder_id != null) formData.append('folder_id', String(folder_id));
+    if (full_name)         formData.append('full_name', full_name);
+    return digitizeAuthFetch(`${DIGITIZE_PREFIX}/documents/upload`, {
+      method: 'POST',
+      body: formData,
+    }) as Promise<{ message: string; document_id: number; status: string }>;
+  },
+
+  deleteDocument: (id: number) =>
+    digitizeAuthFetch(`${DIGITIZE_PREFIX}/documents/${id}`, { method: 'DELETE' }),
+
+  runOCR: (id: number) =>
+    digitizeAuthFetch(`${DIGITIZE_PREFIX}/documents/${id}/ocr`, { method: 'POST' }),
+
+  getProgress: (id: number) =>
+    digitizeAuthFetch(`${DIGITIZE_PREFIX}/documents/${id}/progress`) as Promise<OcrDocumentProgress>,
+
+  downloadDocument: (id: number): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const token = localStorage.getItem('access_token');
+      const url = `${API_CONFIG.FASTAPI_BASE_URL}${DIGITIZE_PREFIX}/documents/${id}/download`;
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+      if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.responseType = 'blob';
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          resolve(xhr.response as Blob);
+        } else {
+          // Đọc error message từ blob JSON nếu có
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const err = JSON.parse(reader.result as string);
+              reject(new Error(err?.detail || `HTTP ${xhr.status}`));
+            } catch {
+              reject(new Error(`HTTP ${xhr.status}`));
+            }
+          };
+          reader.readAsText(xhr.response);
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Không thể kết nối đến server'));
+      xhr.ontimeout = () => reject(new Error('Request timeout'));
+
+      xhr.send();
+    });
+  },
+};
+
 // RIASEC API (if needed)
 export const riasecAPI = {
   // Add RIASEC-related endpoints when they are implemented in the backend
