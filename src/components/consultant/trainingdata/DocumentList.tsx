@@ -1,6 +1,18 @@
 import { TrainingDocument } from './types';
 import { FileText, ScanText } from 'lucide-react';
 
+const getPrivacyBadge = (isPrivate?: boolean) => (
+  <span
+    className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded border ${
+      isPrivate
+        ? 'bg-amber-50 text-amber-700 border-amber-200'
+        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    }`}
+  >
+    {isPrivate ? 'Riêng tư' : 'Công khai'}
+  </span>
+);
+
 const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
   CANBO:     { label: 'Viên chức/NLĐ', color: 'bg-blue-100 text-blue-700 border-blue-200' },
   SINHVIEN:  { label: 'Sinh viên',      color: 'bg-green-100 text-green-700 border-green-200' },
@@ -57,7 +69,10 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
                 <h3 className="font-medium text-gray-900 truncate pr-2">
                   {doc.title}
                 </h3>
-                {getStatusBadge(doc.status)}
+                <div className="flex shrink-0 flex-wrap justify-end gap-1">
+                  {getPrivacyBadge(doc.is_private)}
+                  {getStatusBadge(doc.status)}
+                </div>
               </div>
 
               {}

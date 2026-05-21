@@ -81,7 +81,11 @@ class FastAPIClient {
           // Small delay to ensure localStorage is cleared
           setTimeout(() => {
             if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-              window.location.href = '/login';
+              const staffPaths = ['/admin', '/content', '/consultant', '/admission'];
+              const loginPath = staffPaths.some(path => window.location.pathname.startsWith(path))
+                ? '/loginforad'
+                : '/loginprivate';
+              window.location.href = loginPath;
             }
           }, 100);
           
@@ -158,6 +162,13 @@ class FastAPIClient {
   async put<T>(endpoint: string, data: any): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async patch<T>(endpoint: string, data: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
@@ -305,6 +316,9 @@ export interface KnowledgeDocument {
   reject_reason?: string;
   is_ocr?: boolean;
   is_private?: boolean;
+  target_audiences?: string[];
+  intent_id?: number;
+  intent_name?: string;
 }
 
 export interface TrainingQuestion {

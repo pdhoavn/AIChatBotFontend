@@ -1,5 +1,17 @@
 import { TrainingQuestion } from './types';
 
+const getPrivacyBadge = (isPrivate?: boolean) => (
+  <span
+    className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded border ${
+      isPrivate
+        ? 'bg-amber-50 text-amber-700 border-amber-200'
+        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    }`}
+  >
+    {isPrivate ? 'Riêng tư' : 'Công khai'}
+  </span>
+);
+
 const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
   CANBO:     { label: 'Viên chức/NLĐ', color: 'bg-blue-100 text-blue-700 border-blue-200' },
   SINHVIEN:  { label: 'Sinh viên',      color: 'bg-green-100 text-green-700 border-green-200' },
@@ -76,7 +88,10 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
             <h3 className="font-medium text-gray-900 flex-1 line-clamp-2">
               {question.question}
             </h3>
-            {getStatusBadge(question.status)}
+            <div className="ml-2 flex shrink-0 flex-wrap justify-end gap-1">
+              {getPrivacyBadge(question.is_private)}
+              {getStatusBadge(question.status)}
+            </div>
           </div>
 
           {renderAudienceBadges(question.target_audiences)}

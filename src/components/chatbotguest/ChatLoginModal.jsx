@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, LogIn, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { API_CONFIG } from '../../config/api';
+import { saveChatSession } from '../../utils/chatAuth';
 
 export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
   const [username, setUsername] = useState('');
@@ -34,11 +35,7 @@ export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
       const data = await response.json();
 
       if (response.ok && data.access_token) {
-        localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("token_type", data.token_type || "bearer");
-        if (data.refresh_token) {
-          localStorage.setItem("refresh_token", data.refresh_token);
-        }
+        saveChatSession(data);
         
         toast.success('Đăng nhập thành công!');
         onSuccess(); // Triggers the retry of the pending message
@@ -46,18 +43,18 @@ export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
         setUsername('');
         setPassword('');
       } else {
-        toast.error(data.detail || 'Sai tài khoản hoặc mật khẩu.');
+        toast.error('Sai tài khoản hoặc mật khẩu.');
       }
     } catch (error) {
-      toast.error('Lỗi kết nối đến server xác thực. Vui lòng thử lại.');
+      toast.error('Sai tài khoản hoặc mật khẩu.');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+    <div className="flex justify-start">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col border border-amber-200 animate-in fade-in slide-in-from-bottom-2 duration-200">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <div className="bg-amber-100 p-2 rounded-lg">
@@ -65,9 +62,11 @@ export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
             </div>
             <h2 className="text-xl font-bold text-gray-800">Đăng nhập</h2>
           </div>
-          <button 
+          <button
+            type="button"
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Đóng form đăng nhập"
           >
             <X className="h-5 w-5" />
           </button>
@@ -75,7 +74,7 @@ export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
 
         <form onSubmit={handleLogin} className="p-6 space-y-4">
           <div className="bg-blue-50 text-blue-800 text-sm p-3 rounded-lg border border-blue-100 mb-2">
-            Nội dung bạn đang hỏi yêu cầu quyền truy cập riêng tư. Vui lòng đăng nhập để tiếp tục.
+            Câu hỏi của bạn liên quan đến dữ liệu nội bộ, vui lòng đăng nhập để hệ thống trả lời.
           </div>
           
           <div className="space-y-1.5">

@@ -1,20 +1,18 @@
   import { useNavigate } from "react-router-dom";
-  import { useState, useMemo } from "react";
+  import { useState } from "react";
   import { toast } from "react-toastify";
   import swal from "sweetalert";
   import "./LoginPrivate.css";
-  import { getRoleFromToken } from "./jwtHelper";
   import imgLogin from "/src/assets/images/login-private.jpg";
-  import { useLocation, Link  } from "react-router-dom";
+  import { Link  } from "react-router-dom";
   import { useAuth } from "../../contexts/Auth";
-  import { authAPI } from "@/services/fastapi"; 
 
   const LoginPrivate = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
-    const { login, getDefaultRoute } = useAuth();
+    const { login } = useAuth();
 
 
 const handleLogin = async (event) => {
@@ -34,6 +32,8 @@ const handleLogin = async (event) => {
       const appRole = result.role || "Student"; // role kiểu "Admin" | "Student"...
 
       if (appRole !== "Student" && appRole !== "Parent") {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("token_type");
         // Không cho staff dùng trang này
         swal({
           title: "Sai trang đăng nhập",
@@ -43,7 +43,7 @@ const handleLogin = async (event) => {
             ok: { text: "Đến trang cán bộ", value: true, className: "swal-ok-button" },
           },
         }).then(() => {
-          navigate("/loginforad");
+          window.location.href = "/loginforad";
         });
         return;
       }
@@ -146,13 +146,6 @@ const handleLogin = async (event) => {
                 type="submit"
                 value={submitting ? "Processing..." : "Login"}
                 disabled={submitting}
-              />
-              
-              <input
-                className="button-login button-admin"
-                type="button"
-                value="Cán Bộ GTVT"
-                onClick={() => navigate('/loginforad')}
               />
             </form>
           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Trash2, Download, FileText, FileType, FileSpreadsheet, Copy, Check, Search, AlertTriangle, RefreshCw, ChevronUp, ChevronDown, ClipboardCopy } from 'lucide-react';
+import { X, Trash2, Download, FileText, FileType, FileSpreadsheet, Copy, Check, Search, AlertTriangle, RefreshCw, ChevronUp, ChevronDown, ClipboardCopy, Edit3, Save } from 'lucide-react';
 import { TrainingDocument, Intent } from './types';
 import { Button } from '../../ui/system_users/button';
 import { knowledgeAPI } from '../../../services/fastapi';
@@ -11,6 +11,15 @@ const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
   PHUHUYNH:  { label: 'Phụ huynh',     color: 'bg-purple-100 text-purple-700 border-purple-200' },
   TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
 };
+const AUDIENCE_OPTIONS = ['CANBO', 'SINHVIEN', 'PHUHUYNH', 'TUYENSINH'];
+
+function FieldState({ editable }: { editable: boolean }) {
+  return (
+    <span className={`text-[11px] font-medium ${editable ? 'text-amber-700' : 'text-gray-400'}`}>
+      {editable ? 'Có thể sửa' : 'Không chỉnh sửa'}
+    </span>
+  );
+}
 
 type Tab = 'info' | 'content' | 'full';
 
@@ -20,6 +29,10 @@ interface DocumentDetailModalProps {
   isLeader: boolean;
   onClose: () => void;
   onDelete: (documentId: number) => Promise<void>;
+  onUpdateMetadata: (
+    documentId: number,
+    data: { title?: string; category?: string | null; intent_id?: number | null; target_audiences?: string[]; is_private?: boolean }
+  ) => Promise<void>;
   onApprove?: (documentId: number) => Promise<void>;
   onReject?: (documentId: number) => Promise<void>;
   isApproving?: boolean;
@@ -32,6 +45,7 @@ export function DocumentDetailModal({
   isLeader,
   onClose,
   onDelete,
+  onUpdateMetadata,
   onApprove,
   onReject,
   isApproving,
@@ -39,6 +53,11 @@ export function DocumentDetailModal({
 }: DocumentDetailModalProps) {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('info');
+  const [isEditingMetadata, setIsEditingMetadata] = useState(false);
+  const [editTitle, setEditTitle] = useState(document.title || '');
+  const [editIntentId, setEditIntentId] = useState<string>((document.intent_id ?? 0).toString());
+  const [editAudiences, setEditAudiences] = useState<string[]>(document.target_audiences || []);
+  const [editIsPrivate, setEditIsPrivate] = useState(Boolean(document.is_private));
 
   type Chunk = { chunk_id: number | null; point_id: string | null; chunk_index: number; chunk_text: string; char_count: number };
   const [chunks, setChunks] = useState<Chunk[]>([]);
@@ -64,6 +83,14 @@ export function DocumentDetailModal({
     }
     return 'Không thể tải nội dung. Vui lòng thử lại.';
   };
+
+  useEffect(() => {
+    setEditTitle(document.title || '');
+    setEditIntentId((document.intent_id ?? 0).toString());
+    setEditAudiences(document.target_audiences || []);
+    setEditIsPrivate(Boolean(document.is_private));
+    setIsEditingMetadata(false);
+  }, [document]);
 
   const fetchChunks = useCallback(async () => {
     try {
@@ -130,6 +157,44 @@ export function DocumentDetailModal({
         errorMessage = 'Tệp không tìm thấy trên máy chủ.';
       }
       toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleAudience = (value: string) => {
+    setEditAudiences(prev =>
+      prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]
+    );
+  };
+
+  const resetMetadataForm = () => {
+    setEditTitle(document.title || '');
+    setEditIntentId((document.intent_id ?? 0).toString());
+    setEditAudiences(document.target_audiences || []);
+    setEditIsPrivate(Boolean(document.is_private));
+    setIsEditingMetadata(false);
+  };
+
+  const handleSaveMetadata = async () => {
+    if (!editTitle.trim()) {
+      alert('Vui lòng nhập tiêu đề');
+      return;
+    }
+    if (editAudiences.length === 0) {
+      alert('Vui lòng chọn ít nhất một đối tượng');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onUpdateMetadata(document.document_id, {
+        title: editTitle.trim(),
+        intent_id: Number(editIntentId) || 0,
+        target_audiences: editAudiences,
+        is_private: editIsPrivate,
+      });
+      setIsEditingMetadata(false);
     } finally {
       setLoading(false);
     }
@@ -328,16 +393,30 @@ export function DocumentDetailModal({
             <div className="space-y-5">
               {/* Dòng 1: Tiêu đề */}
               <div>
-                <label className="block text-sm font-medium text-gray-500 mb-1">Tiêu đề</label>
-                <p className="text-gray-900 bg-gray-50 p-3 rounded-lg font-medium">
-                  {document.title}
-                </p>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-gray-500">Tiêu đề</label>
+                  {isEditingMetadata && <FieldState editable />}
+                </div>
+                {isEditingMetadata ? (
+                  <input
+                    value={editTitle}
+                    onChange={(event) => setEditTitle(event.target.value)}
+                    className="w-full rounded-lg border border-amber-300 bg-white p-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#facb01]/60"
+                  />
+                ) : (
+                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg font-medium">
+                    {document.title}
+                  </p>
+                )}
               </div>
 
               {/* Dòng 2: Tên file */}
               {filename && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Tên tệp đính kèm</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-500">Tên tệp đính kèm</label>
+                    {isEditingMetadata && <FieldState editable={false} />}
+                  </div>
                   <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
                     <FileIcon className={`h-5 w-5 shrink-0 ${fileIconColor}`} />
                     <span className="text-sm text-gray-700 break-all">{filename}</span>
@@ -348,11 +427,32 @@ export function DocumentDetailModal({
               {/* Dòng 3: Đối tượng | Lĩnh vực */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Đối tượng</label>
-                  <div className="flex flex-wrap gap-1.5 bg-gray-50 p-3 rounded-lg min-h-[44px]">
-                    {document.target_audiences && document.target_audiences.length > 0 ? (
-                      document.target_audiences.map((val: string) => {
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-500">Đối tượng</label>
+                    {isEditingMetadata && <FieldState editable />}
+                  </div>
+                  <div className={`flex flex-wrap gap-1.5 p-3 rounded-lg min-h-[44px] ${
+                    isEditingMetadata ? 'bg-white border border-amber-300 ring-1 ring-amber-100' : 'bg-gray-50'
+                  }`}>
+                    {(isEditingMetadata ? AUDIENCE_OPTIONS : document.target_audiences || []).length > 0 ? (
+                      (isEditingMetadata ? AUDIENCE_OPTIONS : document.target_audiences || []).map((val: string) => {
                         const info = AUDIENCE_DISPLAY[val];
+                        const selected = editAudiences.includes(val);
+                        if (isEditingMetadata) {
+                          return (
+                            <button
+                              key={val}
+                              type="button"
+                              onClick={() => toggleAudience(val)}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition ${
+                                selected ? info.color : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
+                              }`}
+                            >
+                              {selected && <Check className="h-3 w-3" />}
+                              {info.label}
+                            </button>
+                          );
+                        }
                         return info ? (
                           <span key={val} className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${info.color}`}>
                             {info.label}
@@ -369,17 +469,60 @@ export function DocumentDetailModal({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Lĩnh vực</label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
-                    {(document.intent_name && document.intent_name !== 'None') ? document.intent_name : 'Chung'}
-                  </p>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-500">Lĩnh vực</label>
+                    {isEditingMetadata && <FieldState editable />}
+                  </div>
+                  {isEditingMetadata ? (
+                    <select
+                      value={editIntentId}
+                      onChange={(event) => setEditIntentId(event.target.value)}
+                      className="w-full rounded-lg border border-amber-300 bg-white p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#facb01]/60"
+                    >
+                      <option value="0">Chung</option>
+                      {intents.map(intent => (
+                        <option key={intent.intent_id} value={intent.intent_id}>
+                          {intent.intent_name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
+                      {(document.intent_name && document.intent_name !== 'None') ? document.intent_name : 'Chung'}
+                    </p>
+                  )}
                 </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-gray-500">Chế độ truy cập</label>
+                  {isEditingMetadata && <FieldState editable />}
+                </div>
+                {isEditingMetadata ? (
+                  <label className="flex items-center gap-2 bg-white border border-amber-300 p-3 rounded-lg text-sm text-gray-700 w-fit cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editIsPrivate}
+                      onChange={(event) => setEditIsPrivate(event.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    Riêng tư (Yêu cầu đăng nhập)
+                  </label>
+                ) : (
+                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
+                    {document.is_private ? 'Riêng tư (Yêu cầu đăng nhập)' : 'Công khai'}
+                  </p>
+                )}
               </div>
 
               {/* Dòng 4: Người tải lên | Người duyệt */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Người tải lên</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-500">Người tải lên</label>
+                    {isEditingMetadata && <FieldState editable={false} />}
+                  </div>
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <p className="text-gray-900 font-medium text-sm">
                       {document.created_by_name || 'Hệ thống'}
@@ -392,7 +535,10 @@ export function DocumentDetailModal({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Người duyệt</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-500">Người duyệt</label>
+                    {isEditingMetadata && <FieldState editable={false} />}
+                  </div>
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <p className="text-gray-900 font-medium text-sm">
                       {document.reviewed_by_name || 'Chưa duyệt'}
@@ -581,6 +727,43 @@ export function DocumentDetailModal({
               </Button>
             )}
           </div>
+          {isLeader && activeTab === 'info' && (
+            <div className="flex gap-2">
+              {isEditingMetadata ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={loading}
+                    onClick={resetMetadataForm}
+                    className="border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                  >
+                    Hủy
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={loading}
+                    onClick={handleSaveMetadata}
+                    className="bg-[#facb01] text-gray-900 hover:bg-[#e8b800]"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Lưu thông tin cơ bản
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={() => setIsEditingMetadata(true)}
+                  className="border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                >
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  Sửa thông tin cơ bản
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

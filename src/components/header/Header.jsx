@@ -47,7 +47,7 @@ export default function Header({ minimal = false }) {
   };
 
   const goLogin = () => {
-    navigate("/loginforad");
+    navigate("/login");
     setIsMobileMenuOpen(false);
   };
 

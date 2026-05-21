@@ -29,6 +29,18 @@ export function DocumentList({ filteredDocuments }) {
       </span>
     );
   };
+
+  const getPrivacyBadge = (isPrivate) => (
+    <span
+      className={`px-2 py-1 text-xs font-medium rounded border ${
+        isPrivate
+          ? 'bg-amber-50 text-amber-700 border-amber-200'
+          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      }`}
+    >
+      {isPrivate ? 'Riêng tư' : 'Công khai'}
+    </span>
+  );
   
   const handleDownload = async (doc) => {
     try {
@@ -102,6 +114,7 @@ export function DocumentList({ filteredDocuments }) {
               <span>{doc.fileType}</span>
             </div>
             <div className="flex flex-wrap gap-2">
+              {getPrivacyBadge(doc.is_private)}
               {getStatusBadge(doc.status)}
               <Badge variant="secondary">{doc.category}</Badge>
               {doc.tags && doc.tags.length > 0 && doc.tags.map((tag) => (
