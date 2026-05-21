@@ -930,6 +930,7 @@ export function DocumentDigitization() {
                   </th>
                   <th className="px-3 py-2.5 text-left font-medium text-gray-600">Tên Tệp</th>
                   <th className="px-3 py-2.5 text-left font-medium text-gray-600">Trạng Thái</th>
+                  <th className="px-3 py-2.5 text-left font-medium text-gray-600">Độ Chính Xác</th>
                   <th className="px-3 py-2.5 text-left font-medium text-gray-600">Ngày Tạo</th>
                   <th className="px-3 py-2.5 text-left font-medium text-gray-600">Xử Lý</th>
                   <th className="px-3 py-2.5 text-left font-medium text-gray-600">Người Tạo</th>
@@ -1009,6 +1010,19 @@ export function DocumentDigitization() {
                               {st.label}
                             </span>
                           )}
+                        </td>
+                        <td className="px-3 py-2.5 tabular-nums whitespace-nowrap">
+                          {file.ocr_accuracy != null
+                            ? (
+                              <span className={`text-xs font-medium ${
+                                file.ocr_accuracy >= 90 ? 'text-green-600' :
+                                file.ocr_accuracy >= 70 ? 'text-yellow-600' : 'text-red-500'
+                              }`}>
+                                {file.ocr_accuracy.toFixed(1)}%
+                              </span>
+                            )
+                            : <span className="text-gray-400 text-xs">—</span>
+                          }
                         </td>
                         <td className="px-3 py-2.5 text-gray-600 tabular-nums whitespace-nowrap">{createdDate}</td>
                         <td className="px-3 py-2.5 text-gray-600 tabular-nums whitespace-nowrap">{file.created_time || '—'}</td>

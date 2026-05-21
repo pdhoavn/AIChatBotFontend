@@ -503,6 +503,7 @@ export interface OcrDocumentItem {
   folder_id?: number;
   total_pages: number;
   completed_pages: number;
+  ocr_accuracy?: number | null;
   error_message?: string;
 }
 
