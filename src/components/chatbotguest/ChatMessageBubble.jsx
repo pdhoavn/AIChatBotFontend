@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import PhIcon from "../ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
 
-export default function ChatMessageBubble({ message }) {
+export default function ChatMessageBubble({ message, onLoginClick }) {
   const [isCopied, setIsCopied] = useState(false);
   const navigate = useNavigate();
   const isUser = message.sender === "user";
@@ -83,7 +83,7 @@ export default function ChatMessageBubble({ message }) {
           </div>
           {/* Login button */}
           <button
-            onClick={() => navigate("/loginprivate")}
+            onClick={() => onLoginClick ? onLoginClick() : navigate("/loginprivate")}
             className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-accent text-white hover:bg-accent/90 active:scale-[0.98] transition-all shadow-sm text-sm font-semibold"
           >
             <PhIcon name="login" size={16} />

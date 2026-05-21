@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Send, Info, X, Briefcase, GraduationCap, HeartHandshake, ClipboardList, ChevronDown, Bot, ExternalLink, Sparkles, FileText, Copy, Check, Lock, LogIn } from 'lucide-react';
+import { Mic, Send, Info, X, Briefcase, GraduationCap, HeartHandshake, ClipboardList, ChevronDown, Bot, ExternalLink, Sparkles, FileText, Copy, Check, Lock, LogIn, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
@@ -93,7 +93,24 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
   const [partial, setPartial] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const effectiveApiUrl = apiUrl || import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? `${window.location.origin.replace(/\/$/, '')}/api` : '');
+
+  useEffect(() => {
+    const checkLogin = () => {
+      setIsLoggedIn(!!localStorage.getItem('access_token'));
+    };
+    checkLogin();
+    const interval = setInterval(checkLogin, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('token_type');
+    localStorage.removeItem('refresh_token');
+    setIsLoggedIn(false);
+  };
 
   const defaultAudienceOptions = [
     { id: 'CANBO', label: 'Viên chức / Người lao động', icon: Briefcase },
@@ -487,12 +504,23 @@ useEffect(() => {
                   <ExternalLink className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-600 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
                 </div>
               </div>
-              {/* WS status */}
-              <div className="flex items-center gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full ${!hasError ? 'bg-green-400' : 'bg-red-400'}`} title={!hasError ? 'Sẵn sàng' : 'Lỗi kết nối'} />
+              {/* WS status & Actions */}
+              <div className="flex items-center gap-1">
+                <div className={`w-1.5 h-1.5 rounded-full mr-1 ${!hasError ? 'bg-green-400' : 'bg-red-400'}`} title={!hasError ? 'Sẵn sàng' : 'Lỗi kết nối'} />
+                
+                {isLoggedIn ? (
+                  <button onClick={handleLogout} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors" title="Đăng xuất">
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button onClick={() => window.open((import.meta.env.VITE_MAIN_CHATBOT_URL || 'http://localhost:5173') + '/loginprivate', '_blank')} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors" title="Đăng nhập">
+                    <LogIn className="w-4 h-4" />
+                  </button>
+                )}
+                
                 <button
                   onClick={() => setIsChatOpen(false)}
-                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors ml-1"
+                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>

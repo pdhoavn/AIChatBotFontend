@@ -25,6 +25,25 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
   const schoolLogoUrl = "https://utc2.edu.vn/images/030820230730_U09Tn.png";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("access_token"));
+
+  useEffect(() => {
+    const checkToken = () => setIsLoggedIn(!!localStorage.getItem("access_token"));
+    checkToken();
+    window.addEventListener("storage", checkToken);
+    const interval = setInterval(checkToken, 1000);
+    return () => {
+      window.removeEventListener("storage", checkToken);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("token_type");
+    localStorage.removeItem("refresh_token");
+    setIsLoggedIn(false);
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -131,12 +150,22 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
               </div>
             )}
           </div>
-          <button
-            onClick={() => navigate("/loginforad")}
-            className="rounded-full bg-black px-4 py-1.5 text-sm text-white hover:opacity-90"
-          >
-            Đăng nhập
-          </button>
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="rounded-full bg-green-600 px-4 py-1.5 text-sm text-white hover:bg-green-700 flex items-center gap-1.5"
+            >
+              <PhIcon name="logout" size={14} />
+              Đăng xuất
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate("/loginprivate")}
+              className="rounded-full bg-black px-4 py-1.5 text-sm text-white hover:opacity-90"
+            >
+              Đăng nhập
+            </button>
+          )}
           {shouldShowRiasecLink && (
             <Link
               to="/riasec"

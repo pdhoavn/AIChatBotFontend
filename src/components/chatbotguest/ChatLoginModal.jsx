@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { X, LogIn, Loader2 } from 'lucide-react';
-import { useAuth } from '../../contexts/Auth';
 import { toast } from 'react-toastify';
+import { API_CONFIG } from '../../config/api';
 
 export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const { login } = useAuth();
 
   if (!isOpen) return null;
 
@@ -20,25 +19,37 @@ export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
 
     try {
       setSubmitting(true);
-      const result = await login(username, password);
+      
+      const response = await fetch(`${API_CONFIG.FASTAPI_BASE_URL}/auth/login/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_name: username.trim(),
+          password: password
+        }),
+      });
 
-      if (result?.ok) {
+      const data = await response.json();
+
+      if (response.ok && data.access_token) {
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("token_type", data.token_type || "bearer");
+        if (data.refresh_token) {
+          localStorage.setItem("refresh_token", data.refresh_token);
+        }
+        
         toast.success('Đăng nhập thành công!');
         onSuccess(); // Triggers the retry of the pending message
         onClose();
         setUsername('');
         setPassword('');
       } else {
-        toast.error(result?.message || 'Sai tài khoản hoặc mật khẩu.');
+        toast.error(data.detail || 'Sai tài khoản hoặc mật khẩu.');
       }
     } catch (error) {
-      if (error.response?.status === 403 || (error.response?.data?.detail && error.response.data.detail.includes('deactivated'))) {
-        toast.error('Tài khoản của bạn đã bị vô hiệu hóa.');
-      } else if (error.response?.data?.detail) {
-        toast.error(error.response.data.detail);
-      } else {
-        toast.error('Đăng nhập thất bại. Vui lòng thử lại.');
-      }
+      toast.error('Lỗi kết nối đến server xác thực. Vui lòng thử lại.');
     } finally {
       setSubmitting(false);
     }

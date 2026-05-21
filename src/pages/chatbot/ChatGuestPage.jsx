@@ -645,7 +645,10 @@ export default function ChatGuestPage() {
 
             {messages.map((m, i) => (
               <div key={i} className="mb-4 chat-message">
-                <ChatMessageBubble message={m} />
+                <ChatMessageBubble 
+                  message={m} 
+                  onLoginClick={() => setShowLoginModal(true)} 
+                />
               </div>
             ))}
 
