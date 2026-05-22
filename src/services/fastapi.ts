@@ -310,10 +310,21 @@ export const knowledgeAPI = {
   uploadTrainingQuestion: (data: { question: string; answer: string; intent_id: number; target_audiences: string[]; is_private?: boolean }) =>
     fastAPIClient.post<TrainingQuestion>('/knowledge/upload/training_question', data),
 
-  // Get documents with optional status filter
-  getDocuments: (status?: string) => {
-    const params = status ? `?status=${status}` : '';
-    return fastAPIClient.get<KnowledgeDocument[]>(`/knowledge/documents${params}`);
+  // Get documents with optional status and privacy filters
+  getDocuments: (filters?: string | { status?: string; is_private?: boolean }) => {
+    const params = new URLSearchParams();
+
+    if (typeof filters === 'string') {
+      if (filters) params.set('status', filters);
+    } else if (filters) {
+      if (filters.status) params.set('status', filters.status);
+      if (typeof filters.is_private === 'boolean') {
+        params.set('is_private', String(filters.is_private));
+      }
+    }
+
+    const query = params.toString();
+    return fastAPIClient.get<KnowledgeDocument[]>(`/knowledge/documents${query ? `?${query}` : ''}`);
   },
   getDocumentById: (id: number) => fastAPIClient.get<KnowledgeDocument>(`/knowledge/documents/${id}`),
   getDocumentDetail: (id: number) => fastAPIClient.get<KnowledgeDocument>(`/knowledge/documents/${id}/detail`),
@@ -324,10 +335,21 @@ export const knowledgeAPI = {
     data: { title?: string; category?: string | null; intent_id?: number | null; target_audiences?: string[]; is_private?: boolean }
   ) => fastAPIClient.patch<KnowledgeDocument>(`/knowledge/documents/${id}/metadata`, data),
 
-  // Get training questions with optional status filter
-  getTrainingQuestions: (status?: string) => {
-    const params = status ? `?status=${status}` : '';
-    return fastAPIClient.get<TrainingQuestion[]>(`/knowledge/training_questions${params}`);
+  // Get training questions with optional status and privacy filters
+  getTrainingQuestions: (filters?: string | { status?: string; is_private?: boolean }) => {
+    const params = new URLSearchParams();
+
+    if (typeof filters === 'string') {
+      if (filters) params.set('status', filters);
+    } else if (filters) {
+      if (filters.status) params.set('status', filters.status);
+      if (typeof filters.is_private === 'boolean') {
+        params.set('is_private', String(filters.is_private));
+      }
+    }
+
+    const query = params.toString();
+    return fastAPIClient.get<TrainingQuestion[]>(`/knowledge/training_questions${query ? `?${query}` : ''}`);
   },
   updateTrainingQuestionMetadata: (
     id: number,

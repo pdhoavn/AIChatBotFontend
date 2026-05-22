@@ -6,12 +6,8 @@ export function getChatAccessToken() {
   return localStorage.getItem(CHAT_ACCESS_TOKEN_KEY);
 }
 
-export function getAppAccessToken() {
-  return localStorage.getItem("access_token");
-}
-
 export function getChatRequestToken() {
-  return getChatAccessToken() || getAppAccessToken();
+  return getChatAccessToken();
 }
 
 export function hasChatSession() {

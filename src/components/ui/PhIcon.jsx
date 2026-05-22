@@ -137,6 +137,8 @@ import {
   Wrench,
   Hammer,
   IdentificationCard,
+  SignIn,
+  Database,
 } from "@phosphor-icons/react";
 
 const ICON_MAP = {
@@ -187,12 +189,14 @@ const ICON_MAP = {
   cloud_upload: Upload,
   share: ShareNetwork,
   refresh: ArrowsClockwise,
+  arrows_clockwise: ArrowsClockwise,
   edit: Pencil,
   fullscreen: ArrowsOut,
   open_in_new: ArrowsOut,
   filter_alt: FunnelSimple,
   // General
   person: User,
+  user: User,
   account_circle: UserCircle,
   school: Student,
   check: Check,
@@ -205,6 +209,7 @@ const ICON_MAP = {
   chevron_left: CaretLeft,
   more_vert: DotsThreeVertical,
   logout: SignOut,
+  login: SignIn,
   dark_mode: Moon,
   light_mode: Sun,
   warning: Warning,
@@ -270,6 +275,7 @@ const ICON_MAP = {
   copyright: Copyright,
   code: CodeBlock,
   support_agent: Headset,
+  database: Database,
 };
 
 const DEFAULT_SIZE = 16;

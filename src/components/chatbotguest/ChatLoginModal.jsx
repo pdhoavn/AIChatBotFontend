@@ -3,10 +3,12 @@ import { X, LogIn, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { API_CONFIG } from '../../config/api';
 import { saveChatSession } from '../../utils/chatAuth';
+import PhIcon from '../ui/PhIcon.jsx';
 
 export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -43,10 +45,10 @@ export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
         setUsername('');
         setPassword('');
       } else {
-        toast.error('Sai tài khoản hoặc mật khẩu.');
+        toast.error('Sai tên đăng nhập hoặc mật khẩu.');
       }
     } catch (error) {
-      toast.error('Sai tài khoản hoặc mật khẩu.');
+      toast.error('Sai tên đăng nhập hoặc mật khẩu.');
     } finally {
       setSubmitting(false);
     }
@@ -73,10 +75,6 @@ export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
         </div>
 
         <form onSubmit={handleLogin} className="p-6 space-y-4">
-          <div className="bg-blue-50 text-blue-800 text-sm p-3 rounded-lg border border-blue-100 mb-2">
-            Câu hỏi của bạn liên quan đến dữ liệu nội bộ, vui lòng đăng nhập để hệ thống trả lời.
-          </div>
-          
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">Tên đăng nhập</label>
             <input
@@ -91,14 +89,24 @@ export default function ChatLoginModal({ isOpen, onClose, onSuccess }) {
 
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">Mật khẩu</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#facb01]/50 focus:border-[#facb01] outline-none transition-all"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Nhập mật khẩu"
+                className="w-full px-4 py-2.5 pr-11 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#facb01]/50 focus:border-[#facb01] outline-none transition-all"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((value) => !value)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              >
+                <PhIcon name={showPassword ? "visibility_off" : "visibility"} size={17} />
+              </button>
+            </div>
           </div>
 
           <div className="pt-4">

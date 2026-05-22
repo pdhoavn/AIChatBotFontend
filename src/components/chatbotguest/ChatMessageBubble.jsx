@@ -163,17 +163,13 @@ export default function ChatMessageBubble({ message, onLoginClick, isPrivateLogg
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {citations.map((citation) => (
-                        <a
+                        <div
                           key={citation.documentId}
-                          href={`${API_BASE_URL}/knowledge/documents/${citation.documentId}/public-view`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/8 border border-accent/20 text-accent text-xs font-medium hover:bg-accent/15 hover:border-accent/30 transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/8 border border-accent/20 text-accent text-xs font-medium"
                         >
                           <PhIcon name="description" size={12} />
                           {citation.fileName || `Tài liệu #${citation.documentId}`}
-                          <PhIcon name="open_in_new" size={10} />
-                        </a>
+                        </div>
                       ))}
                     </div>
                   </div>

@@ -8,6 +8,8 @@ export function SearchAndFilter({
   setSearchQuery, 
   selectedCategory, 
   setSelectedCategory,
+  selectedPrivacy = 'all',
+  setSelectedPrivacy,
   categories 
 }) {
   return (
@@ -36,6 +38,19 @@ export function SearchAndFilter({
               ))}
             </SelectContent>
           </Select>
+
+          {setSelectedPrivacy && (
+            <Select value={selectedPrivacy} onValueChange={setSelectedPrivacy}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Quyền truy cập" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả quyền</SelectItem>
+                <SelectItem value="private">Riêng tư</SelectItem>
+                <SelectItem value="public">Công khai</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -4,6 +4,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Briefcase, GraduationCap, HeartHandshake, ClipboardList } from "lucide-react";
 import PhIcon from "../ui/PhIcon.jsx";
 import { resolveAudienceCode } from "../../api/audienceApi.ts";
+import { getRoleFromToken } from "../../pages/login/jwtHelper";
 
 const AUDIENCE_LABELS = {
   CANBO: "Viên chức / Người lao động",
@@ -38,11 +39,29 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("token_type");
-    localStorage.removeItem("refresh_token");
-    setIsLoggedIn(false);
+  const getDefaultRouteFromToken = () => {
+    const token = localStorage.getItem("access_token");
+    const role = getRoleFromToken(token);
+    const normalizedRole = typeof role === "string" ? role.toLowerCase() : "";
+
+    if (normalizedRole === "admin" || normalizedRole === "system_admin") {
+      return "/admin/dashboard";
+    }
+    if (normalizedRole === "content_manager" || normalizedRole === "content manager" || normalizedRole === "content") {
+      return "/content/dashboard";
+    }
+    if (normalizedRole === "consultant") {
+      return "/consultant";
+    }
+    if (normalizedRole === "admission_officer" || normalizedRole === "admission official" || normalizedRole === "officer") {
+      return "/admission/students";
+    }
+
+    return "/profile";
+  };
+
+  const handleAuthenticatedNavigate = () => {
+    navigate(getDefaultRouteFromToken());
   };
 
   useEffect(() => {
@@ -152,11 +171,11 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
           </div>
           {isLoggedIn ? (
             <button
-              onClick={handleLogout}
+              onClick={handleAuthenticatedNavigate}
               className="rounded-full bg-green-600 px-4 py-1.5 text-sm text-white hover:bg-green-700 flex items-center gap-1.5"
             >
-              <PhIcon name="logout" size={14} />
-              Đăng xuất
+              <PhIcon name="user" size={14} />
+              Vào quản trị
             </button>
           ) : (
             <button

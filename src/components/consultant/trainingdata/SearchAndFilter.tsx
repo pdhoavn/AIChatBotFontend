@@ -45,6 +45,9 @@ interface SearchAndFilterProps {
   onStatusFilterChange: (status: string) => void;
   categoryFilter: string;
   onCategoryFilterChange: (category: string) => void;
+  privacyFilter?: string;
+  onPrivacyFilterChange?: (privacy: string) => void;
+  showPrivacyFilter?: boolean;
   audienceFilter?: string[];
   onAudienceFilterChange?: (audiences: string[]) => void;
   showAudienceFilter?: boolean;
@@ -59,6 +62,9 @@ export function SearchAndFilter({
   onStatusFilterChange,
   categoryFilter,
   onCategoryFilterChange,
+  privacyFilter = 'all',
+  onPrivacyFilterChange,
+  showPrivacyFilter = false,
   audienceFilter = [],
   onAudienceFilterChange,
   showAudienceFilter = false,
@@ -121,6 +127,19 @@ export function SearchAndFilter({
             ))}
           </SelectContent>
         </Select>
+
+        {showPrivacyFilter && onPrivacyFilterChange && (
+          <Select value={privacyFilter} onValueChange={onPrivacyFilterChange}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Quyền truy cập" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả quyền</SelectItem>
+              <SelectItem value="private">Riêng tư</SelectItem>
+              <SelectItem value="public">Công khai</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {}

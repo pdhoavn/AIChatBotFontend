@@ -30,6 +30,7 @@ export function TrainingDataManagement() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [privacyFilter, setPrivacyFilter] = useState('all');
 
   const [categoryFilter, setCategoryFilter] = useState(locationState?.categoryFilter || 'all');
   const [audienceFilter, setAudienceFilter] = useState<string[]>([]);
@@ -60,7 +61,7 @@ export function TrainingDataManagement() {
     } else {
       fetchDocuments();
     }
-  }, [activeTab, statusFilter]);
+  }, [activeTab, statusFilter, privacyFilter]);
 
   const fetchIntents = async () => {
     try {
@@ -74,9 +75,11 @@ export function TrainingDataManagement() {
   const fetchQuestions = async () => {
     try {
       setLoading(true);
-      const data = await knowledgeAPI.getTrainingQuestions(
-        statusFilter !== 'all' ? statusFilter : undefined
-      );
+      const filters: { status?: string; is_private?: boolean } = {};
+      if (statusFilter !== 'all') filters.status = statusFilter;
+      if (privacyFilter === 'private') filters.is_private = true;
+      if (privacyFilter === 'public') filters.is_private = false;
+      const data = await knowledgeAPI.getTrainingQuestions(filters);
       setQuestions(data);
     } catch (error) {
       toast.error('Không thể tải câu hỏi huấn luyện');
@@ -88,9 +91,11 @@ export function TrainingDataManagement() {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      const data = await knowledgeAPI.getDocuments(
-        statusFilter !== 'all' ? statusFilter : undefined
-      );
+      const filters: { status?: string; is_private?: boolean } = {};
+      if (statusFilter !== 'all') filters.status = statusFilter;
+      if (privacyFilter === 'private') filters.is_private = true;
+      if (privacyFilter === 'public') filters.is_private = false;
+      const data = await knowledgeAPI.getDocuments(filters);
 
       setDocuments(data.map(doc => ({ 
         ...doc, 
@@ -331,7 +336,7 @@ export function TrainingDataManagement() {
   useEffect(() => {
     setQuestionsPage(1);
     setDocumentsPage(1);
-  }, [searchQuery, statusFilter, categoryFilter, audienceFilter, activeTab]);
+  }, [searchQuery, statusFilter, privacyFilter, categoryFilter, audienceFilter, activeTab]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -366,6 +371,9 @@ export function TrainingDataManagement() {
         onStatusFilterChange={setStatusFilter}
         categoryFilter={categoryFilter}
         onCategoryFilterChange={setCategoryFilter}
+        privacyFilter={privacyFilter}
+        onPrivacyFilterChange={setPrivacyFilter}
+        showPrivacyFilter={true}
         audienceFilter={audienceFilter}
         onAudienceFilterChange={setAudienceFilter}
         showAudienceFilter={true}

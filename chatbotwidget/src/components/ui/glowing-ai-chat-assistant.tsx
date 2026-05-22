@@ -322,7 +322,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
                 setPartial(partialRef.current);
                 break;
               case 'login_required': {
-                const loginMsg = data.message || 'Câu hỏi của bạn liên quan đến dữ liệu nội bộ, vui lòng đăng nhập để hệ thống trả lời.';
+                const loginMsg = 'Câu hỏi của bạn liên quan đến dữ liệu nội bộ, vui lòng đăng nhập để hệ thống trả lời.';
                 setMessages(prev => [
                   ...prev,
                   {

@@ -402,11 +402,11 @@ export default function ChatGuestPage() {
                 break;
               case "login_required": {
                 // Backend yêu cầu đăng nhập để xem nội dung bảo mật
-                const loginMsg = data.message || "Câu hỏi của bạn liên quan đến dữ liệu nội bộ, vui lòng đăng nhập để hệ thống trả lời.";
+                const loginMsg = "Câu hỏi của bạn liên quan đến dữ liệu nội bộ, vui lòng đăng nhập để hệ thống trả lời.";
 
                 // Show modal and save pending text
                 setPendingMessage(text);
-                setShowLoginModal(!getChatAccessToken());
+                setShowLoginModal(false);
 
                 setMessages((prev) => [
                   ...prev,
@@ -638,7 +638,7 @@ export default function ChatGuestPage() {
     clearChatSession();
     setShowLoginModal(false);
     setPendingMessage(null);
-    toast.info("Đã đăng xuất khỏi dữ liệu nội bộ.", { toastId: "chat-private-logout" });
+    toast.info("Đã đăng xuất.", { toastId: "chat-private-logout" });
   };
 
   const handleLoginSuccess = () => {

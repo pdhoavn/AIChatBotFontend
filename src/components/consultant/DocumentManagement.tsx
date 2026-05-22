@@ -39,6 +39,7 @@ export function DocumentManagement() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [privacyFilter, setPrivacyFilter] = useState<string>('all');
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -55,15 +56,17 @@ export function DocumentManagement() {
   useEffect(() => {
     fetchDocuments();
     fetchIntents();
-  }, [statusFilter]);
+  }, [statusFilter, privacyFilter]);
 
   const fetchDocuments = async () => {
     try {
       setLoading(true);
 
-      const data = statusFilter !== 'all'
-        ? await knowledgeAPI.getDocuments(statusFilter)
-        : await knowledgeAPI.getDocuments();
+      const filters: { status?: string; is_private?: boolean } = {};
+      if (statusFilter !== 'all') filters.status = statusFilter;
+      if (privacyFilter === 'private') filters.is_private = true;
+      if (privacyFilter === 'public') filters.is_private = false;
+      const data = await knowledgeAPI.getDocuments(filters);
       setDocuments(data);
 
       if (data.length > 0 && !selectedDoc) {
@@ -235,6 +238,19 @@ export function DocumentManagement() {
                 <SelectItem value="draft">{t('status.draft')}</SelectItem>
                 <SelectItem value="approved">{t('status.approved')}</SelectItem>
                 <SelectItem value="rejected">{t('status.rejected')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Select value={privacyFilter} onValueChange={setPrivacyFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Quyền truy cập" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả quyền</SelectItem>
+                <SelectItem value="private">Riêng tư</SelectItem>
+                <SelectItem value="public">Công khai</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -11,6 +11,7 @@ import { Pagination } from '../../common/Pagination';
 export function KnowledgeBaseViewer() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tất Cả Lĩnh Vực');
+  const [selectedPrivacy, setSelectedPrivacy] = useState('all');
   const [selectedQA, setSelectedQA] = useState(null);
   const [isQADialogOpen, setIsQADialogOpen] = useState(false);
   const [trainingQuestions, setTrainingQuestions] = useState([]);
@@ -37,7 +38,10 @@ export function KnowledgeBaseViewer() {
         });
         setIntents(intentsData);
 
-        const trainingResponse = await knowledgeAPI.getTrainingQuestions();
+        const trainingFilters = {};
+        if (selectedPrivacy === 'private') trainingFilters.is_private = true;
+        if (selectedPrivacy === 'public') trainingFilters.is_private = false;
+        const trainingResponse = await knowledgeAPI.getTrainingQuestions(trainingFilters);
 
         const trainingData = trainingResponse.data || trainingResponse || [];
         
@@ -54,7 +58,10 @@ export function KnowledgeBaseViewer() {
             }))
           : [];
 
-        const documentsResponse = await knowledgeAPI.getDocuments();
+        const documentFilters = {};
+        if (selectedPrivacy === 'private') documentFilters.is_private = true;
+        if (selectedPrivacy === 'public') documentFilters.is_private = false;
+        const documentsResponse = await knowledgeAPI.getDocuments(documentFilters);
 
         const documentsData = documentsResponse.data || documentsResponse || [];
         
@@ -92,7 +99,7 @@ export function KnowledgeBaseViewer() {
     };
 
     fetchData();
-  }, []);
+  }, [selectedPrivacy]);
 
   const getFileType = (filePath) => {
     if (!filePath) return 'PDF';
@@ -133,7 +140,7 @@ export function KnowledgeBaseViewer() {
   useEffect(() => {
     setQuestionsPage(1);
     setDocumentsPage(1);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, selectedPrivacy]);
 
   const handleViewQA = (template) => {
     setSelectedQA(template);
@@ -177,6 +184,8 @@ export function KnowledgeBaseViewer() {
           setSearchQuery={setSearchQuery}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
+          selectedPrivacy={selectedPrivacy}
+          setSelectedPrivacy={setSelectedPrivacy}
           categories={categories}
         />
 
