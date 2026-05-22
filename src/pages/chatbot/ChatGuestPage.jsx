@@ -658,6 +658,8 @@ export default function ChatGuestPage() {
         audiences={audiences}
         selectedAudience={selectedAudience}
         onAudienceChange={handleAudienceChange}
+        isChatPrivateLoggedIn={isChatPrivateLoggedIn}
+        onChatPrivateLogout={handlePrivateLogout}
       />
 
       <div
@@ -667,21 +669,6 @@ export default function ChatGuestPage() {
       >
         <div className="max-w-5xl mx-auto w-full px-3 md:px-6 flex flex-col pb-52 sm:pb-44 min-h-full">
           <div className="w-full flex-1">
-            {isChatPrivateLoggedIn && (
-              <div className="sticky top-2 z-10 mb-4 flex justify-center">
-                <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-emerald-200 bg-white/95 px-3 py-1.5 text-xs text-emerald-700 shadow-sm backdrop-blur">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  <span className="font-medium">Đã đăng nhập dữ liệu nội bộ</span>
-                  <button
-                    type="button"
-                    onClick={handlePrivateLogout}
-                    className="ml-1 rounded-full border border-emerald-200 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50"
-                  >
-                    Đăng xuất
-                  </button>
-                </div>
-              </div>
-            )}
 
             {messages.length === 0 && (
               <ChatEmptyState

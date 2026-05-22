@@ -20,7 +20,7 @@ const AUDIENCE_META = {
   TUYENSINH: { label: "Tuyển sinh", icon: ClipboardList },
 };
 
-export default function ChatGuestHeader({ selectedAudience, onAudienceChange, audiences = [] }) {
+export default function ChatGuestHeader({ selectedAudience, onAudienceChange, audiences = [], isChatPrivateLoggedIn = false, onChatPrivateLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const schoolLogoUrl = "https://utc2.edu.vn/images/030820230730_U09Tn.png";
@@ -184,6 +184,21 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
             >
               Đăng nhập
             </button>
+          )}
+          {isChatPrivateLoggedIn && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/95 px-3 py-1.5 text-xs text-emerald-700 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="font-medium">Đã đăng nhập dữ liệu nội bộ</span>
+              {onChatPrivateLogout && (
+                <button
+                  type="button"
+                  onClick={onChatPrivateLogout}
+                  className="rounded-full border border-emerald-200 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50"
+                >
+                  Đăng xuất
+                </button>
+              )}
+            </div>
           )}
           {shouldShowRiasecLink && (
             <Link
