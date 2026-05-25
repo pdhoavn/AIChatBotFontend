@@ -77,11 +77,11 @@ function TrainingQuestionCard({ question, approvingId, rejectingId, onApprove, o
         </div>
         <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800 flex-shrink-0">Nháp</span>
       </div>
-      <div className="flex flex-col gap-1.5 mb-3">
+      <div className="flex flex-wrap items-center gap-1.5 mb-3">
         <PrivacyBadge isPrivate={question.is_private} />
         <AudienceBadges audiences={question.target_audiences} />
         {question.intent_name && (
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full self-start">
+          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
             Lĩnh vực: {question.intent_name}
           </span>
         )}
@@ -124,11 +124,11 @@ function DocumentCard({ document, approvingId, rejectingId, downloadingId, onApp
         </div>
         <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800 flex-shrink-0">Nháp</span>
       </div>
-      <div className="flex flex-col gap-1.5 mb-3">
+      <div className="flex flex-wrap items-center gap-1.5 mb-3">
         <PrivacyBadge isPrivate={document.is_private} />
         <AudienceBadges audiences={document.target_audiences} />
         {document.intent_name && (
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full self-start">
+          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
             Lĩnh vực: {document.intent_name}
           </span>
         )}
