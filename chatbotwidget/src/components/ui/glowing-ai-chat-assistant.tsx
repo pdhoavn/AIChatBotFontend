@@ -681,17 +681,13 @@ useEffect(() => {
                                 </p>
                                 <div className="flex flex-wrap gap-1.5">
                                   {sources.map((src) => (
-                                    <a
+                                    <span
                                       key={src.document_id}
-                                      href={`${apiBaseUrl}/knowledge/documents/${src.document_id}/public-view`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 text-[11px] font-medium hover:bg-blue-100 hover:border-blue-300 transition-colors"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 text-[11px] font-medium"
                                     >
                                       <FileText className="w-3 h-3" />
                                       {src.file_name || `Tài liệu #${src.document_id}`}
-                                      <ExternalLink className="w-2.5 h-2.5" />
-                                    </a>
+                                    </span>
                                   ))}
                                 </div>
                               </div>
