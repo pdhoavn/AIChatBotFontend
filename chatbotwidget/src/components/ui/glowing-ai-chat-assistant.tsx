@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Send, Info, X, Briefcase, GraduationCap, HeartHandshake, ClipboardList, ChevronDown, Bot, ExternalLink, Sparkles, FileText, Copy, Check, Lock, LogIn, LogOut } from 'lucide-react';
+import { Mic, Send, Info, X, Briefcase, GraduationCap, HeartHandshake, ClipboardList, ChevronDown, Bot, ExternalLink, Sparkles, FileText, Copy, Check, Lock, LogIn, LogOut, Loader2, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
@@ -28,6 +28,12 @@ interface AudienceApiItem {
 
 type SuggestionsResponse = unknown[] | { suggestions?: unknown[] };
 
+interface ChatLoginResponse {
+  access_token?: string;
+  token_type?: string;
+  refresh_token?: string;
+}
+
 // const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 function generateNumericId() {
@@ -55,6 +61,33 @@ async function fetchJson<T>(url: string): Promise<T> {
 
 const GUEST_ID_KEY = 'widget_guest_user_id';
 const GUEST_SESSION_KEY = 'widget_guest_session_id';
+const CHAT_ACCESS_TOKEN_KEY = 'chat_access_token';
+const CHAT_TOKEN_TYPE_KEY = 'chat_token_type';
+const CHAT_REFRESH_TOKEN_KEY = 'chat_refresh_token';
+
+function getChatAccessToken() {
+  return localStorage.getItem(CHAT_ACCESS_TOKEN_KEY);
+}
+
+function saveChatSession(data: ChatLoginResponse) {
+  if (!data.access_token) return;
+
+  localStorage.setItem(CHAT_ACCESS_TOKEN_KEY, data.access_token);
+  localStorage.setItem(CHAT_TOKEN_TYPE_KEY, data.token_type || 'bearer');
+
+  if (data.refresh_token) {
+    localStorage.setItem(CHAT_REFRESH_TOKEN_KEY, data.refresh_token);
+  }
+
+  window.dispatchEvent(new Event('chat-auth-change'));
+}
+
+function clearChatSession() {
+  localStorage.removeItem(CHAT_ACCESS_TOKEN_KEY);
+  localStorage.removeItem(CHAT_TOKEN_TYPE_KEY);
+  localStorage.removeItem(CHAT_REFRESH_TOKEN_KEY);
+  window.dispatchEvent(new Event('chat-auth-change'));
+}
 
 function normalizeWsSources(sources: any[]): Array<{ document_id: number; file_name?: string | null }> {
   if (!Array.isArray(sources)) return [];
@@ -94,6 +127,140 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+function InlineLoginForm({
+  apiBaseUrl,
+  onClose,
+  onSuccess,
+}: {
+  apiBaseUrl: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!username.trim() || !password) {
+      setError('Vui lòng nhập Tên đăng nhập và Mật khẩu.');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError('');
+
+      const response = await fetch(`${apiBaseUrl}/auth/login/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_name: username.trim(),
+          password,
+        }),
+      });
+      const data = await response.json().catch(() => ({})) as ChatLoginResponse;
+
+      if (response.ok && data.access_token) {
+        saveChatSession(data);
+        setUsername('');
+        setPassword('');
+        onSuccess();
+      } else {
+        setError('Sai tên đăng nhập hoặc mật khẩu.');
+      }
+    } catch {
+      setError('Sai tên đăng nhập hoặc mật khẩu.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.3, type: 'spring', bounce: 0.3 }}
+      className="flex w-full justify-start"
+    >
+      <div className="w-[95%] rounded-2xl bg-white shadow-xl overflow-hidden flex flex-col border border-amber-200">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="bg-amber-100 p-2 rounded-lg">
+              <LogIn className="h-4 w-4 text-amber-600" />
+            </div>
+            <h2 className="text-[15px] font-bold text-gray-800">Đăng nhập</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Đóng form đăng nhập"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <form onSubmit={handleLogin} className="p-4 space-y-3">
+          <div className="space-y-1.5">
+            <label className="block text-[12px] font-medium text-gray-700">Tên đăng nhập</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              placeholder="Nhập tên đăng nhập của bạn"
+              className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-[13px] focus:ring-2 focus:ring-[#facb01]/50 focus:border-[#facb01] outline-none transition-all"
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-[12px] font-medium text-gray-700">Mật khẩu</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Nhập mật khẩu"
+                className="w-full px-3 py-2.5 pr-10 rounded-xl border border-gray-300 text-[13px] focus:ring-2 focus:ring-[#facb01]/50 focus:border-[#facb01] outline-none transition-all"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((value) => !value)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+
+          {error && <p className="text-[12px] text-red-600">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full py-2.5 bg-[#facb01] hover:bg-[#e8b800] text-gray-900 font-semibold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-70 text-[13px]"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang xử lý...
+              </>
+            ) : (
+              'Đăng nhập & Tiếp tục'
+            )}
+          </button>
+        </form>
+      </div>
+    </motion.div>
+  );
+}
+
 const markdownComponents = {
   p: ({ node, ...props }: any) => <p className="mb-2.5 leading-relaxed last:mb-0" {...props} />,
   strong: ({ node, ...props }: any) => <strong className="font-semibold text-blue-700" {...props} />,
@@ -121,21 +288,29 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLoginForm, setShowLoginForm] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const apiBaseUrl = (apiUrl || import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? `${window.location.origin.replace(/\/$/, '')}/api` : '')).replace(/\/$/, '');
 
   useEffect(() => {
     const checkLogin = () => {
-      setIsLoggedIn(!!localStorage.getItem('access_token'));
+      setIsLoggedIn(!!getChatAccessToken());
     };
     checkLogin();
     const interval = setInterval(checkLogin, 1000);
-    return () => clearInterval(interval);
+    window.addEventListener('chat-auth-change', checkLogin);
+    window.addEventListener('storage', checkLogin);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('chat-auth-change', checkLogin);
+      window.removeEventListener('storage', checkLogin);
+    };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('token_type');
-    localStorage.removeItem('refresh_token');
+    clearChatSession();
+    setShowLoginForm(false);
+    setPendingMessage(null);
     setIsLoggedIn(false);
   };
 
@@ -286,6 +461,23 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
     }
   }, [apiBaseUrl, selectedAudience, selectedIntent]);
 
+  const handlePrivateLoginClick = () => {
+    if (isLoggedIn) return;
+    setShowLoginForm(true);
+  };
+
+  const handleLoginSuccess = () => {
+    setShowLoginForm(false);
+    setIsLoggedIn(!!getChatAccessToken());
+    if (pendingMessage) {
+      const retryText = pendingMessage;
+      setPendingMessage(null);
+      setTimeout(() => {
+        sendMessageSSE(retryText);
+      }, 300);
+    }
+  };
+
   // SSE streaming: gửi message qua POST, đọc response SSE
   const sendMessageSSE = async (text: string) => {
     setIsLoading(true);
@@ -302,7 +494,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
     abortControllerRef.current = controller;
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = getChatAccessToken();
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -359,6 +551,8 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
                 break;
               case 'login_required': {
                 const loginMsg = 'Câu hỏi của bạn liên quan đến dữ liệu nội bộ, vui lòng đăng nhập để hệ thống trả lời.';
+                setPendingMessage(text);
+                setShowLoginForm(false);
                 setMessages(prev => [
                   ...prev,
                   {
@@ -549,7 +743,7 @@ useEffect(() => {
                     <LogOut className="w-4 h-4" />
                   </button>
                 ) : (
-                  <button onClick={() => window.open((import.meta.env.VITE_MAIN_CHATBOT_URL || 'http://localhost:5173') + '/loginprivate', '_blank')} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors" title="Đăng nhập">
+                  <button onClick={handlePrivateLoginClick} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors" title="Đăng nhập dữ liệu nội bộ">
                     <LogIn className="w-4 h-4" />
                   </button>
                 )}
@@ -618,7 +812,6 @@ useEffect(() => {
 
                   // Render đặc biệt cho yêu cầu đăng nhập
                   if (isLoginRequired) {
-                    const mainChatbotUrl = import.meta.env.VITE_MAIN_CHATBOT_URL || 'http://localhost:5173';
                     return (
                       <motion.div
                         key={msg.id}
@@ -637,15 +830,18 @@ useEffect(() => {
                               <p className="text-[12.5px] text-gray-600 leading-relaxed">{msg.text}</p>
                             </div>
                           </div>
-                          <a
-                            href={`${mainChatbotUrl}/loginprivate`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-blue-600 text-white hover:bg-blue-500 active:scale-[0.98] transition-all shadow-sm text-[12.5px] font-semibold"
+                          <button
+                            type="button"
+                            onClick={handlePrivateLoginClick}
+                            className={`mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl active:scale-[0.98] transition-all shadow-sm text-[12.5px] font-semibold ${
+                              isLoggedIn
+                                ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                                : 'bg-blue-600 text-white hover:bg-blue-500'
+                            }`}
                           >
-                            <LogIn className="w-3.5 h-3.5" />
-                            Đăng nhập
-                          </a>
+                            {isLoggedIn ? <Check className="w-3.5 h-3.5" /> : <LogIn className="w-3.5 h-3.5" />}
+                            {isLoggedIn ? 'Đã đăng nhập dữ liệu nội bộ' : 'Đăng nhập'}
+                          </button>
                         </div>
                       </motion.div>
                     );
@@ -702,6 +898,14 @@ useEffect(() => {
                   );
                 })}
               </AnimatePresence>
+
+              {showLoginForm && (
+                <InlineLoginForm
+                  apiBaseUrl={apiBaseUrl}
+                  onClose={() => setShowLoginForm(false)}
+                  onSuccess={handleLoginSuccess}
+                />
+              )}
 
               {/* Streaming partial bubble */}
               {partial && (
