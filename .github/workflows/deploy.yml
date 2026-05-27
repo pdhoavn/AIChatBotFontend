@@ -26,8 +26,8 @@ jobs:
           echo "Chuyen sang thu muc Backend de chay Docker Compose..."
           cd ~/app/backend
 
-          # 3. Chỉ build và khởi động lại container frontend (Giữ nguyên backend, db...)
-          echo "Build va restart container Frontend..."
-          docker compose up -d --build --no-deps frontend
+          # 3. Build và khởi động lại frontend + chatbot widget (Giữ nguyên backend, db...)
+          echo "Build va restart container Frontend va Chatbot Widget..."
+          docker compose up -d --build --no-deps frontend chatbot_widget
     
          
