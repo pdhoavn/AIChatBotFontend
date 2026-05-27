@@ -30,6 +30,7 @@ RUN echo 'server { \
         proxy_pass BACKEND_PLACEHOLDER/; \
         \
         proxy_http_version 1.1; \
+        proxy_ssl_server_name on; \
         \
         # SSE streaming support \
         proxy_buffering off; \
@@ -39,7 +40,7 @@ RUN echo 'server { \
         proxy_read_timeout 300s; \
         proxy_send_timeout 300s; \
         \
-        proxy_set_header Host $host; \
+        proxy_set_header Host $proxy_host; \
         proxy_set_header X-Real-IP $remote_addr; \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
         proxy_set_header X-Forwarded-Proto $scheme; \

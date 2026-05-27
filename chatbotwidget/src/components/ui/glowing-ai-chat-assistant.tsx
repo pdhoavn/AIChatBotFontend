@@ -18,6 +18,16 @@ interface ChatMessage {
   sources?: Array<{ document_id: number; file_name?: string | null }>;
 }
 
+interface AudienceApiItem {
+  id?: number | string;
+  name?: string | null;
+  code?: string | null;
+  slug?: string | null;
+  description?: string | null;
+}
+
+type SuggestionsResponse = unknown[] | { suggestions?: unknown[] };
+
 // const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 function generateNumericId() {
@@ -25,6 +35,23 @@ function generateNumericId() {
 }
 
 // buildWebSocketUrl removed — SSE uses standard HTTP POST
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const response = await fetch(url);
+  const contentType = response.headers.get('content-type') || '';
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+    throw new Error(`HTTP ${response.status} from ${url}${body ? `: ${body.slice(0, 120)}` : ''}`);
+  }
+
+  if (!contentType.includes('application/json') && !contentType.includes('+json')) {
+    const body = await response.text().catch(() => '');
+    throw new Error(`Expected JSON from ${url}, received ${contentType || 'unknown content type'}${body ? `: ${body.slice(0, 120)}` : ''}`);
+  }
+
+  return response.json() as Promise<T>;
+}
 
 const GUEST_ID_KEY = 'widget_guest_user_id';
 const GUEST_SESSION_KEY = 'widget_guest_session_id';
@@ -94,7 +121,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const effectiveApiUrl = apiUrl || import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? `${window.location.origin.replace(/\/$/, '')}/api` : '');
+  const apiBaseUrl = (apiUrl || import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? `${window.location.origin.replace(/\/$/, '')}/api` : '')).replace(/\/$/, '');
 
   useEffect(() => {
     const checkLogin = () => {
@@ -185,8 +212,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
   };
 
   useEffect(() => {
-    fetch(`${apiUrl}/audiences/target-audience`)
-      .then(res => res.json())
+    fetchJson<AudienceApiItem[]>(`${apiBaseUrl}/audiences/target-audience`)
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
           const mapped = data.map(item => {
@@ -218,37 +244,47 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
           setSelectedAudience(mapped[0]);
         }
       })
-      .catch(console.error);
-  }, []);
+      .catch(error => {
+        console.warn('Không tải được danh sách đối tượng chatbot, dùng cấu hình mặc định.', error);
+      });
+  }, [apiBaseUrl]);
 
   useEffect(() => {
     if (selectedAudience?.rawName) {
-      fetch(`${apiUrl}/knowledge/intentbyid?target_audience=${encodeURIComponent(selectedAudience.rawName)}`)
-        .then(res => res.json())
+      fetchJson<unknown[]>(`${apiBaseUrl}/knowledge/intentbyid?target_audience=${encodeURIComponent(selectedAudience.rawName)}`)
         .then(data => {
           setIntents(Array.isArray(data) ? data : []);
           setSelectedIntent(null);
         })
-        .catch(console.error);
+        .catch(error => {
+          console.warn('Không tải được danh sách chủ đề chatbot.', error);
+          setIntents([]);
+          setSelectedIntent(null);
+        });
     } else {
       setIntents([]);
       setSelectedIntent(null);
     }
-  }, [selectedAudience]);
+  }, [apiBaseUrl, selectedAudience]);
 
   useEffect(() => {
     if (selectedAudience?.dbId) {
       const intentId = selectedIntent?.intent_id ?? 0;
-      fetch(`${apiUrl}/question/suggestions?target_audience_id=${selectedAudience.dbId}&intent_id=${intentId}`)
-        .then(res => res.json())
+      fetchJson<SuggestionsResponse>(`${apiBaseUrl}/question/suggestions?target_audience_id=${selectedAudience.dbId}&intent_id=${intentId}`)
         .then(data => {
-          setSuggestions(Array.isArray(data) ? data : (data?.suggestions || []));
+          const responseSuggestions = !Array.isArray(data) && typeof data === 'object' && data !== null
+            ? data.suggestions
+            : undefined;
+          setSuggestions(Array.isArray(data) ? data : (Array.isArray(responseSuggestions) ? responseSuggestions : []));
         })
-        .catch(console.error);
+        .catch(error => {
+          console.warn('Không tải được gợi ý câu hỏi chatbot.', error);
+          setSuggestions([]);
+        });
     } else {
       setSuggestions([]);
     }
-  }, [selectedAudience, selectedIntent]);
+  }, [apiBaseUrl, selectedAudience, selectedIntent]);
 
   // SSE streaming: gửi message qua POST, đọc response SSE
   const sendMessageSSE = async (text: string) => {
@@ -272,7 +308,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${effectiveApiUrl}/chat/stream`, {
+      const response = await fetch(`${apiBaseUrl}/chat/stream`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -647,7 +683,7 @@ useEffect(() => {
                                   {sources.map((src) => (
                                     <a
                                       key={src.document_id}
-                                      href={`${effectiveApiUrl.replace(/\/$/, '')}/knowledge/documents/${src.document_id}/public-view`}
+                                      href={`${apiBaseUrl}/knowledge/documents/${src.document_id}/public-view`}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 text-[11px] font-medium hover:bg-blue-100 hover:border-blue-300 transition-colors"
