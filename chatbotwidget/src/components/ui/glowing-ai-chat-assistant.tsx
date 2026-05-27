@@ -586,7 +586,7 @@ useEffect(() => {
                         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-500 mb-2.5 flex items-center gap-1.5">
                           <Sparkles className="w-3.5 h-3.5" /> Câu hỏi gợi ý
                         </p>
-                        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                        <div className="flex max-h-32 flex-col gap-2 overflow-y-auto pr-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                           {suggestions.map((sug, i) => {
                             // API returns { question, intent_id, created_at }
                             const btnText = typeof sug === 'string' 
@@ -597,7 +597,7 @@ useEffect(() => {
                               <button
                                 key={i}
                                 onClick={() => handleSend(btnText)}
-                                className="flex-shrink-0 px-3 py-1.5 bg-gray-50/80 border border-gray-200 rounded-2xl text-[12px] text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors text-left shadow-sm max-w-[200px] truncate"
+                                className="w-full px-3 py-1.5 bg-gray-50/80 border border-gray-200 rounded-2xl text-[12px] text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors text-left shadow-sm"
                               >
                                 {btnText}
                               </button>
