@@ -653,8 +653,12 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
     }
   };
 
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  useEffect(() => { scrollToBottom(); }, [messages, partial, isChatOpen]);
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+  };
+  useEffect(() => { scrollToBottom(); }, [messages, partial, isChatOpen, showLoginForm]);
 
 useEffect(() => {
     const handleClickOutside = (event: Event) => {
