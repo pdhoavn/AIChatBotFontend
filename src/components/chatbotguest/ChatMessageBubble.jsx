@@ -4,14 +4,43 @@ import ReactMarkdown from "react-markdown";
 import { useNavigate } from "react-router-dom";
 import PhIcon from "../ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
+import { resolveAudienceCode } from "../../api/audienceApi.ts";
 
-export default function ChatMessageBubble({ message, onLoginClick, isPrivateLoggedIn = false }) {
+import { Briefcase, GraduationCap, HeartHandshake, ClipboardList } from "lucide-react";
+
+const AUDIENCE_META = {
+  CANBO: { color: "blue", icon: Briefcase, label: "Viên chức / Người lao động" },
+  SINHVIEN: { color: "green", icon: GraduationCap, label: "Sinh viên" },
+  PHUHUYNH: { color: "purple", icon: HeartHandshake, label: "Phụ huynh / Bên liên quan" },
+  TUYENSINH: { color: "orange", icon: ClipboardList, label: "Tuyển sinh" },
+};
+
+const COLOR_MAP = {
+  blue: { bg: "bg-blue-50", border: "border-blue-200", iconBg: "bg-blue-100", iconBorder: "border-blue-200", iconText: "text-blue-600", hoverBorder: "hover:border-blue-400", labelText: "text-blue-700" },
+  green: { bg: "bg-emerald-50", border: "border-emerald-200", iconBg: "bg-emerald-100", iconBorder: "border-emerald-200", iconText: "text-emerald-600", hoverBorder: "hover:border-emerald-400", labelText: "text-emerald-700" },
+  purple: { bg: "bg-violet-50", border: "border-violet-200", iconBg: "bg-violet-100", iconBorder: "border-violet-200", iconText: "text-violet-600", hoverBorder: "hover:border-violet-400", labelText: "text-violet-700" },
+  orange: { bg: "bg-yellow-50", border: "border-yellow-200", iconBg: "bg-yellow-100", iconBorder: "border-yellow-200", iconText: "text-yellow-600", hoverBorder: "hover:border-yellow-400", labelText: "text-yellow-700" },
+};
+
+const FALLBACK_COLOR = "blue";
+
+export default function ChatMessageBubble({ message, onLoginClick, isPrivateLoggedIn = false, audiences = [], selectedAudience, onAudienceChange }) {
   const [isCopied, setIsCopied] = useState(false);
+  // Fix logic: Lock the excluded audience when this bubble renders, so options don't jump when user clicks one.
+  const [excludedAudienceId] = useState(selectedAudience?.id);
+
   const navigate = useNavigate();
   const isUser = message.sender === "user";
   const isLoginRequired = message.type === "login_required";
-  const hasLawyerSuggestion = message.text?.includes("[SUGGEST_LAWYER]");
-  const cleanContent = message.text?.replace("[SUGGEST_LAWYER]", "").trim();
+  
+  let cleanContentStr = message.text || "";
+  const hasLawyerSuggestion = cleanContentStr.includes("[SUGGEST_LAWYER]");
+  cleanContentStr = cleanContentStr.replace("[SUGGEST_LAWYER]", "");
+  
+  const hasSetAudience = cleanContentStr.includes("[[user/setaudience]]");
+  cleanContentStr = cleanContentStr.replace("[[user/setaudience]]", "").trim();
+  
+  const cleanContent = cleanContentStr;
 
   const API_BASE_URL = API_CONFIG.FASTAPI_BASE_URL;
 
@@ -150,6 +179,57 @@ export default function ChatMessageBubble({ message, onLoginClick, isPrivateLogg
                       <PhIcon name="search" size={18} />
                       Tìm Chuyên Gia Ngay
                     </a>
+                  </div>
+                )}
+
+                {hasSetAudience && audiences.filter(a => a.id !== excludedAudienceId).length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-border-main/20">
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <div className="w-7 h-7 rounded-lg bg-accent/10 text-accent flex items-center justify-center shrink-0 border border-accent/20">
+                        <PhIcon name="groups" size={15} />
+                      </div>
+                      <span className="text-[13px] font-semibold text-text-main">
+                        Dạ, nội dung này có thể thuộc phạm vi của nhóm đối tượng khác. Vui lòng chọn lại nhóm phù hợp:
+                      </span>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 sm:pl-9">
+                      {audiences.filter(a => a.id !== excludedAudienceId).map((audience) => {
+                        const audienceCode = resolveAudienceCode(audience);
+                        const meta = AUDIENCE_META[audienceCode] || {
+                          color: FALLBACK_COLOR,
+                          icon: Briefcase,
+                          label: audience.name,
+                        };
+                        const c = COLOR_MAP[meta.color];
+                        const AudienceIcon = meta.icon;
+                        const isSelected = selectedAudience?.id === audience.id;
+                        
+                        return (
+                          <button
+                            key={audience.id}
+                            onClick={() => onAudienceChange && onAudienceChange(audience)}
+                            className={`group flex items-center gap-2 rounded-xl border px-3 py-1.5 transition-all ${
+                              isSelected 
+                                ? "bg-accent text-white border-accent shadow-md ring-2 ring-accent/20 scale-[1.02]" 
+                                : `bg-surface/50 ${c.border} ${c.hoverBorder} hover:shadow-sm hover:bg-white`
+                            }`}
+                          >
+                            <div className={`flex items-center justify-center transition-transform group-hover:scale-110 ${isSelected ? "text-white" : c.iconText}`}>
+                              <AudienceIcon size={14} strokeWidth={2.5} />
+                            </div>
+                            <span className={`text-[12px] font-bold ${isSelected ? "text-white" : c.labelText}`}>
+                              {meta.label}
+                            </span>
+                            {isSelected && (
+                              <div className="ml-0.5 flex items-center justify-center text-white">
+                                <PhIcon name="check" size={14} weight="bold" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 

@@ -687,6 +687,9 @@ export default function ChatGuestPage() {
                   message={m} 
                   onLoginClick={handlePrivateLoginClick} 
                   isPrivateLoggedIn={isChatPrivateLoggedIn}
+                  audiences={audiences}
+                  selectedAudience={selectedAudience}
+                  onAudienceChange={handleAudienceChange}
                 />
               </div>
             ))}
