@@ -16,6 +16,7 @@ interface ChatMessage {
   type?: 'login_required';
   confidence?: number | null;
   sources?: Array<{ document_id: number; file_name?: string | null }>;
+  excludedAudienceId?: string | number;
 }
 
 interface AudienceApiItem {
@@ -580,6 +581,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
                       sender: 'ai',
                       confidence: typeof data.confidence === 'number' ? data.confidence : null,
                       sources: normalizedSources,
+                      excludedAudienceId: selectedAudience?.id,
                     },
                   ]);
                 }
@@ -609,6 +611,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
             sender: 'ai',
             confidence: null,
             sources: [],
+            excludedAudienceId: selectedAudience?.id,
           }]);
         }
         partialRef.current = '';
@@ -814,6 +817,10 @@ useEffect(() => {
                   const isLoginRequired = msg.type === 'login_required';
                   const sources = Array.isArray(msg.sources) ? msg.sources : [];
 
+                  let cleanText = msg.text || '';
+                  const hasSetAudience = cleanText.includes('[[user/setaudience]]');
+                  cleanText = cleanText.replace('[[user/setaudience]]', '').trim();
+
                   // Render đặc biệt cho yêu cầu đăng nhập
                   if (isLoginRequired) {
                     return (
@@ -870,8 +877,51 @@ useEffect(() => {
                           <>
                             {/* Markdown content */}
                             <div className="text-gray-800">
-                              <ReactMarkdown components={markdownComponents}>{msg.text}</ReactMarkdown>
+                              <ReactMarkdown components={markdownComponents}>{cleanText}</ReactMarkdown>
                             </div>
+
+                            {/* Audience Switcher */}
+                            {hasSetAudience && audiences.filter(a => a.id !== msg.excludedAudienceId).length > 0 && (
+                              <div className="mt-4 pt-3 border-t border-gray-200/60">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center shrink-0 border border-blue-100">
+                                    <Bot className="w-3.5 h-3.5 text-blue-500" />
+                                  </div>
+                                  <span className="text-[12px] font-semibold text-gray-700">
+                                    Dạ, nội dung này có thể thuộc phạm vi của nhóm đối tượng khác. Vui lòng chọn lại nhóm phù hợp:
+                                  </span>
+                                </div>
+                                
+                                <div className="flex flex-wrap gap-1.5 pl-8">
+                                  {audiences.filter(a => a.id !== msg.excludedAudienceId).map((audience) => {
+                                    const isSelected = selectedAudience?.id === audience.id;
+                                    return (
+                                      <button
+                                        key={audience.id}
+                                        onClick={() => setSelectedAudience(audience)}
+                                        className={`group flex items-center gap-1.5 rounded-xl border px-2.5 py-1 transition-all ${
+                                          isSelected 
+                                            ? "bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-500/20 scale-[1.02]" 
+                                            : "bg-white/50 border-gray-200 hover:bg-white hover:border-gray-300 hover:shadow-sm"
+                                        }`}
+                                      >
+                                        <div className={`flex items-center justify-center transition-transform group-hover:scale-110 ${isSelected ? "text-white" : "text-gray-500"}`}>
+                                          <audience.icon className="w-3.5 h-3.5" />
+                                        </div>
+                                        <span className={`text-[11px] font-bold ${isSelected ? "text-white" : "text-gray-600"}`}>
+                                          {audience.label}
+                                        </span>
+                                        {isSelected && (
+                                          <div className="flex items-center justify-center text-white ml-0.5">
+                                            <Check className="w-3.5 h-3.5" />
+                                          </div>
+                                        )}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
 
                             {/* Document citations */}
                             {sources.length > 0 && (
