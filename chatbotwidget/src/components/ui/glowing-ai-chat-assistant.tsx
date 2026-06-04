@@ -323,7 +323,16 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
   ];
   
   const [audiences, setAudiences] = useState<any[]>(defaultAudienceOptions);
-  const [selectedAudience, setSelectedAudience] = useState<any>(defaultAudienceOptions[0]);
+  const [selectedAudience, setSelectedAudience] = useState<any>(
+    defaultAudienceOptions.find(a => a.id === 'SINHVIEN') || defaultAudienceOptions[0]
+  );
+  // derived classes for audience-specific coloring in the UI
+  const audienceTextClass = (selectedAudience && selectedAudience.color && typeof selectedAudience.color.active === 'string')
+    ? selectedAudience.color.active.split(' ')[0]
+    : 'text-blue-500';
+  const audienceHoverClass = (selectedAudience && selectedAudience.color && typeof selectedAudience.color.hover === 'string')
+    ? selectedAudience.color.hover
+    : 'hover:text-blue-600 hover:bg-blue-50';
   const [intents, setIntents] = useState<any[]>([]);
   const [selectedIntent, setSelectedIntent] = useState<any>(null);
   const [isIntentMenuOpen, setIsIntentMenuOpen] = useState(false);
@@ -379,11 +388,11 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
     "tuyensinh": "TUYENSINH",
   };
 
-  const AUDIENCE_COLORS: Record<string, { active: string, hover: string }> = {
-    CANBO: { active: 'text-indigo-600 bg-white ring-indigo-200', hover: 'hover:text-indigo-600 hover:bg-indigo-50' },
-    SINHVIEN: { active: 'text-emerald-600 bg-white ring-emerald-200', hover: 'hover:text-emerald-600 hover:bg-emerald-50' },
-    PHUHUYNH: { active: 'text-purple-600 bg-white ring-purple-200', hover: 'hover:text-purple-600 hover:bg-purple-50' },
-    TUYENSINH: { active: 'text-amber-600 bg-white ring-amber-200', hover: 'hover:text-amber-600 hover:bg-amber-50' },
+  const AUDIENCE_COLORS: Record<string, { active: string, hover: string, selected?: string }> = {
+    CANBO: { active: 'text-indigo-600 bg-white ring-indigo-200', hover: 'hover:text-indigo-600 hover:bg-indigo-50', selected: 'bg-indigo-600 text-white border-indigo-600 ring-indigo-500/20' },
+    SINHVIEN: { active: 'text-emerald-600 bg-white ring-emerald-200', hover: 'hover:text-emerald-600 hover:bg-emerald-50', selected: 'bg-emerald-600 text-white border-emerald-600 ring-emerald-500/20' },
+    PHUHUYNH: { active: 'text-purple-600 bg-white ring-purple-200', hover: 'hover:text-purple-600 hover:bg-purple-50', selected: 'bg-purple-600 text-white border-purple-600 ring-purple-500/20' },
+    TUYENSINH: { active: 'text-amber-600 bg-white ring-amber-200', hover: 'hover:text-amber-600 hover:bg-amber-50', selected: 'bg-amber-600 text-white border-amber-600 ring-amber-500/20' },
     UNKNOWN: { active: 'text-blue-600 bg-white ring-blue-200', hover: 'hover:text-blue-600 hover:bg-blue-50' },
   };
 
@@ -417,7 +426,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
             };
           });
           setAudiences(mapped);
-          setSelectedAudience(mapped[0]);
+          setSelectedAudience(mapped.find(a => a.id === 'SINHVIEN') || mapped[0]);
         }
       })
       .catch(error => {
@@ -775,6 +784,18 @@ useEffect(() => {
                   transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
                   className="flex w-full justify-start"
                 >
+                  {/** audience color helpers (moved outside JSX for reuse) */}
+                  {
+                    // derive simple classes
+                  }
+                  
+                  {/* compute once so both title and buttons can access */}
+                  {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    null
+                  }
+                  
+                  
                   <div className="w-[95%] rounded-2xl p-4 text-sm leading-relaxed shadow-sm bg-white/80 text-gray-800 rounded-bl-sm border border-gray-200/50 backdrop-blur-md">
                     <p className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-bold mb-1.5">
                       Trợ lý ảo Phân Hiệu Trường Đại học Giao thông Vận tải tại TP. Hồ Chí Minh
@@ -784,9 +805,9 @@ useEffect(() => {
                     </p>
                     {suggestions.length > 0 && (
                       <div className="mt-4 pt-3 border-t border-gray-100">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-500 mb-2.5 flex items-center gap-1.5">
-                          <Sparkles className="w-3.5 h-3.5" /> Câu hỏi gợi ý
-                        </p>
+                            <p className={`text-[10px] font-bold uppercase tracking-[0.14em] mb-2.5 flex items-center gap-1.5 ${audienceTextClass}`}>
+                              <Sparkles className="w-3.5 h-3.5" /> Câu hỏi gợi ý
+                            </p>
                         <div className="flex max-h-32 flex-col gap-2 overflow-y-auto pr-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                           {suggestions.map((sug, i) => {
                             // API returns { question, intent_id, created_at }
@@ -798,9 +819,10 @@ useEffect(() => {
                               <button
                                 key={i}
                                 onClick={() => handleSend(btnText)}
-                                className="w-full px-3 py-1.5 bg-gray-50/80 border border-gray-200 rounded-2xl text-[12px] text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors text-left shadow-sm"
+                                className={`w-full px-3 py-1.5 bg-gray-50/80 border rounded-2xl text-[12px] text-gray-600 transition-colors text-left shadow-sm ${audienceHoverClass} border-gray-200`}
                               >
-                                {btnText}
+                                <span className={`${audienceTextClass} inline-block w-2 h-2 rounded-full mr-2 align-middle`} />
+                                <span className="align-middle">{btnText}</span>
                               </button>
                             );
                           })}
@@ -895,20 +917,25 @@ useEffect(() => {
                                 <div className="flex flex-wrap gap-1.5 pl-8">
                                   {audiences.filter(a => a.id !== msg.excludedAudienceId).map((audience) => {
                                     const isSelected = selectedAudience?.id === audience.id;
+
+                                    const textClass = (audience && audience.color && typeof audience.color.active === 'string')
+                                      ? audience.color.active.split(' ')[0]
+                                      : 'text-blue-600';
+                                    const colorToken = textClass.replace(/^text-/, '') || 'blue-600';
+                                    const colorName = colorToken.split('-').slice(0, -1).join('-') || 'blue';
+                                    const selectedClass = audience.color?.selected || `bg-${colorName}-600 text-white border-${colorName}-600 shadow-sm ring-2 ring-${colorName}-500/20 scale-[1.02]`;
+                                    const unselectedClass = `bg-white/50 border-gray-200 ${audience.color?.hover || 'hover:text-blue-600 hover:bg-blue-50'} hover:border-gray-300 hover:shadow-sm`;
+
                                     return (
                                       <button
                                         key={audience.id}
                                         onClick={() => setSelectedAudience(audience)}
-                                        className={`group flex items-center gap-1.5 rounded-xl border px-2.5 py-1 transition-all ${
-                                          isSelected 
-                                            ? "bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-500/20 scale-[1.02]" 
-                                            : "bg-white/50 border-gray-200 hover:bg-white hover:border-gray-300 hover:shadow-sm"
-                                        }`}
+                                        className={`group flex items-center gap-1.5 rounded-xl border px-2.5 py-1 transition-all ${isSelected ? selectedClass : unselectedClass}`}
                                       >
-                                        <div className={`flex items-center justify-center transition-transform group-hover:scale-110 ${isSelected ? "text-white" : "text-gray-500"}`}>
+                                        <div className={`flex items-center justify-center transition-transform group-hover:scale-110 ${isSelected ? 'text-white' : textClass}`}>
                                           <audience.icon className="w-3.5 h-3.5" />
                                         </div>
-                                        <span className={`text-[11px] font-bold ${isSelected ? "text-white" : "text-gray-600"}`}>
+                                        <span className={`text-[11px] font-bold ${isSelected ? 'text-white' : 'text-gray-600'}`}>
                                           {audience.label}
                                         </span>
                                         {isSelected && (
