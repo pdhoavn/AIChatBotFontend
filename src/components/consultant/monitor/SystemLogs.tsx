@@ -233,7 +233,7 @@ export function SystemLogs() {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto h-full flex flex-col">
+    <div className="p-6 max-w-7xl mx-auto h-full min-h-0 flex flex-col overflow-hidden">
       <div className="flex items-center mb-6">
         <div className="bg-indigo-100 p-3 rounded-full mr-4">
           <Activity className="h-6 w-6 text-indigo-600" />
@@ -313,14 +313,14 @@ export function SystemLogs() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border shadow-sm flex-1 flex flex-col overflow-hidden">
+      <div className="bg-white rounded-lg border shadow-sm flex-1 min-h-0 flex flex-col overflow-hidden">
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
             <p>Đang tải nhật ký...</p>
           </div>
         ) : (
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1 min-h-0">
             {filteredLogs.length === 0 ? (
               <div className="text-center py-12 text-gray-500">Không tìm thấy nhật ký nào phù hợp</div>
             ) : (
