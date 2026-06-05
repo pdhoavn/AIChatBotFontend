@@ -17,6 +17,23 @@ import { TabType, TrainingQuestion, TrainingDocument, Intent } from './types';
 import { Button } from '../../ui/system_users/button';
 import { Pagination } from '../../common/Pagination';
 
+const normalizeSearchText = (value?: string | null) =>
+  (value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const matchesSearchText = (query: string, fields: Array<string | null | undefined>) => {
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery) return true;
+
+  return fields.some((field) => normalizeSearchText(field).includes(normalizedQuery));
+};
+
 export function TrainingDataManagement() {
   const { user, isConsultantLeader } = useAuth();
   const { startOCR } = useOCR();
@@ -29,6 +46,7 @@ export function TrainingDataManagement() {
   );
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [privacyFilter, setPrivacyFilter] = useState('all');
 
@@ -56,12 +74,23 @@ export function TrainingDataManagement() {
 
   useEffect(() => {
     fetchIntents();
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  useEffect(() => {
     if (activeTab === 'questions') {
       fetchQuestions();
     } else {
       fetchDocuments();
     }
-  }, [activeTab, statusFilter, privacyFilter]);
+  }, [activeTab, statusFilter, privacyFilter, debouncedSearchQuery]);
 
   const fetchIntents = async () => {
     try {
@@ -75,10 +104,11 @@ export function TrainingDataManagement() {
   const fetchQuestions = async () => {
     try {
       setLoading(true);
-      const filters: { status?: string; is_private?: boolean } = {};
+      const filters: { status?: string; is_private?: boolean; search?: string } = {};
       if (statusFilter !== 'all') filters.status = statusFilter;
       if (privacyFilter === 'private') filters.is_private = true;
       if (privacyFilter === 'public') filters.is_private = false;
+      if (debouncedSearchQuery.trim()) filters.search = debouncedSearchQuery.trim();
       const data = await knowledgeAPI.getTrainingQuestions(filters);
       setQuestions(data);
     } catch (error) {
@@ -91,10 +121,11 @@ export function TrainingDataManagement() {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      const filters: { status?: string; is_private?: boolean } = {};
+      const filters: { status?: string; is_private?: boolean; search?: string } = {};
       if (statusFilter !== 'all') filters.status = statusFilter;
       if (privacyFilter === 'private') filters.is_private = true;
       if (privacyFilter === 'public') filters.is_private = false;
+      if (debouncedSearchQuery.trim()) filters.search = debouncedSearchQuery.trim();
       const data = await knowledgeAPI.getDocuments(filters);
 
       setDocuments(data.map(doc => ({ 
@@ -293,9 +324,11 @@ export function TrainingDataManagement() {
 
   const filteredQuestions = sortByDateAndStatus(
     questions.filter((q) => {
-      const matchesSearch = q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        q.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        q.intent_name?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = matchesSearchText(searchQuery, [
+        q.question,
+        q.answer,
+        q.intent_name,
+      ]);
       
       const matchesCategory = categoryFilter === 'all' || q.intent_id?.toString() === categoryFilter;
 
@@ -308,9 +341,12 @@ export function TrainingDataManagement() {
 
   const filteredDocuments = sortByDateAndStatus(
     documents.filter((d) => {
-      const matchesSearch = d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.intent_name?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = matchesSearchText(searchQuery, [
+        d.title,
+        d.category,
+        d.intent_name,
+        d.file_path,
+      ]);
       
       const matchesCategory = categoryFilter === 'all' || d.intent_id?.toString() === categoryFilter;
 

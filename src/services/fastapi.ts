@@ -310,8 +310,8 @@ export const knowledgeAPI = {
   uploadTrainingQuestion: (data: { question: string; answer: string; intent_id: number; target_audiences: string[]; is_private?: boolean }) =>
     fastAPIClient.post<TrainingQuestion>('/knowledge/upload/training_question', data),
 
-  // Get documents with optional status and privacy filters
-  getDocuments: (filters?: string | { status?: string; is_private?: boolean }) => {
+  // Get documents with optional status, privacy, and search filters
+  getDocuments: (filters?: string | { status?: string; is_private?: boolean; search?: string }) => {
     const params = new URLSearchParams();
 
     if (typeof filters === 'string') {
@@ -321,6 +321,7 @@ export const knowledgeAPI = {
       if (typeof filters.is_private === 'boolean') {
         params.set('is_private', String(filters.is_private));
       }
+      if (filters.search) params.set('search', filters.search);
     }
 
     const query = params.toString();
@@ -335,8 +336,8 @@ export const knowledgeAPI = {
     data: { title?: string; category?: string | null; intent_id?: number | null; target_audiences?: string[]; is_private?: boolean }
   ) => fastAPIClient.patch<KnowledgeDocument>(`/knowledge/documents/${id}/metadata`, data),
 
-  // Get training questions with optional status and privacy filters
-  getTrainingQuestions: (filters?: string | { status?: string; is_private?: boolean }) => {
+  // Get training questions with optional status, privacy, and search filters
+  getTrainingQuestions: (filters?: string | { status?: string; is_private?: boolean; search?: string }) => {
     const params = new URLSearchParams();
 
     if (typeof filters === 'string') {
@@ -346,6 +347,7 @@ export const knowledgeAPI = {
       if (typeof filters.is_private === 'boolean') {
         params.set('is_private', String(filters.is_private));
       }
+      if (filters.search) params.set('search', filters.search);
     }
 
     const query = params.toString();
