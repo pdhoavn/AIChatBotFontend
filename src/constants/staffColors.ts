@@ -129,7 +129,7 @@ export const getNavigationClasses = (isActive: boolean, isDisabled: boolean = fa
  * Helper function to get sidebar container classes
  */
 export const getSidebarClasses = (collapsed: boolean = false) => {
-  return `bg-${STAFF_COLORS.sidebar.background} ${STAFF_COLORS.sidebar.border} flex flex-col min-h-screen transition-all duration-300 ${STAFF_COLORS.sidebar.shadow} ${collapsed ? 'w-16' : 'w-64'}`;
+  return `bg-${STAFF_COLORS.sidebar.background} ${STAFF_COLORS.sidebar.border} flex h-screen shrink-0 flex-col transition-all duration-300 ${STAFF_COLORS.sidebar.shadow} ${collapsed ? 'w-16' : 'w-64'}`;
 };
 
 /**
