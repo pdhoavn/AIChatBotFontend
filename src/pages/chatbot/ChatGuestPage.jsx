@@ -802,7 +802,7 @@ export default function ChatGuestPage() {
           />
           <div className="mt-2 w-full flex justify-center pointer-events-auto text-xs text-text-muted">
             <span className="bg-sidebar/80 backdrop-blur-sm px-3 py-0.5 rounded-full">
-              Chatbot có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng.
+              Chatbot UTC2 là công cụ hỗ trợ tra cứu và hướng dẫn thông tin. Nội dung trả lời chỉ có giá trị tham khảo, không thay thế văn bản chính thức hoặc ý kiến xử lý của các đơn vị chức năng. Người dùng không nhập thông tin bí mật, dữ liệu cá nhân nhạy cảm, tài liệu chưa được phép công khai vào hệ thống.
             </span>
           </div>
         </div>
