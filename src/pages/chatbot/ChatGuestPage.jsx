@@ -800,9 +800,10 @@ export default function ChatGuestPage() {
             onTranscriptConfirm={handleTranscriptConfirm}
             onStop={handleStop}
           />
-          <div className="mt-2 w-full flex justify-center pointer-events-auto text-xs text-text-muted">
-            <span className="bg-sidebar/80 backdrop-blur-sm px-3 py-0.5 rounded-full">
-              Chatbot UTC2 là công cụ hỗ trợ tra cứu và hướng dẫn thông tin. Nội dung trả lời chỉ có giá trị tham khảo, không thay thế văn bản chính thức hoặc ý kiến xử lý của các đơn vị chức năng. Người dùng không nhập thông tin bí mật, dữ liệu cá nhân nhạy cảm, tài liệu chưa được phép công khai vào hệ thống.
+          <div className="mt-2 w-full flex justify-center pointer-events-auto text-[11px] text-text-muted/80">
+            <span className="bg-sidebar/80 backdrop-blur-sm px-4 py-1.5 rounded-2xl md:rounded-full text-center max-w-3xl leading-relaxed border border-border-main/30">
+              Chatbot UTC2 hỗ trợ tra cứu với giá trị tham khảo, không thay thế văn bản chính thức. <br className="hidden sm:block" />
+              Vui lòng không nhập thông tin cá nhân, dữ liệu nhạy cảm hoặc tài liệu nội bộ.
             </span>
           </div>
         </div>
