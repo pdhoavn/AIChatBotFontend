@@ -97,29 +97,29 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
 
   return (
     <header className="w-full bg-transparent">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 md:px-7 py-4">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 md:px-7">
         {/* Logo + Tên */}
         <Link
           to="/"
-          className="flex cursor-pointer items-center gap-3"
+          className="flex cursor-pointer items-center gap-3 shrink-0"
           onClick={handleLogoClick}
         >
           <img
             src={schoolLogoUrl}
             alt="Logo Trường ĐH Giao thông Vận tải"
-            className="h-10 w-10 object-contain"
+            className="h-10 w-10 object-contain shrink-0"
             loading="eager"
           />
-          <div>
-            <div className="font-semibold text-[#facb01] leading-tight">
+          <div className="hidden sm:block">
+            <div className="font-semibold text-[#facb01] leading-tight whitespace-nowrap">
               Trường ĐH Giao thông Vận tải
             </div>
-            <div className="text-xs text-chat-text-muted -mt-0.5">Phân hiệu tại TP. Hồ Chí Minh</div>
+            <div className="text-xs text-chat-text-muted -mt-0.5 whitespace-nowrap">Phân hiệu tại TP. Hồ Chí Minh</div>
           </div>
         </Link>
 
         {/* Right side badges */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <div className="relative flex items-center gap-2" ref={menuRef}>
             <span className="text-[10px] font-medium text-text-muted uppercase tracking-wider">
               Đối tượng
@@ -186,16 +186,17 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
             </button>
           )}
           {isChatPrivateLoggedIn && (
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/95 px-3 py-1.5 text-xs text-emerald-700 shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="font-medium">Đã đăng nhập dữ liệu nội bộ</span>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/95 pl-2.5 pr-1 py-1 text-xs text-emerald-700 shadow-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="font-medium">Dữ liệu nội bộ</span>
               {onChatPrivateLogout && (
                 <button
                   type="button"
                   onClick={onChatPrivateLogout}
-                  className="rounded-full border border-emerald-200 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50"
+                  title="Đăng xuất"
+                  className="rounded-full p-1 hover:bg-emerald-50 text-emerald-600 transition-colors flex items-center justify-center"
                 >
-                  Đăng xuất
+                  <PhIcon name="logout" size={14} />
                 </button>
               )}
             </div>
@@ -203,14 +204,11 @@ export default function ChatGuestHeader({ selectedAudience, onAudienceChange, au
           {shouldShowRiasecLink && (
             <Link
               to="/riasec"
-              className="riasec-cta-reveal group inline-flex h-9 items-center gap-2 rounded-full border border-[#facb01]/20 bg-[#facb01] px-3 text-white transition hover:bg-[#d95208]"
+              className="riasec-cta-reveal group inline-flex h-8 items-center gap-1.5 rounded-full bg-[#facb01] px-3 text-white transition hover:bg-[#d95208] shadow-sm"
             >
-              <PhIcon name="school" size={15} className="shrink-0" />
-              <span className="text-sm font-medium">
-                Tìm ngành phù hợp
-              </span>
-              <span className="hidden rounded-full bg-white/18 px-2 py-0.5 text-[10px] font-medium text-yellow-50 md:inline-flex">
-                RIASEC 3-5 phút
+              <PhIcon name="school" size={14} className="shrink-0" />
+              <span className="text-xs font-medium">
+                Tìm ngành
               </span>
             </Link>
           )}
