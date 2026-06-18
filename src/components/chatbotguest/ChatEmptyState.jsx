@@ -85,7 +85,7 @@ export default function ChatEmptyState({
           </div>
 
           {/* Audience selection grid */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
             {audiences.map((audience) => {
               const audienceCode = resolveAudienceCode(audience);
               const meta = AUDIENCE_META[audienceCode] || {
@@ -101,30 +101,30 @@ export default function ChatEmptyState({
                 <button
                   key={audience.id}
                   onClick={() => onAudienceChange && onAudienceChange(audience)}
-                  className={`role-card group relative rounded-2xl border-2 p-4 text-left transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
+                  className={`role-card group relative rounded-2xl border-2 p-3 sm:p-4 text-left transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 h-full ${
                     isSelected
                       ? `!border-accent shadow-md bg-accent/5 scale-[1.01] ring-1 ring-accent/30`
                       : `${c.border} ${c.bg} ${c.hoverBorder} hover:shadow-md opacity-80 hover:opacity-100`
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-transform duration-200 ${
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl border flex items-center justify-center shrink-0 transition-transform duration-200 ${
                       isSelected ? `bg-accent/10 border-accent/20 scale-110` : `${c.iconBorder} ${c.iconBg} group-hover:scale-110`
                     }`}>
-                      <AudienceIcon size={22} className={isSelected ? "text-accent" : c.iconText} />
+                      <AudienceIcon size={20} className={isSelected ? "text-accent" : c.iconText} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-xs font-bold uppercase tracking-wide ${c.labelText} leading-tight`}>
+                      <p className={`text-[10px] sm:text-xs font-bold uppercase tracking-wide ${c.labelText} leading-tight`}>
                         {meta.label}
                       </p>
-                      <p className="text-[12px] text-text-muted mt-1.5 leading-relaxed line-clamp-3">
+                      <p className="text-[11px] sm:text-[12px] text-text-muted mt-1 sm:mt-1.5 leading-snug sm:leading-relaxed line-clamp-3">
                         {audience.description}
                       </p>
                     </div>
                   </div>
 
                   {/* Arrow indicator */}
-                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden sm:block">
                     <div className={`w-5 h-5 rounded-full ${c.iconBg} flex items-center justify-center`}>
                       <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                         <path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={c.iconText} />

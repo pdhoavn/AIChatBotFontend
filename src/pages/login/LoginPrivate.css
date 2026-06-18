@@ -23,7 +23,7 @@ body {
     user-select: none !important;
 } */
 
-header {
+.login-private-page header {
     width: 100%;
     font-family: 'Roboto Slab';
     letter-spacing: 1px;
@@ -31,7 +31,7 @@ header {
     margin-top: 10px;
 }
 
-header>div {
+.login-private-page header>div {
     width: 1180px;
     margin: 0 auto;
     display: grid;
@@ -41,7 +41,7 @@ header>div {
 }
 
 
-header>div>.logo-mandb {
+.login-private-page header>div>.logo-mandb {
     grid-column: 1 / 3;
     display: flex;
     justify-content: center;

@@ -90,7 +90,7 @@ const handleLogin = async (event) => {
     };
 
     return (
-      <>
+      <div className="login-private-page">
         <header>
           <div>
             <div className="logo-mandb" onClick={handleOnClick}>
@@ -195,7 +195,7 @@ const handleLogin = async (event) => {
             <h5>Copyright&copy; : tuyensinhhcm@utc2.edu.vn</h5>
           </div>
         </div>
-      </>
+      </div>
     );
   };
 

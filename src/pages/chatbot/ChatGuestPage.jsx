@@ -653,7 +653,7 @@ export default function ChatGuestPage() {
   };
 
   return (
-    <div className="chat-shell flex h-[100dvh] min-h-[100svh] flex-col bg-sidebar relative w-full transition-colors duration-300 overflow-hidden">
+    <div className="chat-shell font-display flex h-[100dvh] min-h-[100svh] flex-col bg-sidebar relative w-full transition-colors duration-300 overflow-x-hidden">
       <ChatGuestHeader
         audiences={audiences}
         selectedAudience={selectedAudience}
@@ -665,7 +665,7 @@ export default function ChatGuestPage() {
       <div
         ref={autoScrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto w-full relative"
+        className="relative z-0 flex-1 overflow-y-auto w-full"
       >
         <div className="max-w-5xl mx-auto w-full px-3 md:px-6 flex flex-col pb-52 sm:pb-44 min-h-full">
           <div className="w-full flex-1">
@@ -800,11 +800,15 @@ export default function ChatGuestPage() {
             onTranscriptConfirm={handleTranscriptConfirm}
             onStop={handleStop}
           />
-          <div className="mt-2 w-full flex justify-center pointer-events-auto text-[11px] text-text-muted/80">
-            <span className="bg-sidebar/80 backdrop-blur-sm px-4 py-1.5 rounded-2xl md:rounded-full text-center max-w-3xl leading-relaxed border border-border-main/30 block">
-              Chatbot UTC2 hỗ trợ tra cứu với giá trị tham khảo, không thay thế văn bản chính thức.<br />
+          <div className="mt-1.5 sm:mt-2 w-full flex justify-center pointer-events-auto">
+            <p
+              role="note"
+              className="w-full max-w-3xl rounded-xl border border-border-main/30 bg-sidebar/85 px-3 py-2 text-center text-[10px] leading-snug text-text-muted/85 shadow-sm backdrop-blur-sm sm:rounded-2xl sm:px-4 sm:text-[11px] sm:leading-relaxed md:rounded-full md:px-5 md:py-1.5"
+            >
+              Chatbot UTC2 hỗ trợ tra cứu với giá trị tham khảo, không thay thế văn bản chính thức.
+              <br />
               Vui lòng không nhập vào hệ thống thông tin bí mật, dữ liệu nhạy cảm, hoặc chưa được phép công khai.
-            </span>
+            </p>
           </div>
         </div>
       </div>
