@@ -1,6 +1,7 @@
 // src/pages/chatbot/ChatGuestPage.jsx
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { chatMarkdownComponents } from "../../components/chatbotguest/chatMarkdownComponents.jsx";
 import { toast } from "react-toastify";
 import ChatGuestHeader from "../../components/chatbotguest/ChatGuestHeader.jsx";
 import ChatMessageBubble from "../../components/chatbotguest/ChatMessageBubble.jsx";
@@ -536,7 +537,7 @@ export default function ChatGuestPage() {
     }
   }, []);
 
-  const send = (text, intentId) => {
+  const send = (text, intentId, audienceId = selectedAudience?.id ?? null) => {
     if (!text.trim()) return;
 
     const userMessage = text;
@@ -545,9 +546,26 @@ export default function ChatGuestPage() {
 
     sendMessageSSE(
       userMessage,
-      selectedAudience?.id || null,
+      audienceId,
       intentId ?? selectedIntent?.intent_id ?? null,
     );
+  };
+
+  const resendLastUserMessage = (audienceId) => {
+    const lastUserMsg = [...messages].reverse().find((m) => m.sender === "user");
+    if (!lastUserMsg?.text?.trim() || !audienceId) return;
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    isStoppedRef.current = false;
+    partialRef.current = "";
+    setPartial("");
+    setIsLoading(false);
+    setHasError(false);
+
+    sendMessageSSE(lastUserMsg.text, audienceId, null);
   };
 
   const handleSubmit = (intentId) => {
@@ -567,11 +585,19 @@ export default function ChatGuestPage() {
     send(text);
   };
 
-  const handleAudienceChange = (audience) => {
+  const handleAudienceChange = (audience, options = {}) => {
+    if (!audience) return;
+
+    const isSameAudience = selectedAudience?.id === audience.id;
+
     setSelectedAudience(audience);
     setSelectedIntent(null);
     if (audience?.description) {
       setGreeting(audience.description);
+    }
+
+    if (options.resendLastMessage && !isSameAudience) {
+      resendLastUserMessage(audience.id);
     }
   };
 
@@ -709,7 +735,7 @@ export default function ChatGuestPage() {
                 <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-surface border border-border-main/50 px-5 py-3.5 shadow-sm">
                   {partial ? (
                     <div className="text-sm leading-relaxed text-text-main prose prose-sm max-w-none">
-                      <ReactMarkdown>{partial}</ReactMarkdown>
+                      <ReactMarkdown components={chatMarkdownComponents}>{partial}</ReactMarkdown>
                       {isLoading && <span className="ml-1 animate-pulse text-accent">|</span>}
                     </div>
                   ) : (

@@ -1,6 +1,7 @@
 // src/components/chatbotguest/ChatEmptyState.jsx
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import { chatMarkdownComponents } from "./chatMarkdownComponents.jsx";
 import { Sparkle, Briefcase, GraduationCap, HeartHandshake, ClipboardList } from "lucide-react";
 import { resolveAudienceCode } from "../../api/audienceApi.ts";
 
@@ -146,7 +147,7 @@ export default function ChatEmptyState({
               Trợ lý ảo Phân Hiệu Trường Đại học Giao thông Vận tải tại TP. Hồ Chí Minh
             </p>
             <div className="text-sm md:text-[15px] text-text-main mt-3 leading-relaxed prose prose-sm max-w-none">
-              <ReactMarkdown>{greeting}</ReactMarkdown>
+              <ReactMarkdown components={chatMarkdownComponents}>{greeting}</ReactMarkdown>
             </div>
             {items.length > 0 && (
               <div className="mt-5">

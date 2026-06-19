@@ -1,6 +1,7 @@
 // src/components/chatbotguest/ChatMessageBubble.jsx
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { chatMarkdownComponents } from "./chatMarkdownComponents.jsx";
 import { useNavigate } from "react-router-dom";
 import PhIcon from "../ui/PhIcon.jsx";
 import { API_CONFIG } from "../../config/api.js";
@@ -153,7 +154,7 @@ export default function ChatMessageBubble({ message, onLoginClick, isPrivateLogg
             ) : (
               <>
                 <div className="prose prose-sm max-w-none text-text-main prose-strong:text-accent prose-a:text-accent prose-headings:text-text-main prose-headings:font-semibold prose-h1:text-[17px] prose-h2:text-[16px] prose-h3:text-[15px] prose-headings:mt-4 prose-headings:mb-2 prose-p:leading-relaxed prose-p:mb-2 prose-ul:my-2 prose-li:my-0.5 prose-code:text-accent">
-                  <ReactMarkdown>{cleanContent}</ReactMarkdown>
+                  <ReactMarkdown components={chatMarkdownComponents}>{cleanContent}</ReactMarkdown>
                 </div>
                 {hasLawyerSuggestion && (
                   <div className="mt-5 p-4 rounded-xl border border-accent/20 bg-accent/5 shadow-sm">
@@ -208,7 +209,7 @@ export default function ChatMessageBubble({ message, onLoginClick, isPrivateLogg
                         return (
                           <button
                             key={audience.id}
-                            onClick={() => onAudienceChange && onAudienceChange(audience)}
+                            onClick={() => onAudienceChange && onAudienceChange(audience, { resendLastMessage: true })}
                             className={`group flex items-center gap-2 rounded-xl border px-3 py-1.5 transition-all ${
                               isSelected 
                                 ? "bg-accent text-white border-accent shadow-md ring-2 ring-accent/20 scale-[1.02]" 
