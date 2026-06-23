@@ -1183,6 +1183,14 @@ useEffect(() => {
                   </div>
                 </div>
               </div>
+              <p
+                role="note"
+                className="mt-2 px-2 text-center text-[9px] leading-[1.35] text-gray-400"
+              >
+                Chatbot UTC2 hỗ trợ tra cứu với giá trị tham khảo, không thay thế văn bản chính thức.
+                <br />
+                Vui lòng không nhập vào hệ thống thông tin bí mật, dữ liệu nhạy cảm, hoặc chưa được phép công khai.
+              </p>
             </div>
 
             {/* Floating Overlay */}
