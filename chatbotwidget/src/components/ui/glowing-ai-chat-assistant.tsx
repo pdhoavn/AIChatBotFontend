@@ -1185,11 +1185,9 @@ useEffect(() => {
               </div>
               <p
                 role="note"
-                className="mt-2 px-2 text-center text-[9px] leading-[1.35] text-gray-400"
+                className="mt-1 px-1 text-center text-[8px] leading-[1.15] text-gray-400"
               >
-                Chatbot UTC2 hỗ trợ tra cứu với giá trị tham khảo, không thay thế văn bản chính thức.
-                <br />
-                Vui lòng không nhập vào hệ thống thông tin bí mật, dữ liệu nhạy cảm, hoặc chưa được phép công khai.
+                Chatbot UTC2 chỉ hỗ trợ tham khảo, không thay thế văn bản chính thức. Không nhập thông tin bí mật, nhạy cảm hoặc chưa được phép công khai.
               </p>
             </div>
 
