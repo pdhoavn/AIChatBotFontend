@@ -321,10 +321,20 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
     { id: 'PHUHUYNH', label: 'Phụ huynh / Bên liên quan', icon: HeartHandshake },
     { id: 'TUYENSINH', label: 'Tuyển sinh', icon: ClipboardList },
   ];
-  
-  const [audiences, setAudiences] = useState<any[]>(defaultAudienceOptions);
+  const isTuyenSinhSite = typeof window !== 'undefined' && (
+    window.location.hostname === 'tuyensinh.utc2.edu.vn' ||
+    (document.referrer && document.referrer.includes('tuyensinh.utc2.edu.vn'))
+  );
+
+  const initialAudiences = isTuyenSinhSite 
+    ? defaultAudienceOptions.filter(a => a.id === 'TUYENSINH')
+    : defaultAudienceOptions;
+
+  const [audiences, setAudiences] = useState<any[]>(initialAudiences);
   const [selectedAudience, setSelectedAudience] = useState<any>(
-    defaultAudienceOptions.find(a => a.id === 'SINHVIEN') || defaultAudienceOptions[0]
+    isTuyenSinhSite 
+      ? initialAudiences.find(a => a.id === 'TUYENSINH') || initialAudiences[0]
+      : initialAudiences.find(a => a.id === 'SINHVIEN') || initialAudiences[0]
   );
   // derived classes for audience-specific coloring in the UI
   const audienceTextClass = (selectedAudience && selectedAudience.color && typeof selectedAudience.color.active === 'string')
@@ -425,14 +435,27 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
               description: item.description
             };
           });
-          setAudiences(mapped);
-          setSelectedAudience(mapped.find(a => a.id === 'SINHVIEN') || mapped[0]);
+
+          let finalMapped = mapped;
+          if (isTuyenSinhSite) {
+            const filtered = mapped.filter(a => a.id === 'TUYENSINH');
+            if (filtered.length > 0) {
+              finalMapped = filtered;
+            }
+          }
+
+          setAudiences(finalMapped);
+          
+          const defaultSelect = isTuyenSinhSite 
+            ? finalMapped.find(a => a.id === 'TUYENSINH') || finalMapped[0]
+            : finalMapped.find(a => a.id === 'SINHVIEN') || finalMapped[0];
+          setSelectedAudience(defaultSelect);
         }
       })
       .catch(error => {
         console.warn('Không tải được danh sách đối tượng chatbot, dùng cấu hình mặc định.', error);
       });
-  }, [apiBaseUrl]);
+  }, [apiBaseUrl, isTuyenSinhSite]);
 
   useEffect(() => {
     if (selectedAudience?.rawName) {
