@@ -1047,7 +1047,7 @@ useEffect(() => {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     rows={2}
-                    className="w-full px-4 py-2.5 bg-transparent border-none outline-none resize-none text-[15px] font-normal leading-relaxed min-h-[60px] text-gray-800 placeholder-gray-400 scrollbar-none"
+                    className="w-full px-4 py-2.5 bg-transparent border-none outline-none resize-none text-[15px] font-semibold leading-relaxed min-h-[60px] text-gray-900 placeholder-gray-400 scrollbar-none"
                     placeholder="Bạn muốn khám phá điều gì hôm nay? Hãy hỏi bất cứ thứ gì..."
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   />
