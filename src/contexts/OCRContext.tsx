@@ -20,6 +20,7 @@ interface OCRContextType {
     formData: FormData,
     intentId: number,
     target_audiences: string[],
+    target_units: string[],
     onDone?: () => void
   ) => void;
 }

@@ -143,6 +143,7 @@ export default function ChatGuestPage() {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedAudience, setSelectedAudience] = useState(null);
   const [selectedIntent, setSelectedIntent] = useState(null);
+  const [selectedUnit, setSelectedUnit] = useState(null); // "UTC" | "UTC2" | null
   const [prefillAudienceCode, setPrefillAudienceCode] = useState(null);
 
   const {
@@ -329,7 +330,7 @@ export default function ChatGuestPage() {
   };
 
   // SSE streaming helper: gửi message qua POST, đọc response SSE
-  const sendMessageSSE = async (text, audienceId, intentId) => {
+  const sendMessageSSE = async (text, audienceId, intentId, unit) => {
     setIsLoading(true);
     setHasError(false);
     setPartial("");
@@ -360,6 +361,7 @@ export default function ChatGuestPage() {
           user_id: guestId,
           audience_id: audienceId || null,
           intent_id: intentId || null,
+          unit: unit || null,
         }),
         signal: controller.signal,
       });
@@ -501,6 +503,7 @@ export default function ChatGuestPage() {
       prefillMessage,
       selectedAudience?.id || null,
       null,
+      selectedUnit
     );
     setPrefillMessage(null);
     setPrefillAudienceCode(null);
@@ -543,18 +546,31 @@ export default function ChatGuestPage() {
     const userMessage = text;
     setMessages((prev) => [...prev, { sender: "user", text: userMessage }]);
     setInput("");
-
+    if (!selectedUnit) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: "Vui lòng chọn đơn vị UTC hoặc UTC2" },
+      ]);
+      return; // KHÔNG gọi sendMessageSSE
+    }
     sendMessageSSE(
       userMessage,
       audienceId,
       intentId ?? selectedIntent?.intent_id ?? null,
+      selectedUnit
     );
   };
 
   const resendLastUserMessage = (audienceId) => {
     const lastUserMsg = [...messages].reverse().find((m) => m.sender === "user");
     if (!lastUserMsg?.text?.trim() || !audienceId) return;
-
+    if (!selectedUnit) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: "Vui lòng chọn đơn vị UTC hoặc UTC2" },
+      ]);
+      return;
+    }
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
@@ -565,7 +581,7 @@ export default function ChatGuestPage() {
     setIsLoading(false);
     setHasError(false);
 
-    sendMessageSSE(lastUserMsg.text, audienceId, null);
+    sendMessageSSE(lastUserMsg.text, audienceId, null, selectedUnit);
   };
 
   const handleSubmit = (intentId) => {
@@ -604,7 +620,9 @@ export default function ChatGuestPage() {
   const handleIntentChange = (intent) => {
     setSelectedIntent(intent);
   };
-
+  const handleUnitChange = (unitCode) => {
+  setSelectedUnit(unitCode);
+  };
   const handleMicClick = () => {
     if (!isSpeechSupported) {
       toast.info(
@@ -684,6 +702,8 @@ export default function ChatGuestPage() {
         audiences={audiences}
         selectedAudience={selectedAudience}
         onAudienceChange={handleAudienceChange}
+        selectedUnit={selectedUnit}      
+        onUnitChange={handleUnitChange}  
         isChatPrivateLoggedIn={isChatPrivateLoggedIn}
         onChatPrivateLogout={handlePrivateLogout}
       />

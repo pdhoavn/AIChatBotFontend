@@ -250,7 +250,7 @@ export const chatAPI = {
 
 // Knowledge Base API
 export const knowledgeAPI = {
-  uploadDocument: (formData: FormData, intendId: number, target_audiences: string[] = []) => {
+  uploadDocument: (formData: FormData, intendId: number, target_audiences: string[] = [], target_units: string[] = []) => {
     const token = localStorage.getItem("access_token");
     const headers: HeadersInit = {};
 
@@ -261,7 +261,7 @@ export const knowledgeAPI = {
     // target_audiences goes into FormData (backend uses Form([]))
     // intend_id goes as query param (backend uses Query(...))
     target_audiences.forEach(a => formData.append('target_audiences', a));
-
+    target_units.forEach(u => formData.append('target_units', u));
     const url = `${API_CONFIG.FASTAPI_BASE_URL}/knowledge/upload/document?intend_id=${intendId}`;
 
     return fetch(url, {
@@ -285,12 +285,14 @@ export const knowledgeAPI = {
     formData: FormData,
     intendId: number,
     target_audiences: string[] = [],
+    target_units: string[] = []
   ): Promise<{ message: string; document_id: number; task_id: number; status: string }> => {
     const token = localStorage.getItem("access_token");
     const headers: HeadersInit = {};
     if (token) headers.Authorization = `Bearer ${token}`;
 
     target_audiences.forEach(a => formData.append('target_audiences', a));
+    target_units.forEach(u => formData.append('target_units', u));
     const url = `${API_CONFIG.FASTAPI_BASE_URL}/knowledge/upload/document-ocr?intend_id=${intendId}`;
 
     const response = await fetch(url, { method: 'POST', headers, body: formData });
@@ -307,7 +309,7 @@ export const knowledgeAPI = {
     return response.json();
   },
 
-  uploadTrainingQuestion: (data: { question: string; answer: string; intent_id: number; target_audiences: string[]; is_private?: boolean }) =>
+  uploadTrainingQuestion: (data: { question: string; answer: string; intent_id: number; target_audiences: string[]; target_units?: string[]; is_private?: boolean }) =>
     fastAPIClient.post<TrainingQuestion>('/knowledge/upload/training_question', data),
 
   // Get documents with optional status, privacy, and search filters
@@ -333,7 +335,7 @@ export const knowledgeAPI = {
     fastAPIClient.get<{ chunk_id: number | null; point_id: string | null; chunk_index: number; chunk_text: string; char_count: number }[]>(`/knowledge/documents/${id}/chunks?source=${source}`),
   updateDocumentMetadata: (
     id: number,
-    data: { title?: string; category?: string | null; intent_id?: number | null; target_audiences?: string[]; is_private?: boolean }
+    data: { title?: string; category?: string | null; intent_id?: number | null; target_audiences?: string[]; target_units?: string[]; is_private?: boolean }
   ) => fastAPIClient.patch<KnowledgeDocument>(`/knowledge/documents/${id}/metadata`, data),
 
   // Get training questions with optional status, privacy, and search filters
@@ -355,7 +357,7 @@ export const knowledgeAPI = {
   },
   updateTrainingQuestionMetadata: (
     id: number,
-    data: { intent_id?: number | null; target_audiences?: string[]; is_private?: boolean }
+    data: { intent_id?: number | null; target_audiences?: string[]; target_units?: string[]; is_private?: boolean }
   ) => fastAPIClient.patch<TrainingQuestion>(`/knowledge/training_questions/${id}/metadata`, data),
 
   // Soft delete (sets status to 'deleted')

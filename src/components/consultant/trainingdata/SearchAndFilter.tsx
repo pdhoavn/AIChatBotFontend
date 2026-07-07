@@ -37,7 +37,22 @@ const AUDIENCE_FILTER_OPTIONS = [
     dot:      'bg-yellow-500',
   },
 ] as const;
-
+const UNIT_FILTER_OPTIONS = [
+  {
+    value: 'UTC',
+    label: 'UTC',
+    inactive: 'bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100',
+    active:   'bg-cyan-600 text-white border-cyan-600 shadow-sm',
+    dot:      'bg-cyan-500',
+  },
+  {
+    value: 'UTC2',
+    label: 'UTC2',
+    inactive: 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100',
+    active:   'bg-indigo-600 text-white border-indigo-600 shadow-sm',
+    dot:      'bg-indigo-500',
+  },
+] as const;
 interface SearchAndFilterProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
@@ -51,6 +66,9 @@ interface SearchAndFilterProps {
   audienceFilter?: string[];
   onAudienceFilterChange?: (audiences: string[]) => void;
   showAudienceFilter?: boolean;
+  unitFilter?: string[];                                    
+  onUnitFilterChange?: (units: string[]) => void;            
+  showUnitFilter?: boolean;                                   
   intents: Intent[];
   isLeader: boolean;
 }
@@ -68,6 +86,9 @@ export function SearchAndFilter({
   audienceFilter = [],
   onAudienceFilterChange,
   showAudienceFilter = false,
+  unitFilter = [],              
+  onUnitFilterChange,           
+  showUnitFilter = false,       
   intents,
   isLeader
 }: SearchAndFilterProps) {
@@ -83,6 +104,20 @@ export function SearchAndFilter({
   const clearAudiences = () => {
     if (onAudienceFilterChange) onAudienceFilterChange([]);
   };
+
+  const toggleUnit = (value: string) => {
+    if (!onUnitFilterChange) return;
+    onUnitFilterChange(
+      unitFilter.includes(value)
+        ? unitFilter.filter(v => v !== value)
+        : [...unitFilter, value]
+    );
+  };
+
+  const clearUnits = () => {
+    if (onUnitFilterChange) onUnitFilterChange([]);
+  };
+
 
   return (
     <div className="mb-4 space-y-3">
@@ -171,6 +206,43 @@ export function SearchAndFilter({
             <button
               type="button"
               onClick={clearAudiences}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors ml-1"
+            >
+              <X className="h-3 w-3" />
+              Xóa lọc
+            </button>
+          )}
+        </div>
+      )}
+
+      {showUnitFilter && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 text-sm text-gray-600 font-medium pr-1">
+            <Users className="h-4 w-4 text-gray-500" />
+            <span>Đơn vị:</span>
+          </div>
+
+          {UNIT_FILTER_OPTIONS.map((opt) => {
+            const selected = unitFilter.includes(opt.value);
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => toggleUnit(opt.value)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                  selected ? opt.active : opt.inactive
+                }`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${selected ? 'bg-white' : opt.dot}`} />
+                {opt.label}
+              </button>
+            );
+          })}
+
+          {unitFilter.length > 0 && (
+            <button
+              type="button"
+              onClick={clearUnits}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors ml-1"
             >
               <X className="h-3 w-3" />

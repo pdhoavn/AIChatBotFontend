@@ -13,6 +13,10 @@ const AUDIENCE_FILTER_OPTIONS = [
   { value: 'PHUHUYNH',  label: 'Phụ huynh',      inactive: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100', active: 'bg-purple-600 text-white border-purple-600 shadow-sm', dot: 'bg-purple-500' },
   { value: 'TUYENSINH', label: 'Tuyển sinh',     inactive: 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100', active: 'bg-yellow-600 text-white border-yellow-600 shadow-sm', dot: 'bg-yellow-500' },
 ];
+const UNIT_FILTER_OPTIONS = [
+  { value: 'UTC',  label: 'UTC',  inactive: 'bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100',     active: 'bg-cyan-600 text-white border-cyan-600 shadow-sm',     dot: 'bg-cyan-500' },
+  { value: 'UTC2', label: 'UTC2', inactive: 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100', active: 'bg-indigo-600 text-white border-indigo-600 shadow-sm', dot: 'bg-indigo-500' },
+];
 import { knowledgeAPI, intentAPI } from '../../../services/fastapi';
 import { toast } from 'react-toastify';
 import { Pagination } from '../../common/Pagination';
@@ -24,6 +28,10 @@ const AUDIENCE_DISPLAY = {
   PHUHUYNH:  { label: 'Phụ huynh',     color: 'bg-purple-100 text-purple-700 border-purple-200' },
   TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
 };
+const UNIT_DISPLAY = {
+  UTC:  { label: 'UTC',  color: 'bg-cyan-100 text-cyan-700 border-cyan-200' },
+  UTC2: { label: 'UTC2', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+};
 
 function AudienceBadges({ audiences }) {
   if (!audiences || audiences.length === 0) return null;
@@ -31,6 +39,32 @@ function AudienceBadges({ audiences }) {
     <div className="flex flex-wrap gap-1">
       {audiences.map(val => {
         const info = AUDIENCE_DISPLAY[val];
+        return info ? (
+          <span key={val} className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${info.color}`}>
+            {info.label}
+          </span>
+        ) : (
+          <span key={val} className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border bg-gray-100 text-gray-700 border-gray-200">
+            {val}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function UnitBadges({ units }) {
+  if (!units || units.length === 0) {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border bg-gray-50 text-gray-400 border-gray-200 italic">
+        Đơn vị: None
+      </span>
+    );
+  }
+  return (
+    <div className="flex flex-wrap gap-1">
+      {units.map(val => {
+        const info = UNIT_DISPLAY[val];
         return info ? (
           <span key={val} className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${info.color}`}>
             {info.label}
@@ -80,6 +114,7 @@ function TrainingQuestionCard({ question, approvingId, rejectingId, onApprove, o
       <div className="flex flex-wrap items-center gap-1.5 mb-3">
         <PrivacyBadge isPrivate={question.is_private} />
         <AudienceBadges audiences={question.target_audiences} />
+        <UnitBadges units={question.target_units} />
         {question.intent_name && (
           <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
             Lĩnh vực: {question.intent_name}
@@ -127,6 +162,7 @@ function DocumentCard({ document, approvingId, rejectingId, downloadingId, onApp
       <div className="flex flex-wrap items-center gap-1.5 mb-3">
         <PrivacyBadge isPrivate={document.is_private} />
         <AudienceBadges audiences={document.target_audiences} />
+        <UnitBadges units={document.target_units} />
         {document.intent_name && (
           <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
             Lĩnh vực: {document.intent_name}
@@ -173,6 +209,7 @@ export function LeaderKnowledgeBase() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [intents, setIntents] = useState([]);
   const [audienceFilter, setAudienceFilter] = useState([]);
+  const [unitFilter, setUnitFilter] = useState([]);
   const [questionsPage, setQuestionsPage] = useState(1);
   const [documentsPage, setDocumentsPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
@@ -295,7 +332,11 @@ export function LeaderKnowledgeBase() {
       prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
     );
   };
-
+  const toggleUnit = (value) => {
+    setUnitFilter(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    );
+  };
   const filteredQuestions = trainingQuestions.filter(q => {
     const matchesSearch = !searchQuery ||
       q.question?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -303,6 +344,7 @@ export function LeaderKnowledgeBase() {
       q.intent_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || q.intent_id?.toString() === categoryFilter;
     const matchesAudience = audienceFilter.length === 0 || q.target_audiences?.some(a => audienceFilter.includes(a));
+    const matchesUnit = unitFilter.length === 0 || q.target_units?.some(u => unitFilter.includes(u));
     return matchesSearch && matchesCategory && matchesAudience;
   });
 
@@ -312,6 +354,7 @@ export function LeaderKnowledgeBase() {
       d.intent_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || d.intent_id?.toString() === categoryFilter;
     const matchesAudience = audienceFilter.length === 0 || d.target_audiences?.some(a => audienceFilter.includes(a));
+    const matchesUnit = unitFilter.length === 0 || d.target_units?.some(u => unitFilter.includes(u));
     return matchesSearch && matchesCategory && matchesAudience;
   });
 
@@ -330,7 +373,7 @@ export function LeaderKnowledgeBase() {
   useEffect(() => {
     setQuestionsPage(1);
     setDocumentsPage(1);
-  }, [activeTab, audienceFilter, searchQuery, categoryFilter]);
+  }, [activeTab, audienceFilter, unitFilter, searchQuery, categoryFilter]);
 
   return (
     <div className="min-h-screen h-full p-6 bg-[#F8FAFC]">
@@ -395,7 +438,36 @@ export function LeaderKnowledgeBase() {
           </button>
         )}
       </div>
-
+      <div className="flex items-center gap-2 flex-wrap mb-4">
+        <div className="flex items-center gap-1.5 text-sm text-gray-600 font-medium pr-1">
+          <Users className="h-4 w-4 text-gray-500" />
+          <span>Đơn vị:</span>
+        </div>
+        {UNIT_FILTER_OPTIONS.map((opt) => {
+          const selected = unitFilter.includes(opt.value);
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => toggleUnit(opt.value)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all ${selected ? opt.active : opt.inactive}`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${selected ? 'bg-white' : opt.dot}`} />
+              {opt.label}
+            </button>
+          );
+        })}
+        {unitFilter.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setUnitFilter([])}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors ml-1"
+          >
+            <X className="h-3 w-3" />
+            Xóa lọc
+          </button>
+        )}
+      </div>
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="qa" className="gap-2">

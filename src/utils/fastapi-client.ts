@@ -317,6 +317,7 @@ export interface KnowledgeDocument {
   is_ocr?: boolean;
   is_private?: boolean;
   target_audiences?: string[];
+  target_units?: string[];
   intent_id?: number;
   intent_name?: string;
 }
@@ -338,6 +339,7 @@ export interface TrainingQuestion {
   status?: string; // draft, approved, rejected, deleted
   reject_reason?: string;
   target_audiences?: string[];
+  target_units?: string[];
   is_private?: boolean;
 }
 

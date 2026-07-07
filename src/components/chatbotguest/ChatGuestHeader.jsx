@@ -1,7 +1,7 @@
 // src/components/chatbotguest/ChatGuestHeader.jsx
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { Briefcase, GraduationCap, HeartHandshake, ClipboardList, Menu, X } from "lucide-react";
+import { Briefcase, GraduationCap, HeartHandshake, ClipboardList, Menu, X, Building2 } from "lucide-react";
 import PhIcon from "../ui/PhIcon.jsx";
 import { resolveAudienceCode } from "../../api/audienceApi.ts";
 import { getRoleFromToken } from "../../pages/login/jwtHelper";
@@ -12,7 +12,10 @@ const AUDIENCE_LABELS = {
   PHUHUYNH: "Phụ huynh / Bên liên quan",
   TUYENSINH: "Tuyển sinh",
 };
-
+const UNIT_OPTIONS = [
+  { code: "UTC", label: "UTC" },
+  { code: "UTC2", label: "UTC2" },
+];
 const AUDIENCE_META = {
   CANBO: { label: "Viên chức / Người lao động", icon: Briefcase },
   SINHVIEN: { label: "Sinh viên", icon: GraduationCap },
@@ -34,6 +37,8 @@ export default function ChatGuestHeader({
   selectedAudience,
   onAudienceChange,
   audiences = [],
+  selectedUnit,      
+  onUnitChange,      
   isChatPrivateLoggedIn = false,
   onChatPrivateLogout,
 }) {
@@ -42,6 +47,8 @@ export default function ChatGuestHeader({
   const schoolLogoUrl = "https://utc2.edu.vn/images/030820230730_U09Tn.png";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAudienceOpen, setIsAudienceOpen] = useState(false);
+  const [isUnitOpen, setIsUnitOpen] = useState(false);
+  const desktopUnitMenuRef = useRef(null)
   const desktopMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("access_token"));
@@ -90,11 +97,18 @@ export default function ChatGuestHeader({
     setIsAudienceOpen(false);
     closeMobileMenu();
   };
-
+  const handleUnitSelect = (unit) => {
+  onUnitChange?.(unit.code);
+  setIsUnitOpen(false);
+  closeMobileMenu();
+  };
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (desktopMenuRef.current && !desktopMenuRef.current.contains(e.target)) {
         setIsAudienceOpen(false);
+      }
+      if (desktopUnitMenuRef.current && !desktopUnitMenuRef.current.contains(e.target)) {
+      setIsUnitOpen(false);           
       }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target)) {
         closeMobileMenu();
@@ -116,9 +130,11 @@ export default function ChatGuestHeader({
   useEffect(() => {
     closeMobileMenu();
     setIsAudienceOpen(false);
+    setIsUnitOpen(false);
   }, [location.pathname, closeMobileMenu]);
 
   const activeAudienceObj = audiences.find((a) => a.id === selectedAudience?.id);
+  const activeUnit = UNIT_OPTIONS.find((u) => u.code === selectedUnit) || null;
   const activeAudienceCode = resolveAudienceCode(activeAudienceObj || selectedAudience);
   const shouldShowRiasecLink = activeAudienceCode === "TUYENSINH";
   const activeAudienceMeta = activeAudienceCode
@@ -172,7 +188,32 @@ export default function ChatGuestHeader({
       )}
     </>
   );
-
+  const unitList = (
+    <>
+      <div className="px-1 py-1.5 text-[11px] font-semibold text-text-muted uppercase tracking-[0.16em]">
+        Chọn đơn vị
+      </div>
+      {UNIT_OPTIONS.map((unit) => {
+        const isSelected = selectedUnit === unit.code;
+        return (
+          <button
+            key={unit.code}
+            type="button"
+            onClick={() => handleUnitSelect(unit)}
+            className={`w-full text-left px-2.5 py-2.5 rounded-lg text-[12px] flex items-center justify-between transition-colors ${
+              isSelected ? "bg-accent/12 text-accent" : "text-text-main hover:bg-primary/45"
+            }`}
+          >
+            <span className="flex min-w-0 items-center gap-2 pr-2">
+              <Building2 size={14} className="shrink-0" />
+              <span>{unit.label}</span>
+            </span>
+            {isSelected && <PhIcon name="check" size={13} weight="bold" className="shrink-0" />}
+          </button>
+        );
+      })}
+    </>
+  );
   return (
     <header className="relative z-50 w-full min-w-0 shrink-0 bg-transparent overflow-visible text-text-main font-display antialiased">
       <div className="mx-auto flex w-full min-w-0 max-w-5xl items-center justify-between gap-2 sm:gap-4 px-3 py-3 sm:px-4 sm:py-4 md:px-7 overflow-visible">
@@ -221,7 +262,9 @@ export default function ChatGuestHeader({
                 <section className="mb-3 rounded-xl border border-border-main/50 bg-surface/30 p-1.5">
                   {audienceList}
                 </section>
-
+                <section className="mb-3 rounded-xl border border-border-main/50 bg-surface/30 p-1.5">
+                  {unitList}
+                </section>
                 <div className="space-y-2">
                   {isLoggedIn ? (
                     <button
@@ -306,7 +349,28 @@ export default function ChatGuestHeader({
               </div>
             )}
           </div>
+          <div className="relative flex min-w-0 items-center gap-2" ref={desktopUnitMenuRef}>
+            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-[0.16em] shrink-0">
+              Đơn vị
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsUnitOpen((open) => !open)}
+              aria-label="Chọn đơn vị"
+              title={activeUnit?.label || "Chọn đơn vị"}
+              className="inline-flex min-w-0 max-w-[110px] items-center gap-1.5 rounded-xl border border-border-main bg-surface/55 px-2.5 py-1.5 text-[11px] font-medium text-text-main hover:bg-surface transition-colors focus:outline-none"
+            >
+              <Building2 size={13} className="text-accent shrink-0" />
+              <span className="min-w-0 truncate">{activeUnit?.label || "Chọn đơn vị"}</span>
+              <PhIcon name="expand_more" size={13} className="text-text-muted ml-0.5 shrink-0" />
+            </button>
 
+            {isUnitOpen && (
+              <div className="absolute top-full right-0 mt-2 w-44 rounded-xl border border-border-main/70 bg-sidebar shadow-2xl p-1.5 z-[60]">
+                {unitList}
+              </div>
+            )}
+          </div>
           {isLoggedIn ? (
             <button
               type="button"

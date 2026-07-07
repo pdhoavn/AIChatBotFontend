@@ -325,7 +325,23 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
     window.location.hostname === 'tuyensinh.utc2.edu.vn' ||
     (document.referrer && document.referrer.includes('tuyensinh.utc2.edu.vn'))
   );
+  const detectedUnit: 'UTC2' | null = (() => {
+    if (typeof window === 'undefined') return null;
+    const host = window.location.hostname?.toLowerCase() || '';
+    const path = window.location.pathname?.toLowerCase() || '';
+    const href = window.location.href?.toLowerCase() || '';
+    const referrer = (document.referrer || '').toLowerCase();
 
+    if (
+      host.includes('utc2') ||
+      path.includes('utc2') ||
+      href.includes('utc2') ||
+      referrer.includes('utc2')
+    ) {
+      return 'UTC2';
+    }
+    return null;
+  })();
   const initialAudiences = isTuyenSinhSite 
     ? defaultAudienceOptions.filter(a => a.id === 'TUYENSINH')
     : defaultAudienceOptions;
@@ -344,6 +360,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
     ? selectedAudience.color.hover
     : 'hover:text-blue-600 hover:bg-blue-50';
   const [intents, setIntents] = useState<any[]>([]);
+  const [selectedUnit, setSelectedUnit] = useState<string | null>(detectedUnit);
   const [selectedIntent, setSelectedIntent] = useState<any>(null);
   const [isIntentMenuOpen, setIsIntentMenuOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -542,6 +559,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
           user_id: _guestId,
           audience_id: selectedAudience?.dbId ?? null,
           intent_id: selectedIntent?.intent_id ?? null,
+          unit: selectedUnit ?? null,
         }),
         signal: controller.signal,
       });

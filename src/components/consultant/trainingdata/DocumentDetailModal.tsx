@@ -12,7 +12,11 @@ const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
   TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
 };
 const AUDIENCE_OPTIONS = ['CANBO', 'SINHVIEN', 'PHUHUYNH', 'TUYENSINH'];
-
+const UNIT_DISPLAY: Record<string, { label: string; color: string }> = {
+  UTC:  { label: 'UTC',  color: 'bg-cyan-100 text-cyan-700 border-cyan-200' },
+  UTC2: { label: 'UTC2', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+};
+const UNIT_OPTIONS = ['UTC', 'UTC2'];
 function FieldState({ editable }: { editable: boolean }) {
   return (
     <span className={`text-[11px] font-medium ${editable ? 'text-amber-700' : 'text-gray-400'}`}>
@@ -31,7 +35,7 @@ interface DocumentDetailModalProps {
   onDelete: (documentId: number) => Promise<void>;
   onUpdateMetadata: (
     documentId: number,
-    data: { title?: string; category?: string | null; intent_id?: number | null; target_audiences?: string[]; is_private?: boolean }
+    data: { title?: string; category?: string | null; intent_id?: number | null; target_audiences?: string[]; target_units?: string[]; is_private?: boolean }
   ) => Promise<void>;
   onApprove?: (documentId: number) => Promise<void>;
   onReject?: (documentId: number) => Promise<void>;
@@ -57,6 +61,7 @@ export function DocumentDetailModal({
   const [editTitle, setEditTitle] = useState(document.title || '');
   const [editIntentId, setEditIntentId] = useState<string>((document.intent_id ?? 0).toString());
   const [editAudiences, setEditAudiences] = useState<string[]>(document.target_audiences || []);
+  const [editUnits, setEditUnits] = useState<string[]>(document.target_units || []);
   const [editIsPrivate, setEditIsPrivate] = useState(Boolean(document.is_private));
 
   type Chunk = { chunk_id: number | null; point_id: string | null; chunk_index: number; chunk_text: string; char_count: number };
@@ -88,6 +93,7 @@ export function DocumentDetailModal({
     setEditTitle(document.title || '');
     setEditIntentId((document.intent_id ?? 0).toString());
     setEditAudiences(document.target_audiences || []);
+    setEditUnits(document.target_units || []);
     setEditIsPrivate(Boolean(document.is_private));
     setIsEditingMetadata(false);
   }, [document]);
@@ -167,11 +173,16 @@ export function DocumentDetailModal({
       prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]
     );
   };
-
+  const toggleUnit = (value: string) => {
+    setEditUnits(prev =>
+      prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]
+    );
+  };
   const resetMetadataForm = () => {
     setEditTitle(document.title || '');
     setEditIntentId((document.intent_id ?? 0).toString());
     setEditAudiences(document.target_audiences || []);
+    setEditUnits(document.target_units || []);
     setEditIsPrivate(Boolean(document.is_private));
     setIsEditingMetadata(false);
   };
@@ -192,6 +203,7 @@ export function DocumentDetailModal({
         title: editTitle.trim(),
         intent_id: Number(editIntentId) || 0,
         target_audiences: editAudiences,
+        target_units: editUnits,
         is_private: editIsPrivate,
       });
       setIsEditingMetadata(false);
@@ -490,6 +502,52 @@ export function DocumentDetailModal({
                     <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
                       {(document.intent_name && document.intent_name !== 'None') ? document.intent_name : 'Chung'}
                     </p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Đơn vị */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-gray-500">
+                    Đơn vị <span className="text-gray-400 font-normal">(Không bắt buộc)</span>
+                  </label>
+                  {isEditingMetadata && <FieldState editable />}
+                </div>
+                <div className={`flex flex-wrap gap-1.5 p-3 rounded-lg min-h-[44px] ${
+                  isEditingMetadata ? 'bg-white border border-amber-300 ring-1 ring-amber-100' : 'bg-gray-50'
+                }`}>
+                  {(isEditingMetadata ? UNIT_OPTIONS : document.target_units || []).length > 0 ? (
+                    (isEditingMetadata ? UNIT_OPTIONS : document.target_units || []).map((val: string) => {
+                      const info = UNIT_DISPLAY[val];
+                      const selected = editUnits.includes(val);
+                      if (isEditingMetadata) {
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => toggleUnit(val)}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition ${
+                              selected ? info.color : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
+                            }`}
+                          >
+                            {selected && <Check className="h-3 w-3" />}
+                            {info.label}
+                          </button>
+                        );
+                      }
+                      return info ? (
+                        <span key={val} className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${info.color}`}>
+                          {info.label}
+                        </span>
+                      ) : (
+                        <span key={val} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-gray-100 text-gray-700 border-gray-200">
+                          {val}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    <span className="text-sm text-gray-400">Chưa chọn đơn vị</span>
                   )}
                 </div>
               </div>

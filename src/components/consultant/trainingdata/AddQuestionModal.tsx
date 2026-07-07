@@ -29,12 +29,20 @@ const AUDIENCE_VALUE_MAP: Record<Audience, string> = {
   'Tuyển sinh':                'TUYENSINH',
 };
 
+const UNIT_OPTIONS = ['UTC', 'UTC2'] as const;
+type Unit = typeof UNIT_OPTIONS[number];
+
+const UNIT_COLORS: Record<string, string> = {
+  UTC:  'bg-cyan-100 text-cyan-700 border-cyan-200',
+  UTC2: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+};
+
 type Audience = typeof AUDIENCE_OPTIONS[number];
 
 interface AddQuestionModalProps {
   intents: Intent[];
   onClose: () => void;
-  onSubmit: (data: { question: string; answer: string; intent_id: number; target_audiences: string[]; is_private?: boolean }) => Promise<void>;
+  onSubmit: (data: { question: string; answer: string; intent_id: number; target_audiences: string[]; target_units: string[]; is_private?: boolean }) => Promise<void>;
 }
 
 export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModalProps) {
@@ -42,6 +50,9 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
   const [answer, setAnswer] = useState('');
   const [intentId, setIntentId] = useState<number | undefined>(undefined);
   const [audiences, setAudiences] = useState<Audience[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [unitOpen, setUnitOpen] = useState(false);
+  const unitRef = useRef<HTMLDivElement>(null);
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -74,6 +85,9 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
       if (audienceRef.current && !audienceRef.current.contains(e.target as Node)) {
         setAudienceOpen(false);
       }
+      if (unitRef.current && !unitRef.current.contains(e.target as Node)) {
+        setUnitOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -82,6 +96,12 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
   const toggleAudience = (option: Audience) => {
     setAudiences(prev =>
       prev.includes(option) ? prev.filter(a => a !== option) : [...prev, option]
+    );
+  };
+
+  const toggleUnit = (option: Unit) => {
+    setUnits(prev =>
+      prev.includes(option) ? prev.filter(u => u !== option) : [...prev, option]
     );
   };
 
@@ -131,7 +151,7 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
     try {
       setLoading(true);
       const resolvedIntentId = intentId ?? 0;
-      await onSubmit({ question, answer, intent_id: resolvedIntentId, target_audiences: audiences.map(a => AUDIENCE_VALUE_MAP[a]), is_private: isPrivate });
+      await onSubmit({ question, answer, intent_id: resolvedIntentId, target_audiences: audiences.map(a => AUDIENCE_VALUE_MAP[a]), target_units: units, is_private: isPrivate });
       onClose();
     } catch (error) {
     } finally {
@@ -275,7 +295,64 @@ export function AddQuestionModal({ intents, onClose, onSubmit }: AddQuestionModa
               )}
             </div>
           </div>
+          {/* Đơn vị */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Đơn vị <span className="text-gray-400 font-normal">(Không bắt buộc)</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setUnits(units.length === UNIT_OPTIONS.length ? [] : [...UNIT_OPTIONS])}
+                className="text-xs text-[#facb01] hover:underline"
+              >
+                {units.length === UNIT_OPTIONS.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+              </button>
+            </div>
+            <div ref={unitRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setUnitOpen(prev => !prev)}
+                className="w-full flex items-center justify-between rounded-md border border-input bg-gray-100 px-3 py-2 text-sm shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-300 transition-colors"
+              >
+                {units.length === 0 ? (
+                  <span className="text-gray-400">Chọn đơn vị...</span>
+                ) : (
+                  <span className="flex flex-wrap gap-1">
+                    {units.map(u => (
+                      <span key={u} className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${UNIT_COLORS[u]}`}>
+                        {u}
+                      </span>
+                    ))}
+                  </span>
+                )}
+                <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+              </button>
 
+              {unitOpen && (
+                <div className="absolute z-50 top-full mt-1 w-full rounded-md border bg-white shadow-md">
+                  {UNIT_OPTIONS.map((option) => {
+                    const selected = units.includes(option);
+                    return (
+                      <div
+                        key={option}
+                        onClick={() => toggleUnit(option)}
+                        className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm select-none"
+                      >
+                        <div className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 ${selected ? 'bg-[#facb01] border-[#facb01]' : 'border-gray-300'}`}>
+                          {selected && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+                        </div>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${UNIT_COLORS[option]}`}>
+                          {option}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        
           {}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

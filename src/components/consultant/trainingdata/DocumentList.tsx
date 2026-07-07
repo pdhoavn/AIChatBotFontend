@@ -19,7 +19,10 @@ const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
   PHUHUYNH:  { label: 'Phụ huynh',     color: 'bg-purple-100 text-purple-700 border-purple-200' },
   TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
 };
-
+const UNIT_DISPLAY: Record<string, { label: string; color: string }> = {
+  UTC:  { label: 'UTC',  color: 'bg-cyan-100 text-cyan-700 border-cyan-200' },
+  UTC2: { label: 'UTC2', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+};
 interface DocumentListProps {
   documents: TrainingDocument[];
   selectedDocument: TrainingDocument | null;
@@ -96,6 +99,30 @@ export function DocumentList({ documents, selectedDocument, onSelectDocument }: 
                 <div className="flex flex-wrap gap-1 mb-1.5">
                   {doc.target_audiences.map(val => {
                     const info = AUDIENCE_DISPLAY[val];
+                    return info ? (
+                      <span
+                        key={val}
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${info.color}`}
+                      >
+                        {info.label}
+                      </span>
+                    ) : (
+                      <span
+                        key={val}
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border bg-gray-100 text-gray-700 border-gray-200"
+                      >
+                        {val}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Đơn vị */}
+              {doc.target_units && doc.target_units.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-1.5">
+                  {doc.target_units.map(val => {
+                    const info = UNIT_DISPLAY[val];
                     return info ? (
                       <span
                         key={val}

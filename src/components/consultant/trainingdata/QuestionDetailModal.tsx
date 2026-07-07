@@ -10,6 +10,11 @@ const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
   TUYENSINH: { label: 'Tuyển sinh',              color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
 };
 const AUDIENCE_OPTIONS = ['CANBO', 'SINHVIEN', 'PHUHUYNH', 'TUYENSINH'];
+const UNIT_DISPLAY: Record<string, { label: string; color: string }> = {
+  UTC:  { label: 'UTC',  color: 'bg-cyan-100 text-cyan-700 border-cyan-200' },
+  UTC2: { label: 'UTC2', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+};
+const UNIT_OPTIONS = ['UTC', 'UTC2'];
 
 function FieldState({ editable }: { editable: boolean }) {
   return (
@@ -27,7 +32,7 @@ interface QuestionDetailModalProps {
   onDelete: (questionId: number) => Promise<void>;
   onUpdateMetadata: (
     questionId: number,
-    data: { intent_id?: number | null; target_audiences?: string[]; is_private?: boolean }
+    data: { intent_id?: number | null; target_audiences?: string[]; target_units?: string[]; is_private?: boolean }
   ) => Promise<void>;
 }
 
@@ -43,11 +48,13 @@ export function QuestionDetailModal({
   const [isEditingMetadata, setIsEditingMetadata] = useState(false);
   const [editIntentId, setEditIntentId] = useState<string>((question.intent_id ?? 0).toString());
   const [editAudiences, setEditAudiences] = useState<string[]>(question.target_audiences || []);
+  const [editUnits, setEditUnits] = useState<string[]>(question.target_units || []);
   const [editIsPrivate, setEditIsPrivate] = useState(Boolean(question.is_private));
 
   useEffect(() => {
     setEditIntentId((question.intent_id ?? 0).toString());
     setEditAudiences(question.target_audiences || []);
+    setEditUnits(question.target_units || []);
     setEditIsPrivate(Boolean(question.is_private));
     setIsEditingMetadata(false);
   }, [question]);
@@ -69,7 +76,11 @@ export function QuestionDetailModal({
       prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]
     );
   };
-
+  const toggleUnit = (value: string) => {
+    setEditUnits(prev =>
+      prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]
+    );
+  };
   const handleSaveMetadata = async () => {
     if (editAudiences.length === 0) {
       alert('Vui lòng chọn ít nhất một đối tượng');
@@ -81,6 +92,7 @@ export function QuestionDetailModal({
       await onUpdateMetadata(question.question_id, {
         intent_id: Number(editIntentId) || 0,
         target_audiences: editAudiences,
+        target_units: editUnits,
         is_private: editIsPrivate,
       });
       setIsEditingMetadata(false);
@@ -93,6 +105,7 @@ export function QuestionDetailModal({
     setIsEditingMetadata(false);
     setEditIntentId((question.intent_id ?? 0).toString());
     setEditAudiences(question.target_audiences || []);
+    setEditUnits(question.target_units || []);
     setEditIsPrivate(Boolean(question.is_private));
   };
 
@@ -185,7 +198,51 @@ export function QuestionDetailModal({
               )}
             </div>
           </div>
-
+          {/* Đơn vị */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Đơn vị <span className="text-gray-400 font-normal">(Không bắt buộc)</span>
+              </label>
+              {isEditingMetadata && <FieldState editable />}
+            </div>
+            <div className={`flex flex-wrap gap-2 p-3 rounded-lg min-h-[48px] ${
+              isEditingMetadata ? 'bg-white border border-amber-300 ring-1 ring-amber-100' : 'bg-gray-50'
+            }`}>
+              {(isEditingMetadata ? UNIT_OPTIONS : question.target_units || []).length > 0 ? (
+                (isEditingMetadata ? UNIT_OPTIONS : question.target_units || []).map(val => {
+                  const info = UNIT_DISPLAY[val];
+                  const selected = editUnits.includes(val);
+                  if (isEditingMetadata) {
+                    return (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => toggleUnit(val)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition ${
+                          selected ? info.color : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
+                        }`}
+                      >
+                        {selected && <Check className="h-3 w-3" />}
+                        {info.label}
+                      </button>
+                    );
+                  }
+                  return info ? (
+                    <span key={val} className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${info.color}`}>
+                      {info.label}
+                    </span>
+                  ) : (
+                    <span key={val} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-gray-100 text-gray-700 border-gray-200">
+                      {val}
+                    </span>
+                  );
+                })
+              ) : (
+                <span className="text-sm text-gray-400">Chưa chọn đơn vị</span>
+              )}
+            </div>
+          </div>
           {}
           <div>
             <div className="flex items-center justify-between mb-2">

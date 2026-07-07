@@ -52,6 +52,7 @@ export function TrainingDataManagement() {
 
   const [categoryFilter, setCategoryFilter] = useState(locationState?.categoryFilter || 'all');
   const [audienceFilter, setAudienceFilter] = useState<string[]>([]);
+  const [unitFilter, setUnitFilter] = useState<string[]>([]);
   const [intents, setIntents] = useState<Intent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -269,7 +270,7 @@ export function TrainingDataManagement() {
     }
   };
 
-  const handleAddQuestion = async (data: { question: string; answer: string; intent_id: number; target_audiences: string[] }) => {
+  const handleAddQuestion = async (data: { question: string; answer: string; intent_id: number; target_audiences: string[]; target_units: string[]; }) => {
     try {
       await knowledgeAPI.uploadTrainingQuestion(data);
       toast.success('Tạo câu hỏi thành công! Đang chờ duyệt.');
@@ -280,9 +281,9 @@ export function TrainingDataManagement() {
     }
   };
 
-  const handleUploadDocument = async (formData: FormData, intentId: number, target_audiences: string[] = []) => {
+  const handleUploadDocument = async (formData: FormData, intentId: number, target_audiences: string[] = [], target_units: string[] = []) => {
     try {
-      await knowledgeAPI.uploadDocument(formData, intentId, target_audiences);
+      await knowledgeAPI.uploadDocument(formData, intentId, target_audiences, target_units);
       toast.success('Tải lên tài liệu thành công! Đang chờ duyệt.');
       await fetchDocuments();
     } catch (error) {
@@ -294,8 +295,8 @@ export function TrainingDataManagement() {
     }
   };
 
-  const handleStartOCR = (formData: FormData, intentId: number, target_audiences: string[]) => {
-    startOCR(formData, intentId, target_audiences, fetchDocuments);
+  const handleStartOCR = (formData: FormData, intentId: number, target_audiences: string[], target_units: string[]) => {
+    startOCR(formData, intentId, target_audiences, target_units, fetchDocuments);
   };
 
   const sortByDateAndStatus = <T extends { created_at?: string | Date; status?: string }>(items: T[]): T[] => {
@@ -335,7 +336,10 @@ export function TrainingDataManagement() {
       const matchesAudience = audienceFilter.length === 0 ||
         (q.target_audiences && q.target_audiences.some(a => audienceFilter.includes(a)));
 
-      return matchesSearch && matchesCategory && matchesAudience;
+      const matchesUnit = unitFilter.length === 0 ||
+        (q.target_units && q.target_units.some(u => unitFilter.includes(u)));
+
+      return matchesSearch && matchesCategory && matchesAudience && matchesUnit;
     })
   );
 
@@ -353,7 +357,10 @@ export function TrainingDataManagement() {
       const matchesAudience = audienceFilter.length === 0 ||
         (d.target_audiences && d.target_audiences.some(a => audienceFilter.includes(a)));
 
-      return matchesSearch && matchesCategory && matchesAudience;
+      const matchesUnit = unitFilter.length === 0 ||
+        (d.target_units && d.target_units.some(u => unitFilter.includes(u)));
+
+      return matchesSearch && matchesCategory && matchesAudience && matchesUnit;
     })
   );
 
@@ -413,6 +420,9 @@ export function TrainingDataManagement() {
         audienceFilter={audienceFilter}
         onAudienceFilterChange={setAudienceFilter}
         showAudienceFilter={true}
+        unitFilter={unitFilter}                    
+        onUnitFilterChange={setUnitFilter}         
+        showUnitFilter={true}  
         intents={intents}
         isLeader={isLeader}
       />
