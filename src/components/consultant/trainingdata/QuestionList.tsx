@@ -18,7 +18,10 @@ const AUDIENCE_DISPLAY: Record<string, { label: string; color: string }> = {
   PHUHUYNH:  { label: 'Phụ huynh',     color: 'bg-purple-100 text-purple-700 border-purple-200' },
   TUYENSINH: { label: 'Tuyển sinh',    color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
 };
-
+const UNIT_DISPLAY: Record<string, { label: string; color: string }> = {
+  UTC:  { label: 'UTC',  color: 'bg-cyan-100 text-cyan-700 border-cyan-200' },
+  UTC2: { label: 'UTC2', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+};
 interface QuestionListProps {
   questions: TrainingQuestion[];
   selectedQuestion: TrainingQuestion | null;
@@ -72,6 +75,32 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
     );
   };
 
+  const renderUnitBadges = (units?: string[]) => {
+    if (!units || units.length === 0) return null;
+    return (
+      <div className="flex flex-wrap gap-1 mb-2">
+        {units.map(val => {
+          const info = UNIT_DISPLAY[val];
+          return info ? (
+            <span
+              key={val}
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${info.color}`}
+            >
+              {info.label}
+            </span>
+          ) : (
+            <span
+              key={val}
+              className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border bg-gray-100 text-gray-700 border-gray-200"
+            >
+              {val}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-2">
       {questions.map((question) => (
@@ -95,12 +124,10 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion }: 
           </div>
 
           {renderAudienceBadges(question.target_audiences)}
-
-          {question.intent_name && (
-            <p className="text-xs text-gray-500 mb-2">
-              Lĩnh vực: {question.intent_name}
-            </p>
-          )}
+          {renderUnitBadges(question.target_units)}
+          <p className="text-xs text-gray-500 mb-2">
+            Lĩnh vực: {(question.intent_name && question.intent_name !== 'None') ? question.intent_name : 'Chung'}
+          </p>
 
           <p className="text-sm text-gray-600 line-clamp-2">
             {question.answer}

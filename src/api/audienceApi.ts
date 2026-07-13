@@ -83,9 +83,9 @@ export const audienceAPI = {
   getAudiences: () => fastAPIClient.get<Audience[]>("/audiences/target-audience"),
   getIntentsByAudience: (code: string) =>
     fastAPIClient.get<IntentKB[]>(`/knowledge/intentbyid?target_audience=${code}`),
-  getSuggestionQuestions: (targetAudienceId: number, intentId = 0) =>
+  getSuggestionQuestions: (targetAudienceId: number, intentId = 0, unit = "") =>
     fastAPIClient.get<unknown>(
-      `/question/suggestions?target_audience_id=${targetAudienceId}&intent_id=${intentId}`
+      `/question/suggestions?target_audience_id=${targetAudienceId}&intent_id=${intentId}&unit=${unit}`
     ),
 };
 

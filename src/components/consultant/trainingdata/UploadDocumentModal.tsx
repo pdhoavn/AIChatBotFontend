@@ -204,6 +204,7 @@ export function UploadDocumentModal({ intents, onClose, onSubmit, onStartOCR }: 
                 />
               </label>
               <p className="text-xs text-gray-500 mt-2">Định dạng: PDF, DOCX, TXT, XLSX</p>
+              <p className="text-base font-bold text-red-600 mt-2">Lưu ý: PDF phải dùng dạng 2 lớp</p>
             </div>
 
             {showOCRPrompt && (

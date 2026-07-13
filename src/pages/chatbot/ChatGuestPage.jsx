@@ -296,7 +296,7 @@ export default function ChatGuestPage() {
     const intentId = selectedIntent?.intent_id || 0;
 
     audienceAPI
-      .getSuggestionQuestions(selectedAudience.id, intentId)
+      .getSuggestionQuestions(selectedAudience.id, intentId, selectedUnit)
       .then((data) => {
         if (!isActive) return;
         setSuggestions(normalizeSuggestionQuestions(data));
@@ -309,7 +309,7 @@ export default function ChatGuestPage() {
     return () => {
       isActive = false;
     };
-  }, [selectedAudience, selectedIntent]);
+  }, [selectedAudience, selectedIntent, selectedUnit]);
 
   useEffect(() => {
     if (isAutoScrollEnabled && autoScrollRef.current) {
@@ -549,7 +549,7 @@ export default function ChatGuestPage() {
     if (!selectedUnit) {
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: "Vui lòng chọn đơn vị UTC hoặc UTC2" },
+        { sender: "bot", text: "Vui lòng chọn đơn vị Trường Đại Học Giao Thông Vận Tải(UTC) hoặc  Phân Hiệu Trường Đại học Giao thông Vận tải tại TP. Hồ Chí Minh(UTC2)" },
       ]);
       return; // KHÔNG gọi sendMessageSSE
     }
@@ -567,7 +567,7 @@ export default function ChatGuestPage() {
     if (!selectedUnit) {
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: "Vui lòng chọn đơn vị UTC hoặc UTC2" },
+        { sender: "bot", text: "Vui lòng chọn đơn vị Trường Đại Học Giao Thông Vận Tải(UTC) hoặc  Phân Hiệu Trường Đại học Giao thông Vận tải tại TP. Hồ Chí Minh(UTC2)" },
       ]);
       return;
     }
