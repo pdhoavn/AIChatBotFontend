@@ -405,8 +405,10 @@ export default function ChatGuestPage() {
                 break;
               case "login_required": {
                 // Backend yêu cầu đăng nhập để xem nội dung bảo mật
-                const loginMsg = "Câu hỏi của bạn liên quan đến dữ liệu nội bộ, vui lòng đăng nhập để hệ thống trả lời.";
-
+                const wasLoggedIn = Boolean(getChatAccessToken());
+                if (wasLoggedIn) {
+                  clearChatSession(); // token cũ không hợp lệ nữa -> đồng bộ lại UI, tự dispatch "chat-auth-change"
+                }
                 // Show modal and save pending text
                 setPendingMessage(text);
                 setShowLoginModal(false);
@@ -415,7 +417,9 @@ export default function ChatGuestPage() {
                   ...prev,
                   {
                     sender: "bot",
-                    text: loginMsg,
+                    text: wasLoggedIn
+                    ? "Phiên đăng nhập dữ liệu nội bộ đã hết hạn. Vui lòng đăng nhập lại để tiếp tục."
+                    : "Câu hỏi của bạn liên quan đến dữ liệu nội bộ, vui lòng đăng nhập để hệ thống trả lời.",
                     type: "login_required",
                   },
                 ]);

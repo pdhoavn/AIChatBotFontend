@@ -360,7 +360,7 @@ const FloatingAiAssistant = ({ apiUrl }: Partial<FloatingAiAssistantProps> = {})
     ? selectedAudience.color.hover
     : 'hover:text-blue-600 hover:bg-blue-50';
   const [intents, setIntents] = useState<any[]>([]);
-  const [selectedUnit] = useState<string | null>(detectedUnit);
+  const [selectedUnit, setSelectedUnit] = useState<string | null>(detectedUnit);
   const [selectedIntent, setSelectedIntent] = useState<any>(null);
   const [isIntentMenuOpen, setIsIntentMenuOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
